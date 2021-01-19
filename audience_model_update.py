@@ -67,6 +67,9 @@ print(malls)
 #loop thorugh malls
 
 
+engine.execute("DELETE FROM audience_segments WHERE datetime LIKE \'2020%%\'")
+engine.execute("DELETE FROM audience_impressions WHERE date LIKE \'2020%%\'")
+
 engine.execute("DELETE FROM audience_segments WHERE datetime LIKE \'2021%%\'")
 engine.execute("DELETE FROM audience_impressions WHERE date LIKE \'2021%%\'")
 
