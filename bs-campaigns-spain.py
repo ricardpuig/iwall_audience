@@ -464,6 +464,7 @@ for row in campaigns:  #for each campaign to analyze
                     # buscar numero de impresiones ese dia para ese display unit
                     sql_select_total_imp= "SELECT total_impressions, total_views from audience_impressions WHERE date LIKE '%s' AND mall_id LIKE '%s'" %(str(day_formatted), str(mall_id))
                     mycursor.execute(sql_select_total_imp)
+                    print(sql_select_total_imp)
                     records_day_impressions = mycursor.fetchall()
                     day_impressions = 0
                     print("Model Impressions / Views : ", records_day_impressions)

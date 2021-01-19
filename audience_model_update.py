@@ -10,12 +10,9 @@ from datetime import date
 from sqlalchemy import create_engine
 from datetime import datetime, timedelta
 
-from fbprophet import Prophet
-from fbprophet.plot import plot_plotly
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-import plotly.offline as py
+
 
 
 
@@ -192,6 +189,9 @@ for m in malls:
 
 
     df_audience_impressions=df_audience_impressions.reset_index()
+    df_audience_impressions['date']=df_audience_impressions['date'].dt.strftime('%Y-%m-%d')
+
+
     #update data
     df_audience_impressions.to_sql('audience_impressions', engine, if_exists='append', index=False)
 
