@@ -70,8 +70,6 @@ print(malls)
 engine.execute("DELETE FROM audience_segments WHERE datetime LIKE \'2021%%\'")
 engine.execute("DELETE FROM audience_impressions WHERE date LIKE \'2021%%\'")
 
-
-
 for m in malls: 
 
     df_mall=df_malls.loc[df_malls['id'] == m]
@@ -90,7 +88,7 @@ for m in malls:
     #build default audience data for the current year
 
     #dates create 
-    begin_date = '2020-12-28'
+    begin_date = '2020-01-01'
     end_date= '2021-12-31'
 
     df_audience_impressions=pd.DataFrame({'mall_id' : mall['id'], 'date':pd.date_range(start=begin_date, end=end_date)})
