@@ -66,10 +66,6 @@ print(malls)
 #for each mall compute audience model 
 #loop thorugh malls
 
-
-engine.execute("DELETE FROM audience_segments WHERE datetime LIKE \'2020%%\'")
-engine.execute("DELETE FROM audience_impressions WHERE date LIKE \'2020%%\'")
-
 engine.execute("DELETE FROM audience_segments WHERE datetime LIKE \'2021%%\'")
 engine.execute("DELETE FROM audience_impressions WHERE date LIKE \'2021%%\'")
 
@@ -91,8 +87,8 @@ for m in malls:
     #build default audience data for the current year
 
     #dates create 
-    begin_date = '2020-01-01'
-    end_date= '2020-12-31'
+    begin_date = '2021-01-01'
+    end_date= '2021-12-31'
 
     df_audience_impressions=pd.DataFrame({'mall_id' : mall['id'], 'date':pd.date_range(start=begin_date, end=end_date)})
     df_audience_segments=pd.DataFrame({'mall_id' : mall['id'], 'date':pd.date_range(start=begin_date, end=end_date)})
