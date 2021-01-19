@@ -232,6 +232,8 @@ for m in malls:
     df_audience_segments_male['concentration_22']=mall['default_dem_male']
     df_audience_segments_male['concentration_23']=mall['default_dem_male']
 
+    df_audience_segments_male['average_concentration']=mall['default_dem_male']
+
 
 
     df_audience_segments_female['target_id']=36
@@ -261,6 +263,8 @@ for m in malls:
     df_audience_segments_female['concentration_22']=mall['default_dem_female']
     df_audience_segments_female['concentration_23']=mall['default_dem_female']
 
+    df_audience_segments_female['average_concentration']=mall['default_dem_male']
+
 
     df_audience_segments_kid['target_id']=24
 
@@ -288,6 +292,8 @@ for m in malls:
     df_audience_segments_kid['concentration_21']=mall['default_age_kid']
     df_audience_segments_kid['concentration_22']=mall['default_age_kid']
     df_audience_segments_kid['concentration_23']=mall['default_age_kid']
+
+    df_audience_segments_kid['average_concentration']=mall['default_dem_male']
 
 
     df_audience_segments_young['target_id']=25
@@ -317,6 +323,8 @@ for m in malls:
     df_audience_segments_young['concentration_22']=mall['default_age_young']
     df_audience_segments_young['concentration_23']=mall['default_age_young']
 
+    df_audience_segments_young['average_concentration']=mall['default_age_young']
+
 
     df_audience_segments_adult['target_id']=26
 
@@ -344,6 +352,7 @@ for m in malls:
     df_audience_segments_adult['concentration_21']=mall['default_age_adult']
     df_audience_segments_adult['concentration_22']=mall['default_age_adult']
     df_audience_segments_adult['concentration_23']=mall['default_age_adult']
+    df_audience_segments_adult['average_concentration']=mall['default_age_adult']
 
     df_audience_segments_senior['target_id']=27
 
@@ -371,6 +380,7 @@ for m in malls:
     df_audience_segments_senior['concentration_21']=mall['default_age_senior']
     df_audience_segments_senior['concentration_22']=mall['default_age_senior']
     df_audience_segments_senior['concentration_23']=mall['default_age_senior']
+    df_audience_segments_senior['average_concentration']=mall['default_age_senior']
 
     
     df_audience_segments_male=df_audience_segments_male.append(df_audience_segments_female,ignore_index = True)

@@ -468,7 +468,7 @@ for row in campaigns:  #for each campaign to analyze
                     # buscar numero de impresiones ese dia para ese display unit
                     sql_select_total_imp= "SELECT total_impressions, total_views from audience_impressions WHERE date LIKE '%s' AND mall_id LIKE '%s'" %(str(day_formatted), str(mall_id))
                     mycursor.execute(sql_select_total_imp)
-                    print(sql_select_total_imp)
+                    #print(sql_select_total_imp)
                     records_day_impressions = mycursor.fetchall()
                     day_impressions = 0
                     print("Model Impressions / Views : ", records_day_impressions)
@@ -491,16 +491,17 @@ for row in campaigns:  #for each campaign to analyze
                     #agafar les concentracions
                     sql_select_total_imp= "SELECT average_concentration FROM audience_segments WHERE datetime LIKE '%s' AND mall_id LIKE '%s' AND target_id='%s'" %(str(day_formatted), str(mall_id), 35) #target hombre
                     mycursor.execute(sql_select_total_imp)
+                    print(sql_select_total_imp)
                     records_concentration = mycursor.fetchall()
 
                     #if no data use default VALUE
                     if mycursor.rowcount==0:
-                        print("No man concentration available for " + str(mall_name) +" found for " + day + ", setting to 0,45 ")
+                        print("No man concentration available for " + str(mall_name) +" found for " + day + ", setting to 0.45 ")
                         concentration_male=0.46
                     else:
                         for rows_3 in records_concentration:
                             concentration_male = rows_3[0]
-                            print("Concentracion male  " + str(mall_id) + " : " + str(rows_3[0]))
+                            print("Concentracion male  " + str(mall_name) + " : " + str(rows_3[0]))
 
                     #agafar les concentracions
                     #print("**** concentracin mujeres*****")
@@ -516,7 +517,7 @@ for row in campaigns:  #for each campaign to analyze
                     else:
                         for rows_3 in records_concentration:
                             concentration_female = rows_3[0]
-                            print("Concentracion female  " + str(mall_id) + " : " + str(rows_3[0]))
+                            print("Concentracion female  " + str(mall_name) + " : " + str(rows_3[0]))
 
 
                     #agafar les concentracions
@@ -533,7 +534,7 @@ for row in campaigns:  #for each campaign to analyze
                     else:
                         for rows_3 in records_concentration:
                             concentration_child = rows_3[0]
-                            print("Concentracion kid  " + str(mall_id) + " : " + str(rows_3[0]))
+                            print("Concentracion kid  " + str(mall_name) + " : " + str(rows_3[0]))
 
 
 
@@ -551,7 +552,7 @@ for row in campaigns:  #for each campaign to analyze
                     else:
                         for rows_3 in records_concentration:
                             concentration_young = rows_3[0]
-                            print("Concentracion young " + str(mall_id) + " : " + str(rows_3[0]))
+                            print("Concentracion young " + str(mall_name) + " : " + str(rows_3[0]))
 
 
                     #agafar les concentracions
@@ -562,13 +563,13 @@ for row in campaigns:  #for each campaign to analyze
 
                     #if no data use default VALUE
                     if mycursor.rowcount==0:
-                        print("No adult concentration available for " + str(mall_name) + " id " + str(mall_id) + " found for " + day + ", setting to 0 .4")
+                        print("No adult concentration available for " + str(mall_name) + " id " + str(mall_id) + " found for " + day + ", setting to 0.4")
                         concentration_adult=0.41
 
                     else:
                         for rows_3 in records_concentration:
                             concentration_adult = rows_3[0]
-                            print("Concentracion adult  " + str(mall_id) + " : " + str(rows_3[0]))
+                            print("Concentracion adult  " + str(mall_name) + " : " + str(rows_3[0]))
 
                     #agafar les concentracions
                     #print("**** concentracion senior*****")
@@ -584,7 +585,7 @@ for row in campaigns:  #for each campaign to analyze
                     else:
                         for rows_3 in records_concentration:
                             concentration_senior = rows_3[0]
-                            print("Concentracion senior " + str(mall_id) + " : " + str(rows_3[0]))
+                            print("Concentracion senior " + str(mall_name) + " : " + str(rows_3[0]))
 
 
                     #total_mall_impressions= total_mall_impressions + day_impressions
