@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 from datetime import date
 
 
-print ("Broadsign Campaign Colombia- POLL \n ")
+print ("Broadsign Campaign COLOMBIA- POLL \n ")
 
 #URLS -----------
 
@@ -17,13 +17,13 @@ url_reservation_by_display_unit= 'https://api.broadsign.com:10889/rest/reservati
 url_container_info= 'https://api.broadsign.com:10889/rest/container/v9/by_id?domain_id=17244398';
 url_display_unit_info= 'https://api.broadsign.com:10889/rest/display_unit/v12/by_id?domain_id=17244398';
 url_container_scoped_colombia= 'https://api.broadsign.com:10889/rest/container/v9/scoped?domain_id=17244398&parent_container_ids=120956285';
+url_container_scoped_spain= 'https://api.broadsign.com:10889/rest/container/v9/scoped?domain_id=17244398&parent_container_ids=49461537';
 url_campaign_performance='https://api.broadsign.com:10889/rest/campaign_performance/v6/by_reservable_id?domain_id=17244398';
 url_campaign_audience= 'https://api.broadsign.com:10889/rest/campaign_audience/v1/by_reservation_id?domain_id=17244398';
 url_display_unit_performance="https://api.broadsign.com:10889/rest/display_unit_performance/v5/by_reservable_id?domain_id=17244398"
 url_display_unit_audience= "https://api.broadsign.com:10889/rest/display_unit_audience/v1/by_reservation_id?domain_id=17244398"
 url_container_id='https://api.broadsign.com:10889/rest/container/v9/by_id?domain_id=17244398';
 url_reservation_by_id= 'https://api.broadsign.com:10889/rest/reservation/v20/by_id?domain_id=17244398';
-
 
 
 container_ids=[]
@@ -50,7 +50,7 @@ mycursor = mydb.cursor()
 auth = "Bearer e03b2732ac76e3a954e4be0c280a04a3";
 
 
-print("Extracting current month COLOMBIAN CAMPAIGNS")
+print("Extracting current month SPANISH CAMPAIGNS")
 
 # poll container IDs
 r=requests.get(url_container_scoped_colombia, headers={'Accept': 'application/json','Authorization': auth});
@@ -78,7 +78,7 @@ for k in data["container"]:
 
 reservations=[]
 
-container_ids=['120956285']
+container_ids=['49461537']
 
 for m in container_ids:
         url_reservation_container=url_reservation_by_display_unit+"&container_ids=" +m
@@ -124,12 +124,7 @@ for m in container_ids:
                 reservation["SAP_ID"]="not set"
 
                 reservations.append(reservation)
-                #print(reservation)
                 
-                #sql= "INSERT INTO reservations (name, booking_state, container_id, duration, saturation, start_time,start_date, end_time, end_date, state, country, active, mall, campaign_id,SAP_ID,days) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
-                #val= (reservation["name"],reservation["booking_state"],reservation["mall_container_id"],reservation["duration_msec"],reservation["saturation"],reservation["start_time"],reservation["start_date"],reservation["end_time"],reservation["end_date"],reservation["state"],reservation["country"],reservation["active"],reservation["mall"],reservation["campaign_id"],reservation["SAP_ID"],reservation["days"])
-                #mycursor.execute(sql,val)
-                #mydb.commit()
                 reservation={}
             
 
@@ -149,14 +144,14 @@ today = pd.to_datetime("today")
 current_month=today.month
 current_year=today.year
 
+#analyze only current month campaigns (based on end_date)
 df_reservations = df_reservations[(df_reservations['year'] ==current_year)] 
 df_reservations = df_reservations[(df_reservations['month'] ==current_month)] 
 
 #remove all programmatic campaigns
 df_reservations = df_reservations[~df_reservations['name'].str.contains("PROGRAMMATIC", na = False) ]
 
-
-print(df_reservations['campaign_id'])
+#print(df_reservations['campaign_id'])
 print(df_reservations)
 
 '''
@@ -215,7 +210,9 @@ for row in campaigns:  #for each campaign to analyze
        campaign_name=df_reservations.loc[df_reservations['campaign_id'] == row].name[0]
 
        print(campaign_name)
-       #***************** GET RESERVATION DATA ******************************
+
+
+       #***************** GET RESERVATION DATA from Broadsign ******************************
        url_reservation_by_id=url_reservation_by_id+"&ids=" +str(reservation_id);
        s=requests.get(url_reservation_by_id,headers={'Accept': 'application/json','Authorization': auth});
        data=json.loads(s.text)
@@ -251,15 +248,17 @@ for row in campaigns:  #for each campaign to analyze
                print("Broadsign Campaign:  ")
                print("---------------------")
 
-               print("Name " + str(n["name"].encode('utf-8', errors ='ignore')))
+               print("Name " + str(n["name"]))
                print("start:"+ str(n["start_date"]))
                print("end:"+ str(n["end_date"]))
-               print("Days "+ str(reservation["days"]))
+               print("Campaign Days "+ str(reservation["days"]))
 
                sql= "INSERT INTO campaign_analysis (country, campaign, name,reservation_id, start_date, end_date, saturation, duration_msec, active, days, description,total_screens_order) VALUES (%s, %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
                val= ("COLOMBIA", campaign_name,campaign_name,reservation_id,str(n["start_date"]),str(n["end_date"]),str(n["saturation"]),n["duration_msec"],reservation["active"],reservation["days"], "Broadsign data" , "null" )
                mycursor.execute(sql,val)
                mydb.commit()
+
+
 
 
            #Performance reports:
@@ -287,10 +286,11 @@ for row in campaigns:  #for each campaign to analyze
                   print(str(n["played_on"]) + " Repetitions: " + str(n["total"]) )
 
                   #print campaign_daily_performance
-                  sql= "INSERT INTO campaign_daily_performance (campaign, total_impressions, played_on, repetitions, reservation_id) VALUES (%s,%s,%s,%s,%s)"
-                  val= (campaign_name, n["total_impressions"],str(n["played_on"]),n["total"],n["reservable_id"])
+                  sql= "INSERT INTO campaign_daily_performance (country, campaign, total_impressions, played_on, repetitions, reservation_id) VALUES (%s,%s,%s,%s,%s,%s)"
+                  val= ("COLOMBIA", campaign_name, n["total_impressions"],str(n["played_on"]),n["total"],n["reservable_id"])
                   mycursor.execute(sql,val)
                   mydb.commit()
+
 
 
            #display uit Performance
@@ -304,7 +304,7 @@ for row in campaigns:  #for each campaign to analyze
            s=requests.get(url_display_unit_performance,headers={'Accept': 'application/json','Authorization': auth});
            data=json.loads(s.text)
 
-           print("Number of Display units in the campaign: "+ str(len(data["display_unit_performance"])))
+           print("Display units in the campaign: "+ str(len(data["display_unit_performance"])))
 
            for n in data["display_unit_performance"]:
                campaign_display_unit_performance["total_impressions"]=n["total_impressions"]
@@ -325,7 +325,7 @@ for row in campaigns:  #for each campaign to analyze
                     #print data_mall_name
                     for o in data_mall_name["container"]:
                         campaign_display_unit_performance["mall_name"]=o["name"].encode('utf-8', errors ='ignore')
-                        print("Repetitions for site "+ str(o["name"].encode('utf-8', errors ='ignore'))+ " and Display unit " + str(m["name"].encode('utf-8', errors ='ignore')) + ":" +str(n["total"]) + " ( " + str(m["host_screen_count"]) +" screens)" )
+                        print("Repetitions for site "+ str(o["name"])+ " and Display unit " + str(m["name"]) + ":" +str(n["total"]) + " ( " + str(m["host_screen_count"]) +" screens)" )
 
                campaign_display_unit_performance["reservation_id"]=n["reservable_id"]
                campaign_display_unit_performance["repetitions"]=n["total"]
@@ -339,8 +339,9 @@ for row in campaigns:  #for each campaign to analyze
            #print campaign_display_unit_performance
            print ("")
            print("-------------------------------------")
-           print("     Display Unit Audience: ")
+           print("     Display Unit Audience:          ")
            print("-------------------------------------")
+
 
            daily_totals=[]
            con_male=[]
@@ -396,7 +397,7 @@ for row in campaigns:  #for each campaign to analyze
                     default_screen_day_impression = 10
                     default_screen_day_views = 5
                     mall_name = "NOT FOUND"
-
+                print("+++++++++++++++++++++++++++++++")
 
                 total_days=len(campaign_days)
                 total_du_campaign_impressions=0
@@ -445,7 +446,7 @@ for row in campaigns:  #for each campaign to analyze
 
                 print (" ")
                 print ("Daily Analysis for " + mall_name + " - mall id: " + str(mall_id))
-                print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+                print("----------------------------------------------------------------")
 
                 day_formatted=""
                 date_unformatted=[]
@@ -460,13 +461,14 @@ for row in campaigns:  #for each campaign to analyze
                     # buscar numero de impresiones ese dia para ese display unit
                     sql_select_total_imp= "SELECT total_impressions, total_views from audience_impressions WHERE date LIKE '%s' AND mall_id LIKE '%s'" %(str(day_formatted), str(mall_id))
                     mycursor.execute(sql_select_total_imp)
+                    #print(sql_select_total_imp)
                     records_day_impressions = mycursor.fetchall()
                     day_impressions = 0
-                    print(records_day_impressions)
+                    print("Model Impressions / Views : ", records_day_impressions)
 
                     #if no data use default VALUE
                     if mycursor.rowcount==0:
-                        print("No audience data for mall " + str(mall_name.encode('utf-8', errors ='ignore')) +" found for " + day + ", using default value "+ str(default_screen_day_impressions))
+                        print("No audience data for mall " + str(mall_name) + " id " + str(mall_id) + " found for " + day + ", using default value "+ str(default_screen_day_impressions))
                         day_impressions= default_screen_day_impressions
                         du_day_impressions= day_impressions*row_0[2]   #numero de pantallas del display unit
                     else:
@@ -480,102 +482,112 @@ for row in campaigns:  #for each campaign to analyze
                             #print("")
 
                     #agafar les concentracions
-                    sql_select_total_imp= "SELECT average_concentration FROM audience_segments WHERE datetime LIKE '%s' AND mall_id LIKE '%s' AND target_id='%s'" %(str(day_formatted), str(mall_id), 35) #target hombre
+                    #sql_select_total_imp= "SELECT average_concentration FROM audience_segments WHERE datetime LIKE '%s' AND mall_id LIKE '%s' AND target_id='%s'" %(str(day_formatted), str(mall_id), 35) #target hombre
+                    sql_select_total_imp= "SELECT default_dem_male FROM malls WHERE id LIKE '%s'" %(str(mall_id)) #target hombre
+                    
+
+
                     mycursor.execute(sql_select_total_imp)
+                    print(sql_select_total_imp)
                     records_concentration = mycursor.fetchall()
 
                     #if no data use default VALUE
                     if mycursor.rowcount==0:
-                        print("No man concentration available for " + str(mall_name.encode('utf-8', errors ='ignore')) +" found for " + day + ", setting to 0,45 ")
+                        print("No man concentration available for " + str(mall_name) +" found for " + day + ", setting to 0.45 ")
                         concentration_male=0.46
                     else:
                         for rows_3 in records_concentration:
                             concentration_male = rows_3[0]
-                            print("Concentracion hombres  " + str(mall_id) + " : " + str(rows_3[0]))
+                            print("Concentracion male  " + str(mall_name) + " : " + str(rows_3[0]))
 
                     #agafar les concentracions
                     #print("**** concentracin mujeres*****")
-                    sql_select_total_imp= "SELECT average_concentration FROM audience_segments WHERE datetime LIKE '%s' AND mall_id LIKE '%s' AND target_id='%s'" %(str(day_formatted), str(mall_id), 36) #target mujeres
+                    #sql_select_total_imp= "SELECT average_concentration FROM audience_segments WHERE datetime LIKE '%s' AND mall_id LIKE '%s' AND target_id='%s'" %(str(day_formatted), str(mall_id), 36) #target mujeres
+                    sql_select_total_imp= "SELECT default_dem_female FROM malls WHERE id LIKE '%s'" %(str(mall_id)) #target hombre
                     mycursor.execute(sql_select_total_imp)
                     records_concentration = mycursor.fetchall()
 
                     #if no data use default VALUE
                     if mycursor.rowcount==0:
-                        print("No woman concentration available for " + str(mall_name.encode('utf-8', errors ='ignore')) +" found for " + day + ", setting to 0.55 ")
+                        print("No woman concentration available for " + str(mall_name) + " id " + str(mall_id) +" found for " + day + ", setting to 0.55 ")
                         concentration_female=0.54
 
                     else:
                         for rows_3 in records_concentration:
                             concentration_female = rows_3[0]
-                            print("Concentracion hombres  " + str(mall_id) + " : " + str(rows_3[0]))
+                            print("Concentracion female  " + str(mall_name) + " : " + str(rows_3[0]))
 
 
                     #agafar les concentracions
                     #print("**** concentracin child*****")
-                    sql_select_total_imp= "SELECT average_concentration FROM audience_segments WHERE datetime LIKE '%s' AND mall_id LIKE '%s' AND target_id='%s'" %(str(day_formatted), str(mall_id), 24) #target hombre
+                    #sql_select_total_imp= "SELECT average_concentration FROM audience_segments WHERE datetime LIKE '%s' AND mall_id LIKE '%s' AND target_id='%s'" %(str(day_formatted), str(mall_id), 24) #target hombre
+                    sql_select_total_imp= "SELECT default_age_kid FROM malls WHERE id LIKE '%s'" %(str(mall_id)) #target hombre
                     mycursor.execute(sql_select_total_imp)
                     records_concentration = mycursor.fetchall()
 
                     #if no data use default VALUE
                     if mycursor.rowcount==0:
-                        print("No child concentration available for " + str(mall_name.encode('utf-8', errors ='ignore')) +" found for " + day + ", setting to 0.05 ")
+                        print("No child concentration available for " + str(mall_name) + " id " + str(mall_id) +" found for " + day + ", setting to 0.05 ")
                         concentration_child=0.05
 
                     else:
                         for rows_3 in records_concentration:
                             concentration_child = rows_3[0]
-                            print("Concentracion hombres  " + str(mall_id) + " : " + str(rows_3[0]))
+                            print("Concentracion kid  " + str(mall_name) + " : " + str(rows_3[0]))
 
 
 
                     #agafar les concentracions
                     #print("**** concentracin young*****")
-                    sql_select_total_imp= "SELECT average_concentration FROM audience_segments WHERE datetime LIKE '%s' AND mall_id LIKE '%s' AND target_id='%s'" %(str(day_formatted), str(mall_id), 25) #target hombre
+                    #sql_select_total_imp= "SELECT average_concentration FROM audience_segments WHERE datetime LIKE '%s' AND mall_id LIKE '%s' AND target_id='%s'" %(str(day_formatted), str(mall_id), 25) #target hombre
+                    sql_select_total_imp= "SELECT default_age_young FROM malls WHERE id LIKE '%s'" %(str(mall_id)) #target hombre
                     mycursor.execute(sql_select_total_imp)
                     records_concentration = mycursor.fetchall()
 
                     #if no data use default VALUE
                     if mycursor.rowcount==0:
-                        print("No young concentration available for " + str(mall_name.encode('utf-8', errors ='ignore')) +" found for " + day + ", setting to 0.4 ")
+                        print("No young concentration available for " + str(mall_name) + " id " + str(mall_id) +" found for " + day + ", setting to 0.4 ")
                         concentration_young=0.39
 
                     else:
                         for rows_3 in records_concentration:
                             concentration_young = rows_3[0]
-                            print("Concentracion mujeres " + str(mall_id) + " : " + str(rows_3[0]))
+                            print("Concentracion young " + str(mall_name) + " : " + str(rows_3[0]))
 
 
                     #agafar les concentracions
                     #print("**** concentracin adult*****")
-                    sql_select_total_imp= "SELECT average_concentration FROM audience_segments WHERE datetime LIKE '%s' AND mall_id LIKE '%s' AND target_id='%s'" %(str(day_formatted), str(mall_id), 26) #target hombre
+                    #sql_select_total_imp= "SELECT average_concentration FROM audience_segments WHERE datetime LIKE '%s' AND mall_id LIKE '%s' AND target_id='%s'" %(str(day_formatted), str(mall_id), 26) #target hombre
+                    sql_select_total_imp= "SELECT default_age_adult FROM malls WHERE id LIKE '%s'" %(str(mall_id)) #target hombre
                     mycursor.execute(sql_select_total_imp)
                     records_concentration = mycursor.fetchall()
 
                     #if no data use default VALUE
                     if mycursor.rowcount==0:
-                        print("No adult concentration available for " + str(mall_name.encode('utf-8', errors ='ignore')) +" found for " + day + ", setting to 0 .4")
+                        print("No adult concentration available for " + str(mall_name) + " id " + str(mall_id) + " found for " + day + ", setting to 0.4")
                         concentration_adult=0.41
 
                     else:
                         for rows_3 in records_concentration:
                             concentration_adult = rows_3[0]
-                            print("Concentracion CHILD  " + str(mall_id) + " : " + str(rows_3[0]))
+                            print("Concentracion adult  " + str(mall_name) + " : " + str(rows_3[0]))
 
                     #agafar les concentracions
                     #print("**** concentracion senior*****")
-                    sql_select_total_imp= "SELECT average_concentration FROM audience_segments WHERE datetime LIKE '%s' AND mall_id LIKE '%s' AND target_id='%s'" %(str(day_formatted), str(mall_id), 27) #target hombre
+                    #sql_select_total_imp= "SELECT average_concentration FROM audience_segments WHERE datetime LIKE '%s' AND mall_id LIKE '%s' AND target_id='%s'" %(str(day_formatted), str(mall_id), 27) #target hombre
+                    sql_select_total_imp= "SELECT default_age_senior FROM malls WHERE id LIKE '%s'" %(str(mall_id)) #target hombre
                     mycursor.execute(sql_select_total_imp)
                     records_concentration = mycursor.fetchall()
 
                     #if no data use default VALUE
                     if mycursor.rowcount==0:
-                        print("No senior concentration available for " + str(mall_name.encode('utf-8', errors ='ignore')) +" found for " + day + ", setting to 0.15 ")
+                        print("No senior concentration available for " + str(mall_name) + " id " + str(mall_id) + " found for " + day + ", setting to 0.15 ")
                         concentration_senior=0.15
 
                     else:
                         for rows_3 in records_concentration:
                             concentration_senior = rows_3[0]
-                            print("Concentracion YOUNG " + str(mall_id) + " : " + str(rows_3[0]))
+                            print("Concentracion senior " + str(mall_name) + " : " + str(rows_3[0]))
 
 
                     #total_mall_impressions= total_mall_impressions + day_impressions
@@ -659,8 +671,8 @@ for row in campaigns:  #for each campaign to analyze
                 daily_totals.append(daily_totals_2)
 
                 #update audience for display unit
-                sql= "INSERT INTO campaign_display_unit_audience (campaign, display_unit_id, container_id, screen_count, display_unit_name, mall_name, female_child, female_young,female_adult,female_senior,female_unknown,male_child,male_young,male_adult,male_senior,male_unknown,unknown_child,unknown_young,unknown_adult,unknown_senior, unknown_unknown, reservation_id) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
-                val= (campaign_name,row_0[3],row_0[0],row_0[2], str(row_0[4].encode('utf-8', errors ='ignore')),str(row_0[5].encode('utf-8', errors ='ignore')),f_child,f_young,f_adult,f_senior,0,m_child,m_young,m_adult,m_senior,0,0,0,0,0,0,reservation_id)
+                sql= "INSERT INTO campaign_display_unit_audience (country, campaign, display_unit_id, container_id, screen_count, display_unit_name, mall_name, female_child, female_young,female_adult,female_senior,female_unknown,male_child,male_young,male_adult,male_senior,male_unknown,unknown_child,unknown_young,unknown_adult,unknown_senior, unknown_unknown, reservation_id) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+                val= ("COLOMBIA", campaign_name,row_0[3],row_0[0],row_0[2], str(row_0[4].encode('utf-8', errors ='ignore')),str(row_0[5].encode('utf-8', errors ='ignore')),f_child,f_young,f_adult,f_senior,0,m_child,m_young,m_adult,m_senior,0,0,0,0,0,0,reservation_id)
                 mycursor.execute(sql,val)
                 mydb.commit()
 
@@ -913,9 +925,3 @@ mycursor.close()
 if(mydb.is_connected()):
     mycursor.close()
     print("MySQL connection is closed")
-
-
-
-
-
-

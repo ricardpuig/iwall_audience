@@ -151,12 +151,8 @@ df_reservations = df_reservations[(df_reservations['month'] ==current_month)]
 #remove all programmatic campaigns
 df_reservations = df_reservations[~df_reservations['name'].str.contains("PROGRAMMATIC", na = False) ]
 
-
-
 #print(df_reservations['campaign_id'])
 print(df_reservations)
-
-
 
 '''
 Analyze campaigns 
