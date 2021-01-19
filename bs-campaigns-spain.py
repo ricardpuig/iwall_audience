@@ -151,9 +151,6 @@ df_reservations = df_reservations[(df_reservations['month'] ==current_month)]
 #remove all programmatic campaigns
 df_reservations = df_reservations[~df_reservations['name'].str.contains("PROGRAMMATIC", na = False) ]
 
-#only CECOTEC campaigns!!!!!!!!!!! removeeeeeeeeeeeeeeeeeeeeeee
-df_reservations = df_reservations[df_reservations['name'].str.contains("CECOTEC", na = False) ]
-
 
 
 #print(df_reservations['campaign_id'])
