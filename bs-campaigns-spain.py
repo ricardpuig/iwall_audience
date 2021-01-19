@@ -125,7 +125,7 @@ for m in container_ids:
 
                 reservations.append(reservation)
                 
-              reservation={}
+                reservation={}
             
 
 df_reservations = pd.DataFrame(reservations)
