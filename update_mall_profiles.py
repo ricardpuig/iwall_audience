@@ -61,8 +61,9 @@ print(df_mall_profile)
 
 for i in range(len(df_mall_profile)) : 
     #print(df_mall_profile.loc[i, "affluence"], df_mall_profile.loc[i, "default_dem_male"]) 
-    query = "UPDATE malls SET name=\'{name}\',  affluence={aff},default_screen_day_impressions={imp},  default_dem_male={mal}, default_dem_female={fem}, default_age_kid={kid},  default_age_young={you},  default_age_adult={adu}, default_age_senior={sen}, default_nse_A={a}, default_nse_B={b}, default_nse_C={c} ,default_nse_D={d} WHERE id={id}".format(
+    query = "UPDATE malls SET name=\'{name}\', mall_model_type={mm}, affluence={aff},default_screen_day_impressions={imp},  default_dem_male={mal}, default_dem_female={fem}, default_age_kid={kid},  default_age_young={you},  default_age_adult={adu}, default_age_senior={sen}, default_nse_A={a}, default_nse_B={b}, default_nse_C={c} ,default_nse_D={d} WHERE id={id}".format(
             name=df_mall_profile.loc[i, "site"],
+            mm=df_mall_profile.loc[i, "default_mall_model_type"],
             aff=df_mall_profile.loc[i, "affluence"],
             imp=df_mall_profile.loc[i, "default_screen_day_impressions"],
             mal=df_mall_profile.loc[i, "default_dem_male"],

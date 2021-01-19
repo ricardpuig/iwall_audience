@@ -470,7 +470,7 @@ for row in campaigns:  #for each campaign to analyze
 
                     #if no data use default VALUE
                     if mycursor.rowcount==0:
-                        print("No audience data for mall " + str(mall_name.encode('utf-8', errors ='ignore')) +" found for " + day + ", using default value "+ str(default_screen_day_impressions))
+                        print("No audience data for mall " + str(mall_name) + " id " + str(mall_id) + " found for " + day + ", using default value "+ str(default_screen_day_impressions))
                         day_impressions= default_screen_day_impressions
                         du_day_impressions= day_impressions*row_0[2]   #numero de pantallas del display unit
                     else:
@@ -490,12 +490,12 @@ for row in campaigns:  #for each campaign to analyze
 
                     #if no data use default VALUE
                     if mycursor.rowcount==0:
-                        print("No man concentration available for " + str(mall_name.encode('utf-8', errors ='ignore')) +" found for " + day + ", setting to 0,45 ")
+                        print("No man concentration available for " + str(mall_name) +" found for " + day + ", setting to 0,45 ")
                         concentration_male=0.46
                     else:
                         for rows_3 in records_concentration:
                             concentration_male = rows_3[0]
-                            print("Concentracion hombres  " + str(mall_id) + " : " + str(rows_3[0]))
+                            print("Concentracion male  " + str(mall_id) + " : " + str(rows_3[0]))
 
                     #agafar les concentracions
                     #print("**** concentracin mujeres*****")
@@ -505,13 +505,13 @@ for row in campaigns:  #for each campaign to analyze
 
                     #if no data use default VALUE
                     if mycursor.rowcount==0:
-                        print("No woman concentration available for " + str(mall_name.encode('utf-8', errors ='ignore')) +" found for " + day + ", setting to 0.55 ")
+                        print("No woman concentration available for " + str(mall_name) + " id " + str(mall_id) +" found for " + day + ", setting to 0.55 ")
                         concentration_female=0.54
 
                     else:
                         for rows_3 in records_concentration:
                             concentration_female = rows_3[0]
-                            print("Concentracion hombres  " + str(mall_id) + " : " + str(rows_3[0]))
+                            print("Concentracion female  " + str(mall_id) + " : " + str(rows_3[0]))
 
 
                     #agafar les concentracions
@@ -522,13 +522,13 @@ for row in campaigns:  #for each campaign to analyze
 
                     #if no data use default VALUE
                     if mycursor.rowcount==0:
-                        print("No child concentration available for " + str(mall_name.encode('utf-8', errors ='ignore')) +" found for " + day + ", setting to 0.05 ")
+                        print("No child concentration available for " + str(mall_name) + " id " + str(mall_id) +" found for " + day + ", setting to 0.05 ")
                         concentration_child=0.05
 
                     else:
                         for rows_3 in records_concentration:
                             concentration_child = rows_3[0]
-                            print("Concentracion hombres  " + str(mall_id) + " : " + str(rows_3[0]))
+                            print("Concentracion kid  " + str(mall_id) + " : " + str(rows_3[0]))
 
 
 
@@ -540,13 +540,13 @@ for row in campaigns:  #for each campaign to analyze
 
                     #if no data use default VALUE
                     if mycursor.rowcount==0:
-                        print("No young concentration available for " + str(mall_name.encode('utf-8', errors ='ignore')) +" found for " + day + ", setting to 0.4 ")
+                        print("No young concentration available for " + str(mall_name) + " id " + str(mall_id) +" found for " + day + ", setting to 0.4 ")
                         concentration_young=0.39
 
                     else:
                         for rows_3 in records_concentration:
                             concentration_young = rows_3[0]
-                            print("Concentracion mujeres " + str(mall_id) + " : " + str(rows_3[0]))
+                            print("Concentracion young " + str(mall_id) + " : " + str(rows_3[0]))
 
 
                     #agafar les concentracions
@@ -557,13 +557,13 @@ for row in campaigns:  #for each campaign to analyze
 
                     #if no data use default VALUE
                     if mycursor.rowcount==0:
-                        print("No adult concentration available for " + str(mall_name.encode('utf-8', errors ='ignore')) +" found for " + day + ", setting to 0 .4")
+                        print("No adult concentration available for " + str(mall_name) + " id " + str(mall_id) + " found for " + day + ", setting to 0 .4")
                         concentration_adult=0.41
 
                     else:
                         for rows_3 in records_concentration:
                             concentration_adult = rows_3[0]
-                            print("Concentracion CHILD  " + str(mall_id) + " : " + str(rows_3[0]))
+                            print("Concentracion adult  " + str(mall_id) + " : " + str(rows_3[0]))
 
                     #agafar les concentracions
                     #print("**** concentracion senior*****")
@@ -573,13 +573,13 @@ for row in campaigns:  #for each campaign to analyze
 
                     #if no data use default VALUE
                     if mycursor.rowcount==0:
-                        print("No senior concentration available for " + str(mall_name.encode('utf-8', errors ='ignore')) +" found for " + day + ", setting to 0.15 ")
+                        print("No senior concentration available for " + str(mall_name) + " id " + str(mall_id) + " found for " + day + ", setting to 0.15 ")
                         concentration_senior=0.15
 
                     else:
                         for rows_3 in records_concentration:
                             concentration_senior = rows_3[0]
-                            print("Concentracion YOUNG " + str(mall_id) + " : " + str(rows_3[0]))
+                            print("Concentracion senior " + str(mall_id) + " : " + str(rows_3[0]))
 
 
                     #total_mall_impressions= total_mall_impressions + day_impressions
@@ -663,8 +663,8 @@ for row in campaigns:  #for each campaign to analyze
                 daily_totals.append(daily_totals_2)
 
                 #update audience for display unit
-                sql= "INSERT INTO campaign_display_unit_audience (campaign, display_unit_id, container_id, screen_count, display_unit_name, mall_name, female_child, female_young,female_adult,female_senior,female_unknown,male_child,male_young,male_adult,male_senior,male_unknown,unknown_child,unknown_young,unknown_adult,unknown_senior, unknown_unknown, reservation_id) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
-                val= (campaign_name,row_0[3],row_0[0],row_0[2], str(row_0[4].encode('utf-8', errors ='ignore')),str(row_0[5].encode('utf-8', errors ='ignore')),f_child,f_young,f_adult,f_senior,0,m_child,m_young,m_adult,m_senior,0,0,0,0,0,0,reservation_id)
+                sql= "INSERT INTO campaign_display_unit_audience (country, campaign, display_unit_id, container_id, screen_count, display_unit_name, mall_name, female_child, female_young,female_adult,female_senior,female_unknown,male_child,male_young,male_adult,male_senior,male_unknown,unknown_child,unknown_young,unknown_adult,unknown_senior, unknown_unknown, reservation_id) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+                val= ("SPAIN", campaign_name,row_0[3],row_0[0],row_0[2], str(row_0[4].encode('utf-8', errors ='ignore')),str(row_0[5].encode('utf-8', errors ='ignore')),f_child,f_young,f_adult,f_senior,0,m_child,m_young,m_adult,m_senior,0,0,0,0,0,0,reservation_id)
                 mycursor.execute(sql,val)
                 mydb.commit()
 
