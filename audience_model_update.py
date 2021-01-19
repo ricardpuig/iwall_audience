@@ -89,8 +89,6 @@ for m in malls:
 
     #build default audience data for the current year
 
-
-
     #dates create 
     begin_date = '2020-12-28'
     end_date= '2021-12-31'
@@ -184,9 +182,6 @@ for m in malls:
     df_audience_impressions.drop(columns, inplace=True, axis=1)
 
     #print(df_audience_impressions)
-
-
-
 
     df_audience_impressions=df_audience_impressions.reset_index()
     df_audience_impressions['date']=df_audience_impressions['date'].dt.strftime('%Y-%m-%d')
@@ -392,6 +387,7 @@ for m in malls:
     print(df_audience_segments)
 
     df_audience_segments['datetime']=df_audience_segments['date']
+    df_audience_segments['datetime']=df_audience_segments['datetime'].dt.strftime('%Y-%m-%d')
 
     columns = ['date']
     df_audience_segments.drop(columns, inplace=True, axis=1)
