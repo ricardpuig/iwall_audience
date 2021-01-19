@@ -489,7 +489,11 @@ for row in campaigns:  #for each campaign to analyze
                             #print("")
 
                     #agafar les concentracions
-                    sql_select_total_imp= "SELECT average_concentration FROM audience_segments WHERE datetime LIKE '%s' AND mall_id LIKE '%s' AND target_id='%s'" %(str(day_formatted), str(mall_id), 35) #target hombre
+                    #sql_select_total_imp= "SELECT average_concentration FROM audience_segments WHERE datetime LIKE '%s' AND mall_id LIKE '%s' AND target_id='%s'" %(str(day_formatted), str(mall_id), 35) #target hombre
+                    sql_select_total_imp= "SELECT default_dem_male FROM malls WHERE id LIKE '%s'" %(str(mall_id)) #target hombre
+                    
+
+
                     mycursor.execute(sql_select_total_imp)
                     print(sql_select_total_imp)
                     records_concentration = mycursor.fetchall()
@@ -505,7 +509,8 @@ for row in campaigns:  #for each campaign to analyze
 
                     #agafar les concentracions
                     #print("**** concentracin mujeres*****")
-                    sql_select_total_imp= "SELECT average_concentration FROM audience_segments WHERE datetime LIKE '%s' AND mall_id LIKE '%s' AND target_id='%s'" %(str(day_formatted), str(mall_id), 36) #target mujeres
+                    #sql_select_total_imp= "SELECT average_concentration FROM audience_segments WHERE datetime LIKE '%s' AND mall_id LIKE '%s' AND target_id='%s'" %(str(day_formatted), str(mall_id), 36) #target mujeres
+                    sql_select_total_imp= "SELECT default_dem_female FROM malls WHERE id LIKE '%s'" %(str(mall_id)) #target hombre
                     mycursor.execute(sql_select_total_imp)
                     records_concentration = mycursor.fetchall()
 
@@ -522,7 +527,8 @@ for row in campaigns:  #for each campaign to analyze
 
                     #agafar les concentracions
                     #print("**** concentracin child*****")
-                    sql_select_total_imp= "SELECT average_concentration FROM audience_segments WHERE datetime LIKE '%s' AND mall_id LIKE '%s' AND target_id='%s'" %(str(day_formatted), str(mall_id), 24) #target hombre
+                    #sql_select_total_imp= "SELECT average_concentration FROM audience_segments WHERE datetime LIKE '%s' AND mall_id LIKE '%s' AND target_id='%s'" %(str(day_formatted), str(mall_id), 24) #target hombre
+                    sql_select_total_imp= "SELECT default_age_kid FROM malls WHERE id LIKE '%s'" %(str(mall_id)) #target hombre
                     mycursor.execute(sql_select_total_imp)
                     records_concentration = mycursor.fetchall()
 
@@ -540,7 +546,8 @@ for row in campaigns:  #for each campaign to analyze
 
                     #agafar les concentracions
                     #print("**** concentracin young*****")
-                    sql_select_total_imp= "SELECT average_concentration FROM audience_segments WHERE datetime LIKE '%s' AND mall_id LIKE '%s' AND target_id='%s'" %(str(day_formatted), str(mall_id), 25) #target hombre
+                    #sql_select_total_imp= "SELECT average_concentration FROM audience_segments WHERE datetime LIKE '%s' AND mall_id LIKE '%s' AND target_id='%s'" %(str(day_formatted), str(mall_id), 25) #target hombre
+                    sql_select_total_imp= "SELECT default_age_young FROM malls WHERE id LIKE '%s'" %(str(mall_id)) #target hombre
                     mycursor.execute(sql_select_total_imp)
                     records_concentration = mycursor.fetchall()
 
@@ -557,7 +564,8 @@ for row in campaigns:  #for each campaign to analyze
 
                     #agafar les concentracions
                     #print("**** concentracin adult*****")
-                    sql_select_total_imp= "SELECT average_concentration FROM audience_segments WHERE datetime LIKE '%s' AND mall_id LIKE '%s' AND target_id='%s'" %(str(day_formatted), str(mall_id), 26) #target hombre
+                    #sql_select_total_imp= "SELECT average_concentration FROM audience_segments WHERE datetime LIKE '%s' AND mall_id LIKE '%s' AND target_id='%s'" %(str(day_formatted), str(mall_id), 26) #target hombre
+                    sql_select_total_imp= "SELECT default_age_adult FROM malls WHERE id LIKE '%s'" %(str(mall_id)) #target hombre
                     mycursor.execute(sql_select_total_imp)
                     records_concentration = mycursor.fetchall()
 
@@ -573,7 +581,8 @@ for row in campaigns:  #for each campaign to analyze
 
                     #agafar les concentracions
                     #print("**** concentracion senior*****")
-                    sql_select_total_imp= "SELECT average_concentration FROM audience_segments WHERE datetime LIKE '%s' AND mall_id LIKE '%s' AND target_id='%s'" %(str(day_formatted), str(mall_id), 27) #target hombre
+                    #sql_select_total_imp= "SELECT average_concentration FROM audience_segments WHERE datetime LIKE '%s' AND mall_id LIKE '%s' AND target_id='%s'" %(str(day_formatted), str(mall_id), 27) #target hombre
+                    sql_select_total_imp= "SELECT default_age_senior FROM malls WHERE id LIKE '%s'" %(str(mall_id)) #target hombre
                     mycursor.execute(sql_select_total_imp)
                     records_concentration = mycursor.fetchall()
 
