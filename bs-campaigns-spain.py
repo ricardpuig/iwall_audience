@@ -124,13 +124,8 @@ for m in container_ids:
                 reservation["SAP_ID"]="not set"
 
                 reservations.append(reservation)
-                #print(reservation)
                 
-                #sql= "INSERT INTO reservations (name, booking_state, container_id, duration, saturation, start_time,start_date, end_time, end_date, state, country, active, mall, campaign_id,SAP_ID,days) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
-                #val= (reservation["name"],reservation["booking_state"],reservation["mall_container_id"],reservation["duration_msec"],reservation["saturation"],reservation["start_time"],reservation["start_date"],reservation["end_time"],reservation["end_date"],reservation["state"],reservation["country"],reservation["active"],reservation["mall"],reservation["campaign_id"],reservation["SAP_ID"],reservation["days"])
-                #mycursor.execute(sql,val)
-                #mydb.commit()
-                reservation={}
+              reservation={}
             
 
 df_reservations = pd.DataFrame(reservations)
@@ -149,6 +144,7 @@ today = pd.to_datetime("today")
 current_month=today.month
 current_year=today.year
 
+#analyze only current month campaigns (based on end_date)
 df_reservations = df_reservations[(df_reservations['year'] ==current_year)] 
 df_reservations = df_reservations[(df_reservations['month'] ==current_month)] 
 
@@ -158,6 +154,8 @@ df_reservations = df_reservations[~df_reservations['name'].str.contains("PROGRAM
 
 #print(df_reservations['campaign_id'])
 print(df_reservations)
+
+
 
 '''
 Analyze campaigns 
@@ -215,7 +213,9 @@ for row in campaigns:  #for each campaign to analyze
        campaign_name=df_reservations.loc[df_reservations['campaign_id'] == row].name[0]
 
        print(campaign_name)
-       #***************** GET RESERVATION DATA ******************************
+
+
+       #***************** GET RESERVATION DATA from Broadsign ******************************
        url_reservation_by_id=url_reservation_by_id+"&ids=" +str(reservation_id);
        s=requests.get(url_reservation_by_id,headers={'Accept': 'application/json','Authorization': auth});
        data=json.loads(s.text)
@@ -251,15 +251,17 @@ for row in campaigns:  #for each campaign to analyze
                print("Broadsign Campaign:  ")
                print("---------------------")
 
-               print("Name " + str(n["name"].encode('utf-8', errors ='ignore')))
+               print("Name " + str(n["name"]))
                print("start:"+ str(n["start_date"]))
                print("end:"+ str(n["end_date"]))
-               print("Days "+ str(reservation["days"]))
+               print("Campaign Days "+ str(reservation["days"]))
 
                sql= "INSERT INTO campaign_analysis (country, campaign, name,reservation_id, start_date, end_date, saturation, duration_msec, active, days, description,total_screens_order) VALUES (%s, %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
                val= ("SPAIN", campaign_name,campaign_name,reservation_id,str(n["start_date"]),str(n["end_date"]),str(n["saturation"]),n["duration_msec"],reservation["active"],reservation["days"], "Broadsign data" , "null" )
                mycursor.execute(sql,val)
                mydb.commit()
+
+
 
 
            #Performance reports:
@@ -287,10 +289,11 @@ for row in campaigns:  #for each campaign to analyze
                   print(str(n["played_on"]) + " Repetitions: " + str(n["total"]) )
 
                   #print campaign_daily_performance
-                  sql= "INSERT INTO campaign_daily_performance (campaign, total_impressions, played_on, repetitions, reservation_id) VALUES (%s,%s,%s,%s,%s)"
-                  val= (campaign_name, n["total_impressions"],str(n["played_on"]),n["total"],n["reservable_id"])
+                  sql= "INSERT INTO campaign_daily_performance (country, campaign, total_impressions, played_on, repetitions, reservation_id) VALUES (%s,%s,%s,%s,%s,%s)"
+                  val= ("SPAIN", campaign_name, n["total_impressions"],str(n["played_on"]),n["total"],n["reservable_id"])
                   mycursor.execute(sql,val)
                   mydb.commit()
+
 
 
            #display uit Performance
@@ -304,7 +307,7 @@ for row in campaigns:  #for each campaign to analyze
            s=requests.get(url_display_unit_performance,headers={'Accept': 'application/json','Authorization': auth});
            data=json.loads(s.text)
 
-           print("Number of Display units in the campaign: "+ str(len(data["display_unit_performance"])))
+           print("Display units in the campaign: "+ str(len(data["display_unit_performance"])))
 
            for n in data["display_unit_performance"]:
                campaign_display_unit_performance["total_impressions"]=n["total_impressions"]
@@ -325,7 +328,7 @@ for row in campaigns:  #for each campaign to analyze
                     #print data_mall_name
                     for o in data_mall_name["container"]:
                         campaign_display_unit_performance["mall_name"]=o["name"].encode('utf-8', errors ='ignore')
-                        print("Repetitions for site "+ str(o["name"].encode('utf-8', errors ='ignore'))+ " and Display unit " + str(m["name"].encode('utf-8', errors ='ignore')) + ":" +str(n["total"]) + " ( " + str(m["host_screen_count"]) +" screens)" )
+                        print("Repetitions for site "+ str(o["name"])+ " and Display unit " + str(m["name"]) + ":" +str(n["total"]) + " ( " + str(m["host_screen_count"]) +" screens)" )
 
                campaign_display_unit_performance["reservation_id"]=n["reservable_id"]
                campaign_display_unit_performance["repetitions"]=n["total"]
@@ -339,8 +342,9 @@ for row in campaigns:  #for each campaign to analyze
            #print campaign_display_unit_performance
            print ("")
            print("-------------------------------------")
-           print("     Display Unit Audience: ")
+           print("     Display Unit Audience:          ")
            print("-------------------------------------")
+
 
            daily_totals=[]
            con_male=[]
@@ -396,7 +400,7 @@ for row in campaigns:  #for each campaign to analyze
                     default_screen_day_impression = 10
                     default_screen_day_views = 5
                     mall_name = "NOT FOUND"
-
+                print("+++++++++++++++++++++++++++++++")
 
                 total_days=len(campaign_days)
                 total_du_campaign_impressions=0
@@ -445,7 +449,7 @@ for row in campaigns:  #for each campaign to analyze
 
                 print (" ")
                 print ("Daily Analysis for " + mall_name + " - mall id: " + str(mall_id))
-                print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+                print("----------------------------------------------------------------")
 
                 day_formatted=""
                 date_unformatted=[]
@@ -462,7 +466,7 @@ for row in campaigns:  #for each campaign to analyze
                     mycursor.execute(sql_select_total_imp)
                     records_day_impressions = mycursor.fetchall()
                     day_impressions = 0
-                    print(records_day_impressions)
+                    print("Model Impressions / Views : ", records_day_impressions)
 
                     #if no data use default VALUE
                     if mycursor.rowcount==0:
