@@ -92,7 +92,7 @@ for m in malls:
 
 
     #dates create 
-    begin_date = '2021-01-01'
+    begin_date = '2020-12-28'
     end_date= '2021-12-31'
 
     df_audience_impressions=pd.DataFrame({'mall_id' : mall['id'], 'date':pd.date_range(start=begin_date, end=end_date)})
