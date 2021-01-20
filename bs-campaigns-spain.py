@@ -442,147 +442,149 @@ for row in campaigns:  #for each campaign to analyze
                 #calculate daily impressions for that display unit and each day
                 for day in campaign_days:
 
-                    print("")
-                    date_unformatted=day.split("-")
-                    day_formatted=date_unformatted[0]+"-"+date_unformatted[1]+"-"+date_unformatted[2]
-                    print("Day: ",  day_formatted)
-
-                    # buscar numero de impresiones ese dia para ese display unit
-                    sql_select_total_imp= "SELECT total_impressions, total_views from audience_impressions WHERE date LIKE '%s' AND mall_id LIKE '%s'" %(str(day_formatted), str(mall_id))
-                    mycursor.execute(sql_select_total_imp)
-                    #print(sql_select_total_imp)
-                    records_day_impressions = mycursor.fetchall()
-                    day_impressions = 0
-                    print("Model Impressions / Views : ", records_day_impressions)
-
-                    #if no data use default VALUE
-                    if mycursor.rowcount==0:
-                        print("No audience data for mall " + str(mall_name) + " id " + str(mall_id) + " found for " + day + ", using default value "+ str(default_screen_day_impressions))
-                        day_impressions= default_screen_day_impressions
-                        du_day_impressions= day_impressions*row_0[2]   #numero de pantallas del display unit
-                    else:
-                        for rows_2 in records_day_impressions:
-                            day_impressions = rows_2[0]
-                            if day_impressions == 0:
-                                day_impressions = 100 #un valor minimo para evitar divisiones por zero.
-                            #print("Impresiones totales del mall " + str(mall_id) + " : " + str(rows_2[0]))
-                            du_day_impressions=int((day_impressions/mall_screens)*row_0[2])    #ponderamos al numero de pantallas del display unit
-                            #print("Impresiones totales" + day_formatted + " para display unit " + row_0[4] + " = "+ str(du_day_impressions) +" (" + str(rows_2[0]) + " totales)" )
-                            #print("")
-
-                    #agafar les concentracions
-                    #sql_select_total_imp= "SELECT average_concentration FROM audience_segments WHERE datetime LIKE '%s' AND mall_id LIKE '%s' AND target_id='%s'" %(str(day_formatted), str(mall_id), 35) #target hombre
-                    sql_select_total_imp= "SELECT default_dem_male FROM malls WHERE id LIKE '%s'" %(str(mall_id)) #target hombre
-                    
-
-
-                    mycursor.execute(sql_select_total_imp)
-                    print(sql_select_total_imp)
-                    records_concentration = mycursor.fetchall()
-
-                    #if no data use default VALUE
-                    if mycursor.rowcount==0:
-                        print("No man concentration available for " + str(mall_name) +" found for " + day + ", setting to 0.45 ")
-                        concentration_male=0.46
-                    else:
-                        for rows_3 in records_concentration:
-                            concentration_male = rows_3[0]
-                            print("Concentracion male  " + str(mall_name) + " : " + str(rows_3[0]))
-
-                    #agafar les concentracions
-                    #print("**** concentracin mujeres*****")
-                    #sql_select_total_imp= "SELECT average_concentration FROM audience_segments WHERE datetime LIKE '%s' AND mall_id LIKE '%s' AND target_id='%s'" %(str(day_formatted), str(mall_id), 36) #target mujeres
-                    sql_select_total_imp= "SELECT default_dem_female FROM malls WHERE id LIKE '%s'" %(str(mall_id)) #target hombre
-                    mycursor.execute(sql_select_total_imp)
-                    records_concentration = mycursor.fetchall()
-
-                    #if no data use default VALUE
-                    if mycursor.rowcount==0:
-                        print("No woman concentration available for " + str(mall_name) + " id " + str(mall_id) +" found for " + day + ", setting to 0.55 ")
-                        concentration_female=0.54
-
-                    else:
-                        for rows_3 in records_concentration:
-                            concentration_female = rows_3[0]
-                            print("Concentracion female  " + str(mall_name) + " : " + str(rows_3[0]))
-
-
-                    #agafar les concentracions
-                    #print("**** concentracin child*****")
-                    #sql_select_total_imp= "SELECT average_concentration FROM audience_segments WHERE datetime LIKE '%s' AND mall_id LIKE '%s' AND target_id='%s'" %(str(day_formatted), str(mall_id), 24) #target hombre
-                    sql_select_total_imp= "SELECT default_age_kid FROM malls WHERE id LIKE '%s'" %(str(mall_id)) #target hombre
-                    mycursor.execute(sql_select_total_imp)
-                    records_concentration = mycursor.fetchall()
-
-                    #if no data use default VALUE
-                    if mycursor.rowcount==0:
-                        print("No child concentration available for " + str(mall_name) + " id " + str(mall_id) +" found for " + day + ", setting to 0.05 ")
-                        concentration_child=0.05
-
-                    else:
-                        for rows_3 in records_concentration:
-                            concentration_child = rows_3[0]
-                            print("Concentracion kid  " + str(mall_name) + " : " + str(rows_3[0]))
-
-
-
-                    #agafar les concentracions
-                    #print("**** concentracin young*****")
-                    #sql_select_total_imp= "SELECT average_concentration FROM audience_segments WHERE datetime LIKE '%s' AND mall_id LIKE '%s' AND target_id='%s'" %(str(day_formatted), str(mall_id), 25) #target hombre
-                    sql_select_total_imp= "SELECT default_age_young FROM malls WHERE id LIKE '%s'" %(str(mall_id)) #target hombre
-                    mycursor.execute(sql_select_total_imp)
-                    records_concentration = mycursor.fetchall()
-
-                    #if no data use default VALUE
-                    if mycursor.rowcount==0:
-                        print("No young concentration available for " + str(mall_name) + " id " + str(mall_id) +" found for " + day + ", setting to 0.4 ")
-                        concentration_young=0.39
-
-                    else:
-                        for rows_3 in records_concentration:
-                            concentration_young = rows_3[0]
-                            print("Concentracion young " + str(mall_name) + " : " + str(rows_3[0]))
-
-
-                    #agafar les concentracions
-                    #print("**** concentracin adult*****")
-                    #sql_select_total_imp= "SELECT average_concentration FROM audience_segments WHERE datetime LIKE '%s' AND mall_id LIKE '%s' AND target_id='%s'" %(str(day_formatted), str(mall_id), 26) #target hombre
-                    sql_select_total_imp= "SELECT default_age_adult FROM malls WHERE id LIKE '%s'" %(str(mall_id)) #target hombre
-                    mycursor.execute(sql_select_total_imp)
-                    records_concentration = mycursor.fetchall()
-
-                    #if no data use default VALUE
-                    if mycursor.rowcount==0:
-                        print("No adult concentration available for " + str(mall_name) + " id " + str(mall_id) + " found for " + day + ", setting to 0.4")
-                        concentration_adult=0.41
-
-                    else:
-                        for rows_3 in records_concentration:
-                            concentration_adult = rows_3[0]
-                            print("Concentracion adult  " + str(mall_name) + " : " + str(rows_3[0]))
-
-                    #agafar les concentracions
-                    #print("**** concentracion senior*****")
-                    #sql_select_total_imp= "SELECT average_concentration FROM audience_segments WHERE datetime LIKE '%s' AND mall_id LIKE '%s' AND target_id='%s'" %(str(day_formatted), str(mall_id), 27) #target hombre
-                    sql_select_total_imp= "SELECT default_age_senior FROM malls WHERE id LIKE '%s'" %(str(mall_id)) #target hombre
-                    mycursor.execute(sql_select_total_imp)
-                    records_concentration = mycursor.fetchall()
-
-                    #if no data use default VALUE
-                    if mycursor.rowcount==0:
-                        print("No senior concentration available for " + str(mall_name) + " id " + str(mall_id) + " found for " + day + ", setting to 0.15 ")
-                        concentration_senior=0.15
-
-                    else:
-                        for rows_3 in records_concentration:
-                            concentration_senior = rows_3[0]
-                            print("Concentracion senior " + str(mall_name) + " : " + str(rows_3[0]))
-
-
-                    #total_mall_impressions= total_mall_impressions + day_impressions
-
 
                     try: 
+                      print("")
+                      date_unformatted=day.split("-")
+                      day_formatted=date_unformatted[0]+"-"+date_unformatted[1]+"-"+date_unformatted[2]
+                      print("Day: ",  day_formatted)
+
+                      # buscar numero de impresiones ese dia para ese display unit
+                      sql_select_total_imp= "SELECT total_impressions, total_views from audience_impressions WHERE date LIKE '%s' AND mall_id LIKE '%s'" %(str(day_formatted), str(mall_id))
+                      mycursor.execute(sql_select_total_imp)
+                      #print(sql_select_total_imp)
+                      records_day_impressions = mycursor.fetchall()
+                      day_impressions = 0
+                      print("Model Impressions / Views : ", records_day_impressions)
+
+                      #if no data use default VALUE
+                      if mycursor.rowcount==0:
+                          print("No audience data for mall " + str(mall_name) + " id " + str(mall_id) + " found for " + day + ", using default value "+ str(default_screen_day_impressions))
+                          day_impressions= default_screen_day_impressions
+                          du_day_impressions= day_impressions*row_0[2]   #numero de pantallas del display unit
+                      else:
+                          for rows_2 in records_day_impressions:
+                              day_impressions = rows_2[0]
+                              if day_impressions == 0:
+                                  day_impressions = 100 #un valor minimo para evitar divisiones por zero.
+                              #print("Impresiones totales del mall " + str(mall_id) + " : " + str(rows_2[0]))
+                              du_day_impressions=int((day_impressions/mall_screens)*row_0[2])    #ponderamos al numero de pantallas del display unit
+                              #print("Impresiones totales" + day_formatted + " para display unit " + row_0[4] + " = "+ str(du_day_impressions) +" (" + str(rows_2[0]) + " totales)" )
+                              #print("")
+
+                      #agafar les concentracions
+                      #sql_select_total_imp= "SELECT average_concentration FROM audience_segments WHERE datetime LIKE '%s' AND mall_id LIKE '%s' AND target_id='%s'" %(str(day_formatted), str(mall_id), 35) #target hombre
+                      sql_select_total_imp= "SELECT default_dem_male FROM malls WHERE id LIKE '%s'" %(str(mall_id)) #target hombre
+                      
+
+
+                      mycursor.execute(sql_select_total_imp)
+                      print(sql_select_total_imp)
+                      records_concentration = mycursor.fetchall()
+
+                      #if no data use default VALUE
+                      if mycursor.rowcount==0:
+                          print("No man concentration available for " + str(mall_name) +" found for " + day + ", setting to 0.45 ")
+                          concentration_male=0.46
+                      else:
+                          for rows_3 in records_concentration:
+                              concentration_male = rows_3[0]
+                              print("Concentracion male  " + str(mall_name) + " : " + str(rows_3[0]))
+
+                      #agafar les concentracions
+                      #print("**** concentracin mujeres*****")
+                      #sql_select_total_imp= "SELECT average_concentration FROM audience_segments WHERE datetime LIKE '%s' AND mall_id LIKE '%s' AND target_id='%s'" %(str(day_formatted), str(mall_id), 36) #target mujeres
+                      sql_select_total_imp= "SELECT default_dem_female FROM malls WHERE id LIKE '%s'" %(str(mall_id)) #target hombre
+                      mycursor.execute(sql_select_total_imp)
+                      records_concentration = mycursor.fetchall()
+
+                      #if no data use default VALUE
+                      if mycursor.rowcount==0:
+                          print("No woman concentration available for " + str(mall_name) + " id " + str(mall_id) +" found for " + day + ", setting to 0.55 ")
+                          concentration_female=0.54
+
+                      else:
+                          for rows_3 in records_concentration:
+                              concentration_female = rows_3[0]
+                              print("Concentracion female  " + str(mall_name) + " : " + str(rows_3[0]))
+
+
+                      #agafar les concentracions
+                      #print("**** concentracin child*****")
+                      #sql_select_total_imp= "SELECT average_concentration FROM audience_segments WHERE datetime LIKE '%s' AND mall_id LIKE '%s' AND target_id='%s'" %(str(day_formatted), str(mall_id), 24) #target hombre
+                      sql_select_total_imp= "SELECT default_age_kid FROM malls WHERE id LIKE '%s'" %(str(mall_id)) #target hombre
+                      mycursor.execute(sql_select_total_imp)
+                      records_concentration = mycursor.fetchall()
+
+                      #if no data use default VALUE
+                      if mycursor.rowcount==0:
+                          print("No child concentration available for " + str(mall_name) + " id " + str(mall_id) +" found for " + day + ", setting to 0.05 ")
+                          concentration_child=0.05
+
+                      else:
+                          for rows_3 in records_concentration:
+                              concentration_child = rows_3[0]
+                              print("Concentracion kid  " + str(mall_name) + " : " + str(rows_3[0]))
+
+
+
+                      #agafar les concentracions
+                      #print("**** concentracin young*****")
+                      #sql_select_total_imp= "SELECT average_concentration FROM audience_segments WHERE datetime LIKE '%s' AND mall_id LIKE '%s' AND target_id='%s'" %(str(day_formatted), str(mall_id), 25) #target hombre
+                      sql_select_total_imp= "SELECT default_age_young FROM malls WHERE id LIKE '%s'" %(str(mall_id)) #target hombre
+                      mycursor.execute(sql_select_total_imp)
+                      records_concentration = mycursor.fetchall()
+
+                      #if no data use default VALUE
+                      if mycursor.rowcount==0:
+                          print("No young concentration available for " + str(mall_name) + " id " + str(mall_id) +" found for " + day + ", setting to 0.4 ")
+                          concentration_young=0.39
+
+                      else:
+                          for rows_3 in records_concentration:
+                              concentration_young = rows_3[0]
+                              print("Concentracion young " + str(mall_name) + " : " + str(rows_3[0]))
+
+
+                      #agafar les concentracions
+                      #print("**** concentracin adult*****")
+                      #sql_select_total_imp= "SELECT average_concentration FROM audience_segments WHERE datetime LIKE '%s' AND mall_id LIKE '%s' AND target_id='%s'" %(str(day_formatted), str(mall_id), 26) #target hombre
+                      sql_select_total_imp= "SELECT default_age_adult FROM malls WHERE id LIKE '%s'" %(str(mall_id)) #target hombre
+                      mycursor.execute(sql_select_total_imp)
+                      records_concentration = mycursor.fetchall()
+
+                      #if no data use default VALUE
+                      if mycursor.rowcount==0:
+                          print("No adult concentration available for " + str(mall_name) + " id " + str(mall_id) + " found for " + day + ", setting to 0.4")
+                          concentration_adult=0.41
+
+                      else:
+                          for rows_3 in records_concentration:
+                              concentration_adult = rows_3[0]
+                              print("Concentracion adult  " + str(mall_name) + " : " + str(rows_3[0]))
+
+                      #agafar les concentracions
+                      #print("**** concentracion senior*****")
+                      #sql_select_total_imp= "SELECT average_concentration FROM audience_segments WHERE datetime LIKE '%s' AND mall_id LIKE '%s' AND target_id='%s'" %(str(day_formatted), str(mall_id), 27) #target hombre
+                      sql_select_total_imp= "SELECT default_age_senior FROM malls WHERE id LIKE '%s'" %(str(mall_id)) #target hombre
+                      mycursor.execute(sql_select_total_imp)
+                      records_concentration = mycursor.fetchall()
+
+                      #if no data use default VALUE
+                      if mycursor.rowcount==0:
+                          print("No senior concentration available for " + str(mall_name) + " id " + str(mall_id) + " found for " + day + ", setting to 0.15 ")
+                          concentration_senior=0.15
+
+                      else:
+                          for rows_3 in records_concentration:
+                              concentration_senior = rows_3[0]
+                              print("Concentracion senior " + str(mall_name) + " : " + str(rows_3[0]))
+
+
+                      #total_mall_impressions= total_mall_impressions + day_impressions
+
+
+                   
                       #numero de impresiones para pantallas del display unit
                       du_day_repetitions=row_0[1]/total_days  #numero de repeticiones para ese dia, dividimos total entre numero de dias de la campana
                       #calculo del factor corrector de impresiones en base a las repeticiones de ese dia
