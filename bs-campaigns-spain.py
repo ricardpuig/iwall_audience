@@ -140,13 +140,21 @@ df_reservations=df_reservations.set_index('end_date')
 df_reservations['year']=df_reservations.index.year
 df_reservations['month']=df_reservations.index.month
 
+
+
 today = pd.to_datetime("today")
 current_month=today.month
 current_year=today.year
 
 #analyze only current month campaigns (based on end_date)
-df_reservations = df_reservations[(df_reservations['year'] ==current_year)] 
-df_reservations = df_reservations[(df_reservations['month'] ==current_month)] 
+#df_reservations = df_reservations[(df_reservations['year'] ==current_year)] 
+#df_reservations = df_reservations[(df_reservations['month'] ==current_month)] 
+
+#analyze only current month campaigns (based on end_date)
+df_reservations = df_reservations[(df_reservations['year'] ==2020)] 
+df_reservations = df_reservations[(df_reservations['month'] > 4)] 
+
+
 
 #remove all programmatic campaigns
 df_reservations = df_reservations[~df_reservations['name'].str.contains("PROGRAMMATIC", na = False) ]
