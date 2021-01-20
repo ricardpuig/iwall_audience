@@ -589,72 +589,74 @@ for row in campaigns:  #for each campaign to analyze
                       screen_day_reps = du_day_repetitions/row_0[2]
                       factor_corrector=0.0003*screen_day_reps+0.0004
                       print("Campaign_repetitions for that day por pantalla: "+ str(screen_day_reps) + " factor: "+ str(factor_corrector))
+                   
+
+                      #corregimos las impressiones para esa campaign
+                      #*********************************************
+                      du_day_campaign_impressions=round(du_day_impressions*factor_corrector)
+
+                      daily_totals_2.append(du_day_campaign_impressions)
+
+                      con_male_2.append(round(du_day_campaign_impressions*concentration_male))
+                      con_female_2.append(round(du_day_campaign_impressions*concentration_female))
+                      con_child_2.append(round(du_day_campaign_impressions*concentration_child))
+                      con_young_2.append(round(du_day_campaign_impressions*concentration_young))
+                      con_adult_2.append(round(du_day_campaign_impressions*concentration_adult))
+                      con_senior_2.append(round(du_day_campaign_impressions*concentration_senior))
+
+                      c_child=round(du_day_campaign_impressions*concentration_child)
+                      c_female=round(du_day_campaign_impressions*concentration_female)
+                      c_male=round(du_day_campaign_impressions*concentration_male)
+                      c_young=round(du_day_campaign_impressions*concentration_young)
+                      c_adult=round(du_day_campaign_impressions*concentration_adult)
+                      c_senior=round(du_day_campaign_impressions*concentration_senior)
+
+                      #print "Concentration " +str(c_child) + " "+ str(c_female) +" " + str(c_male) + " "+ str(c_adult) +" "+ str(c_young) +" " + str(c_senior)
+
+                      c_m_child=round(c_child*c_male/(c_male+c_female))
+                      c_m_young=round(c_young*c_male/(c_male+c_female))
+                      c_m_adult=round(c_adult*c_male/(c_male+c_female))
+                      c_m_senior=round(c_senior*c_male/(c_male+c_female))
+                      c_f_child=round(c_child*c_female/(c_male+c_female))
+                      c_f_young=round(c_young*c_female/(c_male+c_female))
+                      c_f_adult=round(c_adult*c_female/(c_male+c_female))
+                      c_f_senior=round(c_senior*c_female/(c_male+c_female))
+
+                      con_f_child_2.append(c_f_child)
+                      con_f_young_2.append(c_f_young)
+                      con_f_adult_2.append(c_f_adult)
+                      con_f_senior_2.append(c_f_senior)
+                      con_m_child_2.append(c_m_child)
+                      con_m_young_2.append(c_m_young)
+                      con_m_adult_2.append(c_m_adult)
+                      con_m_senior_2.append(c_m_senior)
+
+                      #print("Display unit repetitions para ese dia " + str(du_day_repetitions) + " de un total de " + str(row_0[1]) + ",  "+ str(total_days) + " dias de campana")
+                      print("Impresiones ponderadas para dia " + day_formatted +": "+ str(du_day_campaign_impressions)+ " de un total de " +str(day_impressions) +" diarias del mall y " + str(du_day_impressions) + " del display unit en mall " + str(mall_id) )
+
+                      total_du_campaign_impressions=total_du_campaign_impressions+du_day_campaign_impressions
+
+                      total_con_male=total_con_male + round(du_day_campaign_impressions*concentration_male)
+                      total_con_female=total_con_female + round(du_day_campaign_impressions*concentration_female)
+                      total_con_child=total_con_child + round(du_day_campaign_impressions*concentration_child)
+                      total_con_young=total_con_young + round(du_day_campaign_impressions*concentration_young)
+                      total_con_adult=total_con_adult + round(du_day_campaign_impressions*concentration_adult)
+                      total_con_senior=total_con_senior + round(du_day_campaign_impressions*concentration_senior)
+
+                      f_child=round(total_con_child*total_con_female/(total_con_male+total_con_female))
+                      f_young=round(total_con_young*total_con_female/(total_con_male+total_con_female))
+                      f_adult=round(total_con_adult*total_con_female/(total_con_male+total_con_female))
+                      f_senior=round(total_con_senior*total_con_female/(total_con_male+total_con_female))
+                      m_child=round(total_con_child*total_con_male/(total_con_male+total_con_female))
+                      m_young=round(total_con_young*total_con_male/(total_con_male+total_con_female))
+                      m_adult=round(total_con_adult*total_con_male/(total_con_male+total_con_female))
+                      m_senior=round(total_con_senior*total_con_male/(total_con_male+total_con_female))
+
                     except: 
                       screen_day_reps=0
                       factor_corrector=0
                       print ("Error with display UNIT ******")
 
-
-                    #corregimos las impressiones para esa campaign
-                    #*********************************************
-                    du_day_campaign_impressions=round(du_day_impressions*factor_corrector)
-
-                    daily_totals_2.append(du_day_campaign_impressions)
-
-                    con_male_2.append(round(du_day_campaign_impressions*concentration_male))
-                    con_female_2.append(round(du_day_campaign_impressions*concentration_female))
-                    con_child_2.append(round(du_day_campaign_impressions*concentration_child))
-                    con_young_2.append(round(du_day_campaign_impressions*concentration_young))
-                    con_adult_2.append(round(du_day_campaign_impressions*concentration_adult))
-                    con_senior_2.append(round(du_day_campaign_impressions*concentration_senior))
-
-                    c_child=round(du_day_campaign_impressions*concentration_child)
-                    c_female=round(du_day_campaign_impressions*concentration_female)
-                    c_male=round(du_day_campaign_impressions*concentration_male)
-                    c_young=round(du_day_campaign_impressions*concentration_young)
-                    c_adult=round(du_day_campaign_impressions*concentration_adult)
-                    c_senior=round(du_day_campaign_impressions*concentration_senior)
-
-                    #print "Concentration " +str(c_child) + " "+ str(c_female) +" " + str(c_male) + " "+ str(c_adult) +" "+ str(c_young) +" " + str(c_senior)
-
-                    c_m_child=round(c_child*c_male/(c_male+c_female))
-                    c_m_young=round(c_young*c_male/(c_male+c_female))
-                    c_m_adult=round(c_adult*c_male/(c_male+c_female))
-                    c_m_senior=round(c_senior*c_male/(c_male+c_female))
-                    c_f_child=round(c_child*c_female/(c_male+c_female))
-                    c_f_young=round(c_young*c_female/(c_male+c_female))
-                    c_f_adult=round(c_adult*c_female/(c_male+c_female))
-                    c_f_senior=round(c_senior*c_female/(c_male+c_female))
-
-                    con_f_child_2.append(c_f_child)
-                    con_f_young_2.append(c_f_young)
-                    con_f_adult_2.append(c_f_adult)
-                    con_f_senior_2.append(c_f_senior)
-                    con_m_child_2.append(c_m_child)
-                    con_m_young_2.append(c_m_young)
-                    con_m_adult_2.append(c_m_adult)
-                    con_m_senior_2.append(c_m_senior)
-
-                    #print("Display unit repetitions para ese dia " + str(du_day_repetitions) + " de un total de " + str(row_0[1]) + ",  "+ str(total_days) + " dias de campana")
-                    print("Impresiones ponderadas para dia " + day_formatted +": "+ str(du_day_campaign_impressions)+ " de un total de " +str(day_impressions) +" diarias del mall y " + str(du_day_impressions) + " del display unit en mall " + str(mall_id) )
-
-                    total_du_campaign_impressions=total_du_campaign_impressions+du_day_campaign_impressions
-
-                    total_con_male=total_con_male + round(du_day_campaign_impressions*concentration_male)
-                    total_con_female=total_con_female + round(du_day_campaign_impressions*concentration_female)
-                    total_con_child=total_con_child + round(du_day_campaign_impressions*concentration_child)
-                    total_con_young=total_con_young + round(du_day_campaign_impressions*concentration_young)
-                    total_con_adult=total_con_adult + round(du_day_campaign_impressions*concentration_adult)
-                    total_con_senior=total_con_senior + round(du_day_campaign_impressions*concentration_senior)
-
-                    f_child=round(total_con_child*total_con_female/(total_con_male+total_con_female))
-                    f_young=round(total_con_young*total_con_female/(total_con_male+total_con_female))
-                    f_adult=round(total_con_adult*total_con_female/(total_con_male+total_con_female))
-                    f_senior=round(total_con_senior*total_con_female/(total_con_male+total_con_female))
-                    m_child=round(total_con_child*total_con_male/(total_con_male+total_con_female))
-                    m_young=round(total_con_young*total_con_male/(total_con_male+total_con_female))
-                    m_adult=round(total_con_adult*total_con_male/(total_con_male+total_con_female))
-                    m_senior=round(total_con_senior*total_con_male/(total_con_male+total_con_female))
 
 
                 #update impressions in display unit performance
