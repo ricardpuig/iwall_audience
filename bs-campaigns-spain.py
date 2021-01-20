@@ -582,13 +582,18 @@ for row in campaigns:  #for each campaign to analyze
                     #total_mall_impressions= total_mall_impressions + day_impressions
 
 
+                    try: 
+                      #numero de impresiones para pantallas del display unit
+                      du_day_repetitions=row_0[1]/total_days  #numero de repeticiones para ese dia, dividimos total entre numero de dias de la campana
+                      #calculo del factor corrector de impresiones en base a las repeticiones de ese dia
+                      screen_day_reps = du_day_repetitions/row_0[2]
+                      factor_corrector=0.0003*screen_day_reps+0.0004
+                      print("Campaign_repetitions for that day por pantalla: "+ str(screen_day_reps) + " factor: "+ str(factor_corrector))
+                    except: 
+                      screen_day_reps=0
+                      factor_corrector=0
+                      print ("Error with display UNIT ******")
 
-                    #numero de impresiones para pantallas del display unit
-                    du_day_repetitions=row_0[1]/total_days  #numero de repeticiones para ese dia, dividimos total entre numero de dias de la campana
-                    #calculo del factor corrector de impresiones en base a las repeticiones de ese dia
-                    screen_day_reps = du_day_repetitions/row_0[2]
-                    factor_corrector=0.0003*screen_day_reps+0.0004
-                    print("Campaign_repetitions for that day por pantalla: "+ str(screen_day_reps) + " factor: "+ str(factor_corrector))
 
                     #corregimos las impressiones para esa campaign
                     #*********************************************
