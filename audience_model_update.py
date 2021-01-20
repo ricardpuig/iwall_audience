@@ -66,8 +66,8 @@ print(malls)
 #for each mall compute audience model 
 #loop thorugh malls
 
-engine.execute("DELETE FROM audience_segments WHERE datetime LIKE \'2021%%\'")
-engine.execute("DELETE FROM audience_impressions WHERE date LIKE \'2021%%\'")
+engine.execute("DELETE FROM audience_segments WHERE datetime LIKE \'2020%%\'")
+engine.execute("DELETE FROM audience_impressions WHERE date LIKE \'2020%%\'")
 
 for m in malls: 
 
@@ -87,8 +87,8 @@ for m in malls:
     #build default audience data for the current year
 
     #dates create 
-    begin_date = '2021-01-01'
-    end_date= '2021-12-31'
+    begin_date = '2020-01-01'
+    end_date= '2020-12-31'
 
     df_audience_impressions=pd.DataFrame({'mall_id' : mall['id'], 'date':pd.date_range(start=begin_date, end=end_date)})
     df_audience_segments=pd.DataFrame({'mall_id' : mall['id'], 'date':pd.date_range(start=begin_date, end=end_date)})
@@ -103,7 +103,6 @@ for m in malls:
     overall_daily=(mall['screens_type1']*default_screen_impressions*type_deviation) + \
         (mall['screens_type2']*default_screen_impressions) + \
         (mall['screens_type3']*default_screen_impressions*(1+type_deviation))
-
 
 
     #do hourly population
@@ -171,7 +170,6 @@ for m in malls:
     df_audience_impressions['impressions_21']=df_audience_impressions['total_impressions']*hourly[21]
     df_audience_impressions['impressions_22']=df_audience_impressions['total_impressions']*hourly[22]
     df_audience_impressions['impressions_23']=df_audience_impressions['total_impressions']*hourly[23]
-
     #print(df_audience_impressions)
 
 
@@ -187,12 +185,7 @@ for m in malls:
     #update data
     df_audience_impressions.to_sql('audience_impressions', engine, if_exists='append', index=False)
 
-
-
     #get audience data from cameras to adjust 
-
-
-
 
     #SEGMENTS DATA
 
@@ -232,7 +225,6 @@ for m in malls:
     df_audience_segments_male['concentration_23']=mall['default_dem_male']
 
     df_audience_segments_male['average_concentration']=mall['default_dem_male']
-
 
 
     df_audience_segments_female['target_id']=36

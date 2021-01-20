@@ -50,35 +50,18 @@ mycursor = mydb.cursor()
 auth = "Bearer e03b2732ac76e3a954e4be0c280a04a3";
 
 
-print("Extracting current month SPANISH CAMPAIGNS")
+print("Extracting  SPANISH CAMPAIGNS")
 
-# poll container IDs
-r=requests.get(url_container_scoped_spain, headers={'Accept': 'application/json','Authorization': auth});
-data= json.loads(r.text)
+
 
 container_ids=[]
 container_name=[]
 reservation={}
 malls={}
-
-#print data
-
-for k in data["container"]:
-        #print(k["name"].encode('utf-8', errors ='ignore'))
-        #container_name = k["name"] + " id = " + str(k["id"])
-        
-        if str(k["active"]) == "True":
-            container_ids.append(str(k["id"]))
-            container_name.append(k["name"].encode('utf-8', errors ='ignore'))
-            malls[str(k["id"])]=k["name"].encode('utf-8', errors ='ignore')
-
-#print(malls)
-#print(container_name)
-#print(container_ids)
-
 reservations=[]
 
-container_ids=['49461537']
+container_ids=["49461537"]
+
 
 for m in container_ids:
         url_reservation_container=url_reservation_by_display_unit+"&container_ids=" +m
@@ -116,7 +99,7 @@ for m in container_ids:
                 reservation["name"]=n["name"]
                 reservation["country"]="SPAIN"
                 reservation["last_updated"]=datetime.today().strftime("%m/%d/%Y, %H:%M:%S")
-                reservation["mall"]=malls[m]
+                #reservation["mall"]=malls[m]
                 name=n["name"].encode('utf-8', errors ='ignore')
                 #if re.findall('\$(.*)\$',name):
                 #    reservation["SAP_ID"]=re.findall('\$(.*)\$', name)[0]
@@ -129,6 +112,8 @@ for m in container_ids:
             
 
 df_reservations = pd.DataFrame(reservations)
+
+
 
 #filter last month campaigns
 
@@ -151,16 +136,13 @@ current_year=today.year
 #df_reservations = df_reservations[(df_reservations['month'] ==current_month)] 
 
 #analyze only current month campaigns (based on end_date)
-df_reservations = df_reservations[(df_reservations['year'] ==2020)] 
-df_reservations = df_reservations[(df_reservations['month'] > 4)] 
-
-
+#df_reservations = df_reservations[(df_reservations['year'] ==2020)] 
+#df_reservations = df_reservations[(df_reservations['month'] > 4)] 
 
 #remove all programmatic campaigns
 df_reservations = df_reservations[~df_reservations['name'].str.contains("PROGRAMMATIC", na = False) ]
+df_reservations = df_reservations[df_reservations['name'].str.contains("NUTRIBEN", na = False) ]
 
-#print(df_reservations['campaign_id'])
-print(df_reservations)
 
 '''
 Analyze campaigns 
@@ -216,7 +198,6 @@ for row in campaigns:  #for each campaign to analyze
 
 
        campaign_name=df_reservations.loc[df_reservations['campaign_id'] == row].name[0]
-
        print(campaign_name)
 
 
