@@ -208,9 +208,9 @@ for row in campaigns:  #for each campaign to analyze
 
        print(data)
 
-      # try:
+       try:
 
-      for n in data["reservation"]:
+           for n in data["reservation"]:
                reservation["name"]=str(n["name"].encode('utf-8', errors ='ignore'))
                reservation["saturation"]=str(n["saturation"])
                reservation["duration_msec"]=str(n["duration_msec"])
@@ -660,19 +660,22 @@ for row in campaigns:  #for each campaign to analyze
                       print ("Error with display UNIT ******")
 
 
+                try:         
+                  #update impressions in display unit performance
+                  sql= "UPDATE campaign_display_unit_performance  SET  total_impressions=%s WHERE display_unit_id=%s AND campaign=%s"
+                  val= (total_du_campaign_impressions,row_0[3],campaign_name)
+                  mycursor.execute(sql,val)
+                  mydb.commit()
+                  daily_totals.append(daily_totals_2)
 
-                #update impressions in display unit performance
-                sql= "UPDATE campaign_display_unit_performance  SET  total_impressions=%s WHERE display_unit_id=%s AND campaign=%s"
-                val= (total_du_campaign_impressions,row_0[3],campaign_name)
-                mycursor.execute(sql,val)
-                mydb.commit()
-                daily_totals.append(daily_totals_2)
+                  #update audience for display unit
+                  sql= "INSERT INTO campaign_display_unit_audience (country, campaign, display_unit_id, container_id, screen_count, display_unit_name, mall_name, female_child, female_young,female_adult,female_senior,female_unknown,male_child,male_young,male_adult,male_senior,male_unknown,unknown_child,unknown_young,unknown_adult,unknown_senior, unknown_unknown, reservation_id) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+                  val= ("SPAIN", campaign_name,row_0[3],row_0[0],row_0[2], str(row_0[4].encode('utf-8', errors ='ignore')),str(row_0[5].encode('utf-8', errors ='ignore')),f_child,f_young,f_adult,f_senior,0,m_child,m_young,m_adult,m_senior,0,0,0,0,0,0,reservation_id)
+                  mycursor.execute(sql,val)
+                  mydb.commit()
+                except: 
+                  print("Error updating disply unit performance")
 
-                #update audience for display unit
-                sql= "INSERT INTO campaign_display_unit_audience (country, campaign, display_unit_id, container_id, screen_count, display_unit_name, mall_name, female_child, female_young,female_adult,female_senior,female_unknown,male_child,male_young,male_adult,male_senior,male_unknown,unknown_child,unknown_young,unknown_adult,unknown_senior, unknown_unknown, reservation_id) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
-                val= ("SPAIN", campaign_name,row_0[3],row_0[0],row_0[2], str(row_0[4].encode('utf-8', errors ='ignore')),str(row_0[5].encode('utf-8', errors ='ignore')),f_child,f_young,f_adult,f_senior,0,m_child,m_young,m_adult,m_senior,0,0,0,0,0,0,reservation_id)
-                mycursor.execute(sql,val)
-                mydb.commit()
 
                 con_male.append(con_male_2)
                 con_female.append(con_female_2)
@@ -708,129 +711,145 @@ for row in campaigns:  #for each campaign to analyze
                 day_total=0
                 for j in i:
                     day_total=day_total+j
-                #print campaign_daily_performance
-                sql= "UPDATE campaign_daily_performance SET total_impressions=%s WHERE played_on=%s AND reservation_id=%s"
-                val= (day_total,campaign_days[index],str(reservation_id))
-                mycursor.execute(sql,val)
-                mydb.commit()
-                sql= "INSERT INTO campaign_daily_audience (campaign, played_on, reservation_id) VALUES (%s, %s, %s) "
-                val= (campaign_name, campaign_days[index],str(reservation_id))
-                mycursor.execute(sql,val)
-                mydb.commit()
 
-
-           #matrius de concentraciones
-           print("")
-           print("Daily audience")
-           print("-----------------")
-
-           t_matrix= [[con_m_child[j][i] for j in range(len(con_m_child))] for i in range(len(con_m_child[0]))]
-           for index,i in enumerate(t_matrix):
-                  #print i
-                  day_total=0
-                  for j in i:
-                      day_total=day_total+j
+                try:     
                   #print campaign_daily_performance
-                  sql= "UPDATE campaign_daily_audience SET male_child=%s WHERE played_on=%s AND reservation_id=%s"
-                  val= (day_total,campaign_days[index], str(reservation_id))
-                  mycursor.execute(sql,val)
-                  mydb.commit()
-
-
-
-
-           t_matrix= [[con_m_young[j][i] for j in range(len(con_m_young))] for i in range(len(con_m_young[0]))]
-           for index,i in enumerate(t_matrix):
-                  #print i
-                  day_total=0
-                  for j in i:
-                      day_total=day_total+j
-                  #print campaign_daily_performance
-                  sql= "UPDATE campaign_daily_audience SET male_young=%s WHERE played_on=%s AND reservation_id=%s"
-                  val= (day_total,campaign_days[index], str(reservation_id))
-                  mycursor.execute(sql,val)
-                  mydb.commit()
-
-
-           t_matrix= [[con_m_senior[j][i] for j in range(len(con_m_senior))] for i in range(len(con_m_senior[0]))]
-           for index,i in enumerate(t_matrix):
-                  #print i
-                  day_total=0
-                  for j in i:
-                      day_total=day_total+j
-                  #print campaign_daily_performance
-                  sql= "UPDATE campaign_daily_audience SET male_senior=%s WHERE played_on=%s AND reservation_id=%s"
-                  val= (day_total,campaign_days[index], str(reservation_id))
-                  mycursor.execute(sql,val)
-                  mydb.commit()
-
-
-
-           t_matrix= [[con_m_adult[j][i] for j in range(len(con_m_adult))] for i in range(len(con_m_adult[0]))]
-           for index,i in enumerate(t_matrix):
-                  #print i
-                  day_total=0
-                  for j in i:
-                      day_total=day_total+j
-                  #print campaign_daily_performance
-                  sql= "UPDATE campaign_daily_audience SET male_adult=%s WHERE played_on=%s AND reservation_id=%s"
+                  sql= "UPDATE campaign_daily_performance SET total_impressions=%s WHERE played_on=%s AND reservation_id=%s"
                   val= (day_total,campaign_days[index],str(reservation_id))
                   mycursor.execute(sql,val)
                   mydb.commit()
-
-
-           t_matrix= [[con_f_child[j][i] for j in range(len(con_f_child))] for i in range(len(con_f_child[0]))]
-           for index,i in enumerate(t_matrix):
-                  #print i
-                  day_total=0
-                  for j in i:
-                      day_total=day_total+j
-                  #print campaign_daily_performance
-                  sql= "UPDATE campaign_daily_audience SET female_child=%s WHERE played_on=%s AND reservation_id=%s"
-                  val= (day_total,campaign_days[index],str(reservation_id))
+                  sql= "INSERT INTO campaign_daily_audience (campaign, played_on, reservation_id) VALUES (%s, %s, %s) "
+                  val= (campaign_name, campaign_days[index],str(reservation_id))
                   mycursor.execute(sql,val)
                   mydb.commit()
+                except: 
+                  print("Error updating Daily performance")
 
 
-           t_matrix= [[con_f_young[j][i] for j in range(len(con_f_young))] for i in range(len(con_f_young[0]))]
-           for index,i in enumerate(t_matrix):
-                  #print i
-                  day_total=0
-                  for j in i:
-                      day_total=day_total+j
-                  #print campaign_daily_performance
-                  sql= "UPDATE campaign_daily_audience SET female_young=%s WHERE played_on=%s AND reservation_id=%s"
-                  val= (day_total,campaign_days[index],str(reservation_id))
-                  mycursor.execute(sql,val)
-                  mydb.commit()
+           try: 
+
+             #matrius de concentraciones
+             print("")
+             print("Daily audience")
+             print("-----------------")
+
+             t_matrix= [[con_m_child[j][i] for j in range(len(con_m_child))] for i in range(len(con_m_child[0]))]
+             for index,i in enumerate(t_matrix):
+                    #print i
+                    day_total=0
+                    for j in i:
+                        day_total=day_total+j
+                    #print campaign_daily_performance
+                    try:
+                      sql= "UPDATE campaign_daily_audience SET male_child=%s WHERE played_on=%s AND reservation_id=%s"
+                      val= (day_total,campaign_days[index], str(reservation_id))
+                      mycursor.execute(sql,val)
+                      mydb.commit()
+                    except: 
+                      print("Error updating daily audience male_child")
 
 
-           t_matrix= [[con_f_senior[j][i] for j in range(len(con_f_senior))] for i in range(len(con_f_senior[0]))]
-           for index,i in enumerate(t_matrix):
-                  #print i
-                  day_total=0
-                  for j in i:
-                      day_total=day_total+j
-                  #print campaign_daily_performance
-                  sql= "UPDATE campaign_daily_audience SET female_senior=%s WHERE played_on=%s AND reservation_id=%s"
-                  val= (day_total,campaign_days[index],str(reservation_id))
-                  mycursor.execute(sql,val)
-                  mydb.commit()
+
+             t_matrix= [[con_m_young[j][i] for j in range(len(con_m_young))] for i in range(len(con_m_young[0]))]
+             for index,i in enumerate(t_matrix):
+                    #print i
+                    day_total=0
+                    for j in i:
+                        day_total=day_total+j
+
+                    try:    
+                      #print campaign_daily_performance
+                      sql= "UPDATE campaign_daily_audience SET male_young=%s WHERE played_on=%s AND reservation_id=%s"
+                      val= (day_total,campaign_days[index], str(reservation_id))
+                      mycursor.execute(sql,val)
+                      mydb.commit()
+                    except: 
+                      print("Error updating dialy audience male_young")
+
+             t_matrix= [[con_m_senior[j][i] for j in range(len(con_m_senior))] for i in range(len(con_m_senior[0]))]
+             for index,i in enumerate(t_matrix):
+                    #print i
+                    day_total=0
+                    for j in i:
+                        day_total=day_total+j
+                    #print campaign_daily_performance
+
+                    try:
+                      sql= "UPDATE campaign_daily_audience SET male_senior=%s WHERE played_on=%s AND reservation_id=%s"
+                      val= (day_total,campaign_days[index], str(reservation_id))
+                      mycursor.execute(sql,val)
+                      mydb.commit()
+                    except: 
+                      print("Error updating dialy audience male_senior")
 
 
-           t_matrix= [[con_f_adult[j][i] for j in range(len(con_f_adult))] for i in range(len(con_f_adult[0]))]
-           for index,i in enumerate(t_matrix):
-                  #print i
-                  day_total=0
-                  for j in i:
-                      day_total=day_total+j
-                  #print campaign_daily_performance
-                  sql= "UPDATE campaign_daily_audience SET female_adult=%s WHERE played_on=%s AND reservation_id=%s"
-                  val= (day_total,campaign_days[index],str(reservation_id))
-                  mycursor.execute(sql,val)
-                  mydb.commit()
+
+             t_matrix= [[con_m_adult[j][i] for j in range(len(con_m_adult))] for i in range(len(con_m_adult[0]))]
+             for index,i in enumerate(t_matrix):
+                    #print i
+                    day_total=0
+                    for j in i:
+                        day_total=day_total+j
+                    #print campaign_daily_performance
+                    sql= "UPDATE campaign_daily_audience SET male_adult=%s WHERE played_on=%s AND reservation_id=%s"
+                    val= (day_total,campaign_days[index],str(reservation_id))
+                    mycursor.execute(sql,val)
+                    mydb.commit()
 
 
+             t_matrix= [[con_f_child[j][i] for j in range(len(con_f_child))] for i in range(len(con_f_child[0]))]
+             for index,i in enumerate(t_matrix):
+                    #print i
+                    day_total=0
+                    for j in i:
+                        day_total=day_total+j
+                    #print campaign_daily_performance
+                    sql= "UPDATE campaign_daily_audience SET female_child=%s WHERE played_on=%s AND reservation_id=%s"
+                    val= (day_total,campaign_days[index],str(reservation_id))
+                    mycursor.execute(sql,val)
+                    mydb.commit()
+
+
+             t_matrix= [[con_f_young[j][i] for j in range(len(con_f_young))] for i in range(len(con_f_young[0]))]
+             for index,i in enumerate(t_matrix):
+                    #print i
+                    day_total=0
+                    for j in i:
+                        day_total=day_total+j
+                    #print campaign_daily_performance
+                    sql= "UPDATE campaign_daily_audience SET female_young=%s WHERE played_on=%s AND reservation_id=%s"
+                    val= (day_total,campaign_days[index],str(reservation_id))
+                    mycursor.execute(sql,val)
+                    mydb.commit()
+
+
+             t_matrix= [[con_f_senior[j][i] for j in range(len(con_f_senior))] for i in range(len(con_f_senior[0]))]
+             for index,i in enumerate(t_matrix):
+                    #print i
+                    day_total=0
+                    for j in i:
+                        day_total=day_total+j
+                    #print campaign_daily_performance
+                    sql= "UPDATE campaign_daily_audience SET female_senior=%s WHERE played_on=%s AND reservation_id=%s"
+                    val= (day_total,campaign_days[index],str(reservation_id))
+                    mycursor.execute(sql,val)
+                    mydb.commit()
+
+
+             t_matrix= [[con_f_adult[j][i] for j in range(len(con_f_adult))] for i in range(len(con_f_adult[0]))]
+             for index,i in enumerate(t_matrix):
+                    #print i
+                    day_total=0
+                    for j in i:
+                        day_total=day_total+j
+                    #print campaign_daily_performance
+                    sql= "UPDATE campaign_daily_audience SET female_adult=%s WHERE played_on=%s AND reservation_id=%s"
+                    val= (day_total,campaign_days[index],str(reservation_id))
+                    mycursor.execute(sql,val)
+                    mydb.commit()
+
+           except: 
+              print("Error updating daily audiences matrices")
 
            url_display_unit_audience=url_display_unit_audience+"&reservation_id=" +str(reservation_id)
            print(url_display_unit_audience)
@@ -882,7 +901,6 @@ for row in campaigns:  #for each campaign to analyze
 
                print(campaign_display_unit_audience)
 
-       '''        
        except:
                print("Error analyzing campaign")
                print("deleting previous campaign results...")
@@ -916,7 +934,7 @@ for row in campaigns:  #for each campaign to analyze
                )
                mycursor.execute(query)
                mydb.commit()
-        '''
+
 
 
 mycursor.close()
