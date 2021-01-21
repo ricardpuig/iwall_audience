@@ -208,9 +208,9 @@ for row in campaigns:  #for each campaign to analyze
 
        print(data)
 
-       try:
+      # try:
 
-           for n in data["reservation"]:
+      for n in data["reservation"]:
                reservation["name"]=str(n["name"].encode('utf-8', errors ='ignore'))
                reservation["saturation"]=str(n["saturation"])
                reservation["duration_msec"]=str(n["duration_msec"])
@@ -882,6 +882,7 @@ for row in campaigns:  #for each campaign to analyze
 
                print(campaign_display_unit_audience)
 
+       '''        
        except:
                print("Error analyzing campaign")
                print("deleting previous campaign results...")
@@ -915,7 +916,7 @@ for row in campaigns:  #for each campaign to analyze
                )
                mycursor.execute(query)
                mydb.commit()
-
+        '''
 
 
 mycursor.close()
