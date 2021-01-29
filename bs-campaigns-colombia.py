@@ -222,6 +222,16 @@ for row in campaigns:  #for each campaign to analyze
          reservation["end_time"]=str(n["end_time"])
          reservation["end_date"]=str(n["end_date"])
 
+         #name=n["name"].encode('utf-8', errors ='ignore')
+         name=n["name"]
+         print("campaign name", name)
+         if re.findall('\$(.*)\$',name):
+              reservation["SAP_ID"]=re.findall('\$(.*)\$', name)[0]
+         else:
+              reservation["SAP_ID"]="not set"
+         print("SAP id", reservation["SAP_ID"])
+
+
          print("")
          print("---------------------")
          print("Broadsign Campaign:  ")
@@ -232,8 +242,8 @@ for row in campaigns:  #for each campaign to analyze
          print("end:"+ str(n["end_date"]))
          print("Campaign Days "+ str(reservation["days"]))
 
-         sql= "INSERT INTO campaign_analysis (country, campaign, name,reservation_id, start_date, end_date, saturation, duration_msec, active, days, description,total_screens_order) VALUES (%s, %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
-         val= ("COLOMBIA", campaign_name,campaign_name,reservation_id,str(n["start_date"]),str(n["end_date"]),str(n["saturation"]),n["duration_msec"],reservation["active"],reservation["days"], "Broadsign data" , "null" )
+         sql= "INSERT INTO campaign_analysis (SAP_id, country, campaign, name,reservation_id, start_date, end_date, saturation, duration_msec, active, days, description,total_screens_order) VALUES (%s, %s, %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+         val= (reservation["SAP_ID"], "COLOMBIA", campaign_name,campaign_name,reservation_id,str(n["start_date"]),str(n["end_date"]),str(n["saturation"]),n["duration_msec"],reservation["active"],reservation["days"], "Broadsign data" , "null" )
          mycursor.execute(sql,val)
          mydb.commit()
 
