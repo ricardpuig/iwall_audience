@@ -21,7 +21,7 @@ url_container_scoped_colombia= 'https://api.broadsign.com:10889/rest/container/v
 url_container_scoped_led_spain= 'https://api.broadsign.com:10889/rest/container/v9/scoped?domain_id=17244398&parent_container_ids=21003047';
 
 
-
+url_schedule_by_reservation= 'https://api.broadsign.com:10889/rest/schedule/v8/by_reservable?domain_id=17244398'
 
 
 container_ids=[]
@@ -52,11 +52,11 @@ data= json.loads(r.text)
 #print data
 
 for k in data["container"]:
-	print("container name = " +  k["name"].encode('utf-8', errors ='ignore') + " id = " + str(k["id"]))
-	if str(k["active"]) == "True":
-		container_ids.append(str(k["id"]))
-		container_name.append(k["name"].encode('utf-8', errors ='ignore'))
-		malls[str(k["id"])]=k["name"].encode('utf-8', errors ='ignore')
+    print("container name = ", k["name"].encode('utf-8', errors ='ignore') , " id = " , str(k["id"]))
+    if str(k["active"]) == "True":
+        container_ids.append(str(k["id"]))
+        container_name.append(k["name"].encode('utf-8', errors ='ignore'))
+        malls[str(k["id"])]=k["name"].encode('utf-8', errors ='ignore')
 
 #print container_ids
 #print container_name
@@ -69,58 +69,102 @@ today=datetime.now()
 url_reservation_container=""
 
 
-#mycursor.execute("DELETE FROM reservations WHERE country='PERU'")
-mycursor.execute("DELETE FROM reservations")
+mycursor.execute("DELETE FROM reservations WHERE country='PERU'")
+#mycursor.execute("DELETE FROM reservations")
 
 sql_insert=""
 
 
 for m in container_ids:
-	url_reservation_container=url_reservation_by_display_unit+"&container_ids=" +m;
-	print(url_reservation_container);
-	s=requests.get(url_reservation_container,headers={'Accept': 'application/json','Authorization': auth});
-	data=json.loads(s.text)
-	#print data
-	for n in data["reservation"]:
-		insert=1
-		reservation["mall_container_id"]=m
-		reservation["booking_state"]=str(n["booking_state"])
-		reservation["saturation"]=str(n["saturation"])
-		reservation["duration_msec"]=str(n["duration_msec"])
-		reservation["start_time"]=str(n["start_time"])
-		reservation["start_date"]=str(n["start_date"])
-		fecha_inicio=datetime.strptime(str(n["start_date"]),"%Y-%m-%d")
-		fecha_fin=datetime.strptime(str(n["end_date"]),"%Y-%m-%d")
-		reservation["active"]="unknown"
-		if fecha_inicio < datetime.today():
-			if fecha_fin > datetime.today():
-				reservation["active"]="Running"
-		if fecha_inicio>datetime.today():
-			reservation["active"]="por emitir"
-		if fecha_fin<datetime.today():
-			reservation["active"]="Emitida"
-		delta=fecha_fin-fecha_inicio
-		reservation["days"]=0
-		reservation["days"]=delta.days+1
-		reservation["end_time"]=str(n["end_time"])
-		reservation["end_date"]=str(n["end_date"])
-		reservation["campaign_id"]=str(n["id"])
-		reservation["state"]=str(n["state"])
-		reservation["name"]=n["name"].encode('utf-8', errors ='ignore')
-		reservation["country"]="PERU"
-		reservation["last_updated"]=datetime.today().strftime("%m/%d/%Y, %H:%M:%S")
-		reservation["mall"]=malls[m]
-		name=n["name"].encode('utf-8', errors ='ignore')
-		if re.findall('\%(.*)\%',name):
-			reservation["SAP_ID"]=re.findall('\%(.*)\%', name)[0]
-		else:
-			reservation["SAP_ID"]="not found"
-		sql= "INSERT INTO reservations (name, booking_state, container_id, duration, saturation, start_time,start_date, end_time, end_date, state, country, active, mall, campaign_id,SAP_ID,days) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
-		val= (reservation["name"],reservation["booking_state"],reservation["mall_container_id"],reservation["duration_msec"],reservation["saturation"],reservation["start_time"],reservation["start_date"],reservation["end_time"],reservation["end_date"],reservation["state"],reservation["country"],reservation["active"],reservation["mall"],reservation["campaign_id"],reservation["SAP_ID"],reservation["days"])
-		mycursor.execute(sql,val)
-		mydb.commit()
-		reservation={}
-	print("\n")
+    url_reservation_container=url_reservation_by_display_unit+"&container_ids=" +m;
+    print(url_reservation_container);
+    s=requests.get(url_reservation_container,headers={'Accept': 'application/json','Authorization': auth});
+    data=json.loads(s.text)
+    #print data
+    for n in data["reservation"]:
+
+
+            insert=1
+            reservation["mall_container_id"]=m
+            reservation["booking_state"]=str(n["booking_state"])
+            reservation["saturation"]=str(n["saturation"])
+            reservation["duration_msec"]=str(n["duration_msec"])
+            reservation["start_time"]=str(n["start_time"])
+            reservation["start_date"]=str(n["start_date"])
+            fecha_inicio=datetime.strptime(str(n["start_date"]),"%Y-%m-%d")
+            fecha_fin=datetime.strptime(str(n["end_date"]),"%Y-%m-%d")
+            reservation["active"]="unknown"
+            if fecha_inicio < datetime.today():
+                if fecha_fin > datetime.today():
+                    reservation["active"]="Running"
+            if fecha_inicio>datetime.today():
+                reservation["active"]="por emitir"
+            if fecha_fin<datetime.today():
+                reservation["active"]="Emitida"
+            delta=fecha_fin-fecha_inicio
+            reservation["days"]=0
+            reservation["days"]=delta.days+1
+            reservation["end_time"]=str(n["end_time"])
+            reservation["end_date"]=str(n["end_date"])
+            reservation["campaign_id"]=str(n["id"])
+            reservation["state"]=str(n["state"])
+            reservation["name"]=n["name"].encode('utf-8', errors ='ignore')
+            reservation["country"]="PERU"
+            reservation["last_updated"]=datetime.today().strftime("%m/%d/%Y, %H:%M:%S")
+            reservation["mall"]=malls[m]
+            name=n["name"]
+            
+            if re.findall('\%(.*)\%',name):
+                reservation["SAP_ID"]=re.findall('\%(.*)\%', name)[0]
+            else:
+                reservation["SAP_ID"]="not found"
+            
+            schedule_start_date=""
+            schedule_end_date=""
+            schedule_days=0
+
+            url_schedule=url_schedule_by_reservation+"&id="+str(n["id"])
+            s=requests.get(url_schedule,headers={'Accept': 'application/json','Authorization': auth});
+            data_schedules=json.loads(s.text)
+            num_schedules=0
+
+            for o in data_schedules["schedule"]:
+
+                if o["active"] == True:
+                    num_schedules=num_schedules +1
+                    schedule_fecha_inicio=datetime.strptime(str(o["start_date"]),"%Y-%m-%d")
+                    schedule_fecha_fin=datetime.strptime(str(o["end_date"]),"%Y-%m-%d")
+
+
+                    if schedule_start_date=="":
+                        schedule_start_date=schedule_fecha_inicio
+                    if schedule_end_date=="": 
+                        schedule_end_date=schedule_fecha_fin
+                    if schedule_fecha_inicio<=schedule_start_date:
+                        schedule_start_date=schedule_fecha_inicio
+                    if schedule_fecha_fin>=schedule_end_date:
+                        schedule_end_date=schedule_fecha_fin
+
+                #print(schedule_start_date)
+                #print(schedule_end_date)
+                #print(o["name"])
+                #print(o["active"])
+
+            reservation["schedule_end_date"]=str(schedule_end_date)       
+            reservation["schedule_start_date"]=str(schedule_start_date)
+            delta=schedule_end_date-schedule_start_date
+            schedule_days=delta.days+1
+
+            
+
+
+            sql= "INSERT INTO reservations (schedule_days, schedules, schedule_start_date, schedule_end_date, name, booking_state, container_id, duration, saturation, start_time,start_date, end_time, end_date, state, country, active, mall, campaign_id,SAP_ID,days) VALUES (%s,%s,%s,%s, %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+            val= (schedule_days,num_schedules,reservation["schedule_start_date"], reservation["schedule_end_date"],  reservation["name"],reservation["booking_state"],reservation["mall_container_id"],reservation["duration_msec"],reservation["saturation"],reservation["start_time"],reservation["start_date"],reservation["end_time"],reservation["end_date"],reservation["state"],reservation["country"],reservation["active"],reservation["mall"],reservation["campaign_id"],reservation["SAP_ID"],reservation["days"])
+            mycursor.execute(sql,val)
+            mydb.commit()
+            reservation={}
+
+    print("\n")
 
 
 
@@ -128,7 +172,7 @@ for m in container_ids:
 print("COLOMBIA CAMPAIGNS")
 
 
-
+mycursor.execute("DELETE FROM reservations WHERE country='COLOMBIA'")
 
 # poll container IDs
 r=requests.get(url_container_scoped_colombia, headers={'Accept': 'application/json','Authorization': auth});
@@ -145,7 +189,7 @@ malls={}
 #print data
 
 for k in data["container"]:
-        print("container name = " + k["name"].encode('utf-8', errors ='ignore') + " id = " + str(k["id"]))
+        print("container name = ", k["name"].encode('utf-8', errors ='ignore') , " id = " , str(k["id"]))
         if str(k["active"]) == "True":
                 container_ids.append(str(k["id"]))
                 container_name.append(k["name"].encode('utf-8', errors ='ignore'))
@@ -160,6 +204,9 @@ for m in container_ids:
         data=json.loads(s.text)
         #print data
         for n in data["reservation"]:
+
+
+
                 insert=1
                 reservation["mall_container_id"]=m
                 reservation["booking_state"]=str(n["booking_state"])
@@ -188,14 +235,54 @@ for m in container_ids:
                 reservation["country"]="COLOMBIA"
                 reservation["last_updated"]=datetime.today().strftime("%m/%d/%Y, %H:%M:%S")
                 reservation["mall"]=malls[m]
-                name=n["name"].encode('utf-8', errors ='ignore')
+                name=n["name"]
                 if re.findall('\$(.*)\$',name):
                         reservation["SAP_ID"]=re.findall('\$(.*)\$', name)[0]
                 else:
                         reservation["SAP_ID"]="not found"
-      		#print reservation;
-                sql= "INSERT INTO reservations (name, booking_state, container_id, duration, saturation, start_time,start_date, end_time, end_date, state, country, active, mall, campaign_id,SAP_ID,days) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
-                val= (reservation["name"],reservation["booking_state"],reservation["mall_container_id"],reservation["duration_msec"],reservation["saturation"],reservation["start_time"],reservation["start_date"],reservation["end_time"],reservation["end_date"],reservation["state"],reservation["country"],reservation["active"],reservation["mall"],reservation["campaign_id"],reservation["SAP_ID"],reservation["days"])
+                schedule_start_date=""
+                schedule_end_date=""
+                schedule_days=0
+
+                url_schedule=url_schedule_by_reservation+"&id="+str(n["id"])
+                s=requests.get(url_schedule,headers={'Accept': 'application/json','Authorization': auth});
+                data_schedules=json.loads(s.text)
+                num_schedules=0
+
+                #print("*")
+                for o in data_schedules["schedule"]:
+
+                    if o["active"] == True:
+                        num_schedules=num_schedules +1
+                        schedule_fecha_inicio=datetime.strptime(str(o["start_date"]),"%Y-%m-%d")
+                        schedule_fecha_fin=datetime.strptime(str(o["end_date"]),"%Y-%m-%d")
+
+     
+
+                        if schedule_start_date=="":
+                            schedule_start_date=schedule_fecha_inicio
+                        if schedule_end_date=="": 
+                            schedule_end_date=schedule_fecha_fin
+                        if schedule_fecha_inicio<=schedule_start_date:
+                            schedule_start_date=schedule_fecha_inicio
+                        if schedule_fecha_fin>=schedule_end_date:
+                            schedule_end_date=schedule_fecha_fin
+
+                #print(schedule_start_date)
+                #print(schedule_end_date)
+
+                reservation["schedule_end_date"]=str(schedule_end_date)       
+                reservation["schedule_start_date"]=str(schedule_start_date)
+                delta=schedule_end_date-schedule_start_date
+                schedule_days=delta.days+1
+
+                #print(reservation["schedule_start_date"])
+                #print(reservation["schedule_end_date"])
+                #print("---")
+
+
+                sql= "INSERT INTO reservations (schedule_days, schedules, schedule_start_date, schedule_end_date, name, booking_state, container_id, duration, saturation, start_time,start_date, end_time, end_date, state, country, active, mall, campaign_id,SAP_ID,days) VALUES (%s,%s,%s,%s, %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+                val= (schedule_days,num_schedules,reservation["schedule_start_date"], reservation["schedule_end_date"],  reservation["name"],reservation["booking_state"],reservation["mall_container_id"],reservation["duration_msec"],reservation["saturation"],reservation["start_time"],reservation["start_date"],reservation["end_time"],reservation["end_date"],reservation["state"],reservation["country"],reservation["active"],reservation["mall"],reservation["campaign_id"],reservation["SAP_ID"],reservation["days"])
                 mycursor.execute(sql,val)
                 mydb.commit()
                 reservation={}
@@ -211,6 +298,9 @@ malls={}
 
 
 
+print("SPAIN CAMPAIGNS *******")
+mycursor.execute("DELETE FROM reservations WHERE country='SPAIN'")
+
 
 # poll container IDs
 r=requests.get(url_container_scoped_spain, headers={'Accept': 'application/json','Authorization': auth});
@@ -219,7 +309,7 @@ data= json.loads(r.text)
 #print data
 
 for k in data["container"]:
-        print("container name = " + k["name"].encode('utf-8', errors ='ignore') + " id = " + str(k["id"]))
+        print("container name = ", k["name"].encode('utf-8', errors ='ignore') , " id = " , str(k["id"]))
         if str(k["active"]) == "True":
                 container_ids.append(str(k["id"]))
                 container_name.append(k["name"].encode('utf-8', errors ='ignore'))
@@ -269,17 +359,57 @@ for m in container_ids:
                 reservation["country"]="SPAIN"
                 reservation["last_updated"]=datetime.today().strftime("%m/%d/%Y, %H:%M:%S")
                 reservation["mall"]=malls[m]
-                name=n["name"].encode('utf-8', errors ='ignore')
+                name=n["name"]
                 if re.findall('\$(.*)\$',name):
                         reservation["SAP_ID"]=re.findall('\$(.*)\$', name)[0]
                 else:
                         reservation["SAP_ID"]="not found"
-     #           print reservation;
-                sql= "INSERT INTO reservations (name, booking_state, container_id, duration, saturation, start_time,start_date, end_time, end_date, state, country, active, mall, campaign_id,SAP_ID,days) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
-                val= (reservation["name"],reservation["booking_state"],reservation["mall_container_id"],reservation["duration_msec"],reservation["saturation"],reservation["start_time"],reservation["start_date"],reservation["end_time"],reservation["end_date"],reservation["state"],reservation["country"],reservation["active"],reservation["mall"],reservation["campaign_id"],reservation["SAP_ID"],reservation["days"])
+                schedule_start_date=""
+                schedule_end_date=""
+                schedule_days=0
+
+                url_schedule=url_schedule_by_reservation+"&id="+str(n["id"])
+                s=requests.get(url_schedule,headers={'Accept': 'application/json','Authorization': auth});
+                data_schedules=json.loads(s.text)
+                num_schedules=0
+
+                #print("*")
+                for o in data_schedules["schedule"]:
+                    if o["active"] == True:
+                        num_schedules=num_schedules +1
+                        schedule_fecha_inicio=datetime.strptime(str(o["start_date"]),"%Y-%m-%d")
+                        schedule_fecha_fin=datetime.strptime(str(o["end_date"]),"%Y-%m-%d")
+
+      
+
+                        if schedule_start_date=="":
+                            schedule_start_date=schedule_fecha_inicio
+                        if schedule_end_date=="": 
+                            schedule_end_date=schedule_fecha_fin
+                        if schedule_fecha_inicio<=schedule_start_date:
+                            schedule_start_date=schedule_fecha_inicio
+                        if schedule_fecha_fin>=schedule_end_date:
+                            schedule_end_date=schedule_fecha_fin
+
+                #print(schedule_start_date)
+                #print(schedule_end_date)
+
+                reservation["schedule_end_date"]=str(schedule_end_date)       
+                reservation["schedule_start_date"]=str(schedule_start_date)
+                delta=schedule_end_date-schedule_start_date
+                schedule_days=delta.days+1
+
+                #print(reservation["schedule_start_date"])
+                #print(reservation["schedule_end_date"])
+                #print("---")
+
+
+                sql= "INSERT INTO reservations (schedule_days, schedules, schedule_start_date, schedule_end_date, name, booking_state, container_id, duration, saturation, start_time,start_date, end_time, end_date, state, country, active, mall, campaign_id,SAP_ID,days) VALUES (%s,%s,%s,%s, %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+                val= (schedule_days,num_schedules,reservation["schedule_start_date"], reservation["schedule_end_date"],  reservation["name"],reservation["booking_state"],reservation["mall_container_id"],reservation["duration_msec"],reservation["saturation"],reservation["start_time"],reservation["start_date"],reservation["end_time"],reservation["end_date"],reservation["state"],reservation["country"],reservation["active"],reservation["mall"],reservation["campaign_id"],reservation["SAP_ID"],reservation["days"])
                 mycursor.execute(sql,val)
                 mydb.commit()
                 reservation={}
+
         print("\n")
 
 
@@ -304,7 +434,7 @@ data= json.loads(r.text)
 #print data
 
 for k in data["container"]:
-        print("container name = " +  k["name"].encode('utf-8', errors ='ignore') + " id = " + str(k["id"]))
+        print("container name = ", k["name"].encode('utf-8', errors ='ignore') , " id = " , str(k["id"]))
         if str(k["active"]) == "True":
                 container_ids.append(str(k["id"]))
                 container_name.append(k["name"].encode('utf-8', errors ='ignore'))
@@ -313,10 +443,6 @@ for k in data["container"]:
 #print container_ids
 #print container_name
 name=""
-
-
-
-
 
 
 for m in container_ids:
@@ -354,14 +480,57 @@ for m in container_ids:
                 reservation["country"]="SPAIN"
                 reservation["last_updated"]=datetime.today().strftime("%m/%d/%Y, %H:%M:%S")
                 reservation["mall"]=malls[m]
-                name=n["name"].encode('utf-8', errors ='ignore')
+                name=n["name"]
                 if re.findall('\$(.*)\$',name):
                         reservation["SAP_ID"]=re.findall('\$(.*)\$', name)[0]
                 else:
                         reservation["SAP_ID"]="not found"
-#                print reservation;
-                sql= "INSERT INTO reservations (name, booking_state, container_id, duration, saturation, start_time,start_date, end_time, end_date, state, country, active, mall, campaign_id,SAP_ID,days) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
-                val= (reservation["name"],reservation["booking_state"],reservation["mall_container_id"],reservation["duration_msec"],reservation["saturation"],reservation["start_time"],reservation["start_date"],reservation["end_time"],reservation["end_date"],reservation["state"],reservation["country"],reservation["active"],reservation["mall"],reservation["campaign_id"],reservation["SAP_ID"],reservation["days"])
+
+                schedule_start_date=""
+                schedule_end_date=""
+                schedule_days=0
+
+                url_schedule=url_schedule_by_reservation+"&id="+str(n["id"])
+                s=requests.get(url_schedule,headers={'Accept': 'application/json','Authorization': auth});
+                data_schedules=json.loads(s.text)
+                num_schedules=0
+
+                #print("*")
+                for o in data_schedules["schedule"]:
+
+                    if o["active"] == True:
+                    
+                    
+
+                        num_schedules=num_schedules +1
+                        schedule_fecha_inicio=datetime.strptime(str(o["start_date"]),"%Y-%m-%d")
+                        schedule_fecha_fin=datetime.strptime(str(o["end_date"]),"%Y-%m-%d")
+
+
+                        if schedule_start_date=="":
+                            schedule_start_date=schedule_fecha_inicio
+                        if schedule_end_date=="": 
+                            schedule_end_date=schedule_fecha_fin
+                        if schedule_fecha_inicio<=schedule_start_date:
+                            schedule_start_date=schedule_fecha_inicio
+                        if schedule_fecha_fin>=schedule_end_date:
+                            schedule_end_date=schedule_fecha_fin
+
+                #print(schedule_start_date)
+                #print(schedule_end_date)
+
+                reservation["schedule_end_date"]=str(schedule_end_date)       
+                reservation["schedule_start_date"]=str(schedule_start_date)
+                delta=schedule_end_date-schedule_start_date
+                schedule_days=delta.days+1
+
+                #print(reservation["schedule_start_date"])
+                #print(reservation["schedule_end_date"])
+                #print("---")
+
+
+                sql= "INSERT INTO reservations (schedule_days, schedules, schedule_start_date, schedule_end_date, name, booking_state, container_id, duration, saturation, start_time,start_date, end_time, end_date, state, country, active, mall, campaign_id,SAP_ID,days) VALUES (%s,%s,%s,%s, %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+                val= (schedule_days,num_schedules,reservation["schedule_start_date"], reservation["schedule_end_date"],  reservation["name"],reservation["booking_state"],reservation["mall_container_id"],reservation["duration_msec"],reservation["saturation"],reservation["start_time"],reservation["start_date"],reservation["end_time"],reservation["end_date"],reservation["state"],reservation["country"],reservation["active"],reservation["mall"],reservation["campaign_id"],reservation["SAP_ID"],reservation["days"])
                 mycursor.execute(sql,val)
                 mydb.commit()
                 reservation={}

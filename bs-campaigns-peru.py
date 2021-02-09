@@ -163,7 +163,7 @@ df_reservations = df_reservations[~df_reservations['name'].str.contains("PROGRAM
 if all_campaigns:
   print("Selecting current month campaigns") 
   df_reservations = df_reservations[(df_reservations['year'] ==current_year)] 
-  df_reservations = df_reservations[(df_reservations['month'] ==current_month)] 
+  #df_reservations = df_reservations[(df_reservations['month'] ==current_month)] 
 else:
   print("Getting campaigns from name ", campaigns_to_analyze)
   df_reservations = df_reservations[df_reservations['name'].str.contains(campaigns_to_analyze, na = False) ]
@@ -224,8 +224,8 @@ for row in campaigns:  #for each campaign to analyze
          #name=n["name"].encode('utf-8', errors ='ignore')
          name=n["name"]
          print("campaign name", name)
-         if re.findall('\$(.*)\$',name):
-              reservation["SAP_ID"]=re.findall('\$(.*)\$', name)[0]
+         if re.findall('\%(.*)\%',name):
+              reservation["SAP_ID"]=re.findall('\%(.*)\%', name)[0]
          else:
               reservation["SAP_ID"]="not set"
          print("SAP id", reservation["SAP_ID"])
