@@ -175,6 +175,8 @@ current_year=2021
 
 #remove all programmatic campaigns
 df_reservations = df_reservations[~df_reservations['name'].str.contains("PROGRAMMATIC", na = False) ]
+df_reservations = df_reservations[~df_reservations['name'].str.contains("AUTOPROMO", na = False) ]
+
 
 #select campaigns to analyze
 if all_campaigns:
