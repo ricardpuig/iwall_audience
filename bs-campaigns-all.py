@@ -47,7 +47,7 @@ mycursor = mydb.cursor()
 #Authorization
 auth = "Bearer e03b2732ac76e3a954e4be0c280a04a3";
 
-print ("PERU CAMPAIGNS \n")
+print("PERU CAMPAIGNS \n")
 
 # poll container IDs
 r=requests.get(url_container_scoped_peru, headers={'Accept': 'application/json','Authorization': auth});
@@ -56,7 +56,7 @@ data= json.loads(r.text)
 #print data
 
 for k in data["container"]:
-	print "container name = " +  k["name"].encode('utf-8', errors ='ignore') + " id = " + str(k["id"])
+	print("container name = " +  k["name"].encode('utf-8', errors ='ignore') + " id = " + str(k["id"]))
 	if str(k["active"]) == "True":
 		container_ids.append(str(k["id"]))
 		container_name.append(k["name"].encode('utf-8', errors ='ignore'))
@@ -81,7 +81,7 @@ sql_insert=""
 
 for m in container_ids:
 	url_reservation_container=url_reservation_by_display_unit+"&container_ids=" +m;
-	print url_reservation_container;
+	print(url_reservation_container);
 	s=requests.get(url_reservation_container,headers={'Accept': 'application/json','Authorization': auth});
 	data=json.loads(s.text)
 	#print data
@@ -124,12 +124,12 @@ for m in container_ids:
 		mycursor.execute(sql,val)
 		mydb.commit()
 		reservation={}
-	print "\n"
+	print("\n")
 
 
 
 
-print "COLOMBIA CAMPAIGNS"
+print("COLOMBIA CAMPAIGNS")
 
 
 
@@ -149,7 +149,7 @@ malls={}
 #print data
 
 for k in data["container"]:
-        print "container name = " + k["name"].encode('utf-8', errors ='ignore') + " id = " + str(k["id"])
+        print("container name = " + k["name"].encode('utf-8', errors ='ignore') + " id = " + str(k["id"]))
         if str(k["active"]) == "True":
                 container_ids.append(str(k["id"]))
                 container_name.append(k["name"].encode('utf-8', errors ='ignore'))
@@ -159,7 +159,7 @@ for k in data["container"]:
 
 for m in container_ids:
         url_reservation_container=url_reservation_by_display_unit+"&container_ids=" +m;
-        print url_reservation_container;
+        print(url_reservation_container);
         s=requests.get(url_reservation_container,headers={'Accept': 'application/json','Authorization': auth});
         data=json.loads(s.text)
         #print data
@@ -203,7 +203,7 @@ for m in container_ids:
                 mycursor.execute(sql,val)
                 mydb.commit()
                 reservation={}
-        print "\n"
+        print("\n")
 
 
 
@@ -223,7 +223,7 @@ data= json.loads(r.text)
 #print data
 
 for k in data["container"]:
-        print "container name = " + k["name"].encode('utf-8', errors ='ignore') + " id = " + str(k["id"])
+        print("container name = " + k["name"].encode('utf-8', errors ='ignore') + " id = " + str(k["id"]))
         if str(k["active"]) == "True":
                 container_ids.append(str(k["id"]))
                 container_name.append(k["name"].encode('utf-8', errors ='ignore'))
@@ -240,7 +240,7 @@ name=""
 
 for m in container_ids:
         url_reservation_container=url_reservation_by_display_unit+"&container_ids=" +m;
-        print url_reservation_container;
+        print(url_reservation_container);
         s=requests.get(url_reservation_container,headers={'Accept': 'application/json','Authorization': auth});
         data=json.loads(s.text)
         #print data
@@ -284,7 +284,7 @@ for m in container_ids:
                 mycursor.execute(sql,val)
                 mydb.commit()
                 reservation={}
-        print "\n"
+        print("\n")
 
 
 
@@ -308,7 +308,7 @@ data= json.loads(r.text)
 #print data
 
 for k in data["container"]:
-        print "container name = " +  k["name"].encode('utf-8', errors ='ignore') + " id = " + str(k["id"])
+        print("container name = " +  k["name"].encode('utf-8', errors ='ignore') + " id = " + str(k["id"]))
         if str(k["active"]) == "True":
                 container_ids.append(str(k["id"]))
                 container_name.append(k["name"].encode('utf-8', errors ='ignore'))
@@ -325,7 +325,7 @@ name=""
 
 for m in container_ids:
         url_reservation_container=url_reservation_by_display_unit+"&container_ids=" +m;
-        print url_reservation_container;
+        print(url_reservation_container);
         s=requests.get(url_reservation_container,headers={'Accept': 'application/json','Authorization': auth});
         data=json.loads(s.text)
         #print data
@@ -369,4 +369,4 @@ for m in container_ids:
                 mycursor.execute(sql,val)
                 mydb.commit()
                 reservation={}
-        print "\n"
+        print("\n")
