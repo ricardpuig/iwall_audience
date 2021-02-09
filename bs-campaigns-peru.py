@@ -49,6 +49,7 @@ url_display_unit_performance="https://api.broadsign.com:10889/rest/display_unit_
 url_display_unit_audience= "https://api.broadsign.com:10889/rest/display_unit_audience/v1/by_reservation_id?domain_id=17244398"
 url_container_id='https://api.broadsign.com:10889/rest/container/v9/by_id?domain_id=17244398';
 url_reservation_by_id= 'https://api.broadsign.com:10889/rest/reservation/v20/by_id?domain_id=17244398';
+url_schedule_by_reservation= 'https://api.broadsign.com:10889/rest/schedule/v8/by_reservable?domain_id=17244398';
 
 
 container_ids=[]
@@ -200,51 +201,84 @@ for row in campaigns:  #for each campaign to analyze
 
   #get reservation data
   for n in data["reservation"]:
-         reservation["name"]=str(n["name"].encode('utf-8', errors ='ignore'))
-         reservation["saturation"]=str(n["saturation"])
-         reservation["duration_msec"]=str(n["duration_msec"])
-         reservation["start_time"]=str(n["start_time"])
-         reservation["start_date"]=str(n["start_date"])
-         fecha_inicio=datetime.strptime(str(n["start_date"]),"%Y-%m-%d")
-         fecha_fin=datetime.strptime(str(n["end_date"]),"%Y-%m-%d")
-         reservation["active"]="unknown"
-         if fecha_inicio < datetime.today():
-             if fecha_fin > datetime.today():
-                 reservation["active"]="Running"
-         if fecha_inicio>datetime.today():
-             reservation["active"]="por emitir"
-         if fecha_fin<datetime.today():
-             reservation["active"]="Emitida"
-         delta=fecha_fin-fecha_inicio
-         reservation["days"]=0
-         reservation["days"]=delta.days+1
-         reservation["end_time"]=str(n["end_time"])
-         reservation["end_date"]=str(n["end_date"])
 
-         #name=n["name"].encode('utf-8', errors ='ignore')
-         name=n["name"]
-         print("campaign name", name)
-         if re.findall('\%(.*)\%',name):
-              reservation["SAP_ID"]=re.findall('\%(.*)\%', name)[0]
-         else:
-              reservation["SAP_ID"]="not set"
-         print("SAP id", reservation["SAP_ID"])
+    reservation["name"]=str(n["name"].encode('utf-8', errors ='ignore'))
+    reservation["saturation"]=str(n["saturation"])
+    reservation["duration_msec"]=str(n["duration_msec"])
+    reservation["start_time"]=str(n["start_time"])
+    reservation["start_date"]=str(n["start_date"])
+    fecha_inicio=datetime.strptime(str(n["start_date"]),"%Y-%m-%d")
+    fecha_fin=datetime.strptime(str(n["end_date"]),"%Y-%m-%d")
+    reservation["active"]="unknown"
+    if fecha_inicio < datetime.today():
+       if fecha_fin > datetime.today():
+           reservation["active"]="Running"
+    if fecha_inicio>datetime.today():
+       reservation["active"]="por emitir"
+    if fecha_fin<datetime.today():
+       reservation["active"]="Emitida"
+    delta=fecha_fin-fecha_inicio
+    reservation["days"]=0
+    reservation["days"]=delta.days+1
+    reservation["end_time"]=str(n["end_time"])
+    reservation["end_date"]=str(n["end_date"])
+
+    #name=n["name"].encode('utf-8', errors ='ignore')
+    name=n["name"]
+    print("campaign name", name)
+    if re.findall('\%(.*)\%',name):
+        reservation["SAP_ID"]=re.findall('\%(.*)\%', name)[0]
+    else:
+        reservation["SAP_ID"]="not set"
+    print("SAP id", reservation["SAP_ID"])
+
+    schedule_start_date=""
+    schedule_end_date=""
+    schedule_days=0
+
+    url_schedule=url_schedule_by_reservation+"&id="+str(n["id"])
+    s=requests.get(url_schedule,headers={'Accept': 'application/json','Authorization': auth});
+    data_schedules=json.loads(s.text)
+    num_schedules=0
+
+    for o in data_schedules["schedule"]:
+
+        if o["active"] == True:
+            num_schedules=num_schedules +1
+            schedule_fecha_inicio=datetime.strptime(str(o["start_date"]),"%Y-%m-%d")
+            schedule_fecha_fin=datetime.strptime(str(o["end_date"]),"%Y-%m-%d")
 
 
-         print("")
-         print("---------------------")
-         print("Broadsign Campaign:  ")
-         print("---------------------")
+            if schedule_start_date=="":
+                schedule_start_date=schedule_fecha_inicio
+            if schedule_end_date=="": 
+                schedule_end_date=schedule_fecha_fin
+            if schedule_fecha_inicio<=schedule_start_date:
+                schedule_start_date=schedule_fecha_inicio
+            if schedule_fecha_fin>=schedule_end_date:
+                schedule_end_date=schedule_fecha_fin
 
-         print("Name " + str(n["name"]))
-         print("start:"+ str(n["start_date"]))
-         print("end:"+ str(n["end_date"]))
-         print("Campaign Days "+ str(reservation["days"]))
 
-         sql= "INSERT INTO campaign_analysis (SAP_id, country, campaign, name,reservation_id, start_date, end_date, saturation, duration_msec, active, days, description,total_screens_order) VALUES (%s, %s, %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
-         val= (reservation["SAP_ID"], "PERU", campaign_name,campaign_name,reservation_id,str(n["start_date"]),str(n["end_date"]),str(n["saturation"]),n["duration_msec"],reservation["active"],reservation["days"], "Broadsign data" , "null" )
-         mycursor.execute(sql,val)
-         mydb.commit()
+    reservation["schedule_end_date"]=str(schedule_end_date)       
+    reservation["schedule_start_date"]=str(schedule_start_date)
+    delta=schedule_end_date-schedule_start_date
+    schedule_days=delta.days+1
+
+    print("")
+    print("---------------------")
+    print("Broadsign Campaign:  ")
+    print("---------------------")
+
+    print("Name " + str(n["name"]))
+    print("start:"+ str(n["start_date"]))
+    print("end:"+ str(n["end_date"]))
+    print("Campaign Days "+ str(reservation["days"]))
+
+    sql= "INSERT INTO campaign_analysis (schedule_days, schedules, schedule_start_date, schedule_end_date, SAP_id, country, campaign, name,reservation_id, start_date, end_date, saturation, duration_msec, active, days, description,total_screens_order) VALUES (%s,%s,%s,%s,%s, %s, %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+    val= (schedule_days,num_schedules,reservation["schedule_start_date"], reservation["schedule_end_date"],reservation["SAP_ID"], "PERU", campaign_name,campaign_name,reservation_id,str(n["start_date"]),str(n["end_date"]),str(n["saturation"]),n["duration_msec"],reservation["active"],reservation["days"], "Broadsign data" , "null" )
+    mycursor.execute(sql,val)
+    mydb.commit()
+
 
   #Performance report:
   print("")

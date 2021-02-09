@@ -43,6 +43,9 @@ mycursor = mydb.cursor()
 #Authorization
 auth = "Bearer e03b2732ac76e3a954e4be0c280a04a3";
 
+
+
+
 print("PERU CAMPAIGNS \n")
 
 # poll container IDs
@@ -150,10 +153,18 @@ for m in container_ids:
                 #print(o["name"])
                 #print(o["active"])
 
-            reservation["schedule_end_date"]=str(schedule_end_date)       
-            reservation["schedule_start_date"]=str(schedule_start_date)
-            delta=schedule_end_date-schedule_start_date
-            schedule_days=delta.days+1
+            if num_schedules>0:
+
+                    reservation["schedule_end_date"]=str(schedule_end_date)       
+                    reservation["schedule_start_date"]=str(schedule_start_date)
+                    delta=schedule_end_date-schedule_start_date
+                    schedule_days=delta.days+1
+
+                else:
+
+                    schedule_days=0
+                    reservation["schedule_end_date"]=None
+                    reservation["schedule_start_date"]=None
 
             
 
@@ -165,7 +176,6 @@ for m in container_ids:
             reservation={}
 
     print("\n")
-
 
 
 
@@ -240,6 +250,9 @@ for m in container_ids:
                         reservation["SAP_ID"]=re.findall('\$(.*)\$', name)[0]
                 else:
                         reservation["SAP_ID"]="not found"
+
+
+
                 schedule_start_date=""
                 schedule_end_date=""
                 schedule_days=0
@@ -268,13 +281,19 @@ for m in container_ids:
                         if schedule_fecha_fin>=schedule_end_date:
                             schedule_end_date=schedule_fecha_fin
 
-                #print(schedule_start_date)
-                #print(schedule_end_date)
+                
+                if num_schedules>0:
 
-                reservation["schedule_end_date"]=str(schedule_end_date)       
-                reservation["schedule_start_date"]=str(schedule_start_date)
-                delta=schedule_end_date-schedule_start_date
-                schedule_days=delta.days+1
+                    reservation["schedule_end_date"]=str(schedule_end_date)       
+                    reservation["schedule_start_date"]=str(schedule_start_date)
+                    delta=schedule_end_date-schedule_start_date
+                    schedule_days=delta.days+1
+
+                else:
+
+                    schedule_days=0
+                    reservation["schedule_end_date"]=None
+                    reservation["schedule_start_date"]=None
 
                 #print(reservation["schedule_start_date"])
                 #print(reservation["schedule_end_date"])
@@ -394,10 +413,18 @@ for m in container_ids:
                 #print(schedule_start_date)
                 #print(schedule_end_date)
 
-                reservation["schedule_end_date"]=str(schedule_end_date)       
-                reservation["schedule_start_date"]=str(schedule_start_date)
-                delta=schedule_end_date-schedule_start_date
-                schedule_days=delta.days+1
+                if num_schedules>0:
+
+                    reservation["schedule_end_date"]=str(schedule_end_date)       
+                    reservation["schedule_start_date"]=str(schedule_start_date)
+                    delta=schedule_end_date-schedule_start_date
+                    schedule_days=delta.days+1
+
+                else:
+
+                    schedule_days=0
+                    reservation["schedule_end_date"]=None
+                    reservation["schedule_start_date"]=None
 
                 #print(reservation["schedule_start_date"])
                 #print(reservation["schedule_end_date"])
@@ -519,10 +546,18 @@ for m in container_ids:
                 #print(schedule_start_date)
                 #print(schedule_end_date)
 
-                reservation["schedule_end_date"]=str(schedule_end_date)       
-                reservation["schedule_start_date"]=str(schedule_start_date)
-                delta=schedule_end_date-schedule_start_date
-                schedule_days=delta.days+1
+                if num_schedules>0:
+
+                    reservation["schedule_end_date"]=str(schedule_end_date)       
+                    reservation["schedule_start_date"]=str(schedule_start_date)
+                    delta=schedule_end_date-schedule_start_date
+                    schedule_days=delta.days+1
+
+                else:
+
+                    schedule_days=0
+                    reservation["schedule_end_date"]=None
+                    reservation["schedule_start_date"]=None
 
                 #print(reservation["schedule_start_date"])
                 #print(reservation["schedule_end_date"])
