@@ -239,14 +239,30 @@ for row in campaigns:  #for each campaign to analyze
     reservation["end_time"]=str(n["end_time"])
     reservation["end_date"]=str(n["end_date"])
 
+
     #name=n["name"].encode('utf-8', errors ='ignore')
     name=n["name"]
     print("campaign name", name)
-    if re.findall('\%(.*)\%',name):
-        reservation["SAP_ID"]=re.findall('\%(.*)\%', name)[0]
-    else:
-        reservation["SAP_ID"]="not set"
+
+    if country=="SPAIN":
+      if re.findall('\$(.*)\$',name):
+          reservation["SAP_ID"]=re.findall('\$(.*)\$', name)[0]
+      else:
+          reservation["SAP_ID"]="not set"
+
+    if country=="PERU":
+      if re.findall('\%(.*)\%',name):
+          reservation["SAP_ID"]=re.findall('\%(.*)\%', name)[0]
+      else:
+          reservation["SAP_ID"]="not set"
+
+    if country=="COLOMBIA":
+      if re.findall('\$(.*)\$',name):
+          reservation["SAP_ID"]=re.findall('\$(.*)\$', name)[0]
+      else:
+          reservation["SAP_ID"]="not set"
     print("SAP id", reservation["SAP_ID"])
+
 
     schedule_start_date=""
     schedule_end_date=""
