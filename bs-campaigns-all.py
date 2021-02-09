@@ -32,14 +32,10 @@ malls={}
 
 #database connector
 mydb = mysql.connector.connect(
-  #host="ec2-52-18-248-109.eu-west-1.compute.amazonaws.com",
-  host="54.38.184.204",
-  #user="root",
-  user="iwall",
-  database="netmon",
-  passwd= "iwalldigitalsignage",
-  #passwd="sonaeRootMysql2017",
-  #database="audience"
+  host="ec2-52-18-248-109.eu-west-1.compute.amazonaws.com",
+  user="root",
+  passwd="sonaeRootMysql2017",
+  database="audience"
 )
 
 mycursor = mydb.cursor()
