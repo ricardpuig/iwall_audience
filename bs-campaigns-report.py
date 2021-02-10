@@ -293,10 +293,18 @@ for row in campaigns:  #for each campaign to analyze
                 schedule_end_date=schedule_fecha_fin
 
 
-    reservation["schedule_end_date"]=str(schedule_end_date)       
-    reservation["schedule_start_date"]=str(schedule_start_date)
-    delta=schedule_end_date-schedule_start_date
-    schedule_days=delta.days+1
+    if num_schedules>0:
+
+                        reservation["schedule_end_date"]=str(schedule_end_date)       
+                        reservation["schedule_start_date"]=str(schedule_start_date)
+                        delta=schedule_end_date-schedule_start_date
+                        schedule_days=delta.days+1
+
+    else:
+
+                        schedule_days=0
+                        reservation["schedule_end_date"]=None
+                        reservation["schedule_start_date"]=None
 
     print("")
     print("---------------------")
