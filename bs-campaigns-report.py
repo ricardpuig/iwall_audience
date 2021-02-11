@@ -176,6 +176,9 @@ current_year=2021
 #remove all programmatic campaigns
 df_reservations = df_reservations[~df_reservations['name'].str.contains("PROGRAMMATIC", na = False) ]
 df_reservations = df_reservations[~df_reservations['name'].str.contains("AUTOPROMO", na = False) ]
+df_reservations = df_reservations[~df_reservations['name'].str.contains("CORPORATIVO", na = False) ]
+df_reservations = df_reservations[~df_reservations['name'].str.contains("CORPORATIVA", na = False) ]
+df_reservations = df_reservations[~df_reservations['name'].str.contains("PROMO", na = False) ]
 
 
 #select campaigns to analyze
