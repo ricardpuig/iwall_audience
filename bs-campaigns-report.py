@@ -164,7 +164,7 @@ df_reservations['start_date']=pd.to_datetime(df_reservations['start_date'], form
 df_reservations['end_date']=pd.to_datetime(df_reservations['end_date'], format="%Y-%m-%d")
 
 #add date and time columns for aggregation
-df_reservations=df_reservations.set_index('start_date')
+df_reservations=df_reservations.set_index('end_date')
 df_reservations['year']=df_reservations.index.year
 df_reservations['month']=df_reservations.index.month
 
