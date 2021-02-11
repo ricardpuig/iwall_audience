@@ -220,6 +220,10 @@ for row in campaigns:  #for each campaign to analyze
   #get reservation data
   for n in data["reservation"]:
 
+
+
+
+
     reservation["name"]=str(n["name"].encode('utf-8', errors ='ignore'))
     reservation["saturation"]=str(n["saturation"])
     reservation["duration_msec"]=str(n["duration_msec"])
@@ -227,14 +231,7 @@ for row in campaigns:  #for each campaign to analyze
     reservation["start_date"]=str(n["start_date"])
     fecha_inicio=datetime.strptime(str(n["start_date"]),"%Y-%m-%d")
     fecha_fin=datetime.strptime(str(n["end_date"]),"%Y-%m-%d")
-    reservation["active"]="unknown"
-    if fecha_inicio < datetime.today():
-       if fecha_fin > datetime.today():
-           reservation["active"]="Running"
-    if fecha_inicio>datetime.today():
-       reservation["active"]="por emitir"
-    if fecha_fin<datetime.today():
-       reservation["active"]="Emitida"
+ 
     delta=fecha_fin-fecha_inicio
     reservation["days"]=0
     reservation["days"]=delta.days+1
@@ -251,20 +248,27 @@ for row in campaigns:  #for each campaign to analyze
           reservation["SAP_ID"]=re.findall('\$(.*)\$', name)[0]
       else:
           reservation["SAP_ID"]="not set"
+      name=re.sub('\$(.*)\$','', name)
 
     if country=="PERU":
       if re.findall('\%(.*)\%',name):
           reservation["SAP_ID"]=re.findall('\%(.*)\%', name)[0]
       else:
           reservation["SAP_ID"]="not set"
+      name=re.sub('\%(.*)\%','', name)
 
     if country=="COLOMBIA":
       if re.findall('\$(.*)\$',name):
           reservation["SAP_ID"]=re.findall('\$(.*)\$', name)[0]
       else:
           reservation["SAP_ID"]="not set"
+      name=re.sub('\$(.*)\$','', name)
+    
+
+
     print("SAP id", reservation["SAP_ID"])
 
+    reservation["name"]=name
 
     schedule_start_date=""
     schedule_end_date=""
@@ -277,34 +281,43 @@ for row in campaigns:  #for each campaign to analyze
 
     for o in data_schedules["schedule"]:
 
-        if o["active"] == True:
-            num_schedules=num_schedules +1
-            schedule_fecha_inicio=datetime.strptime(str(o["start_date"]),"%Y-%m-%d")
-            schedule_fecha_fin=datetime.strptime(str(o["end_date"]),"%Y-%m-%d")
+      if o["active"] == True:
+        num_schedules=num_schedules +1
+        schedule_fecha_inicio=datetime.strptime(str(o["start_date"]),"%Y-%m-%d")
+        schedule_fecha_fin=datetime.strptime(str(o["end_date"]),"%Y-%m-%d")
 
 
-            if schedule_start_date=="":
-                schedule_start_date=schedule_fecha_inicio
-            if schedule_end_date=="": 
-                schedule_end_date=schedule_fecha_fin
-            if schedule_fecha_inicio<=schedule_start_date:
-                schedule_start_date=schedule_fecha_inicio
-            if schedule_fecha_fin>=schedule_end_date:
-                schedule_end_date=schedule_fecha_fin
+        if schedule_start_date=="":
+          schedule_start_date=schedule_fecha_inicio
+        if schedule_end_date=="": 
+          schedule_end_date=schedule_fecha_fin
+        if schedule_fecha_inicio<=schedule_start_date:
+          schedule_start_date=schedule_fecha_inicio
+        if schedule_fecha_fin>=schedule_end_date:
+          schedule_end_date=schedule_fecha_fin
+
 
 
     if num_schedules>0:
-
-                        reservation["schedule_end_date"]=str(schedule_end_date)       
-                        reservation["schedule_start_date"]=str(schedule_start_date)
-                        delta=schedule_end_date-schedule_start_date
-                        schedule_days=delta.days+1
+      reservation["schedule_end_date"]=str(schedule_end_date)       
+      reservation["schedule_start_date"]=str(schedule_start_date)
+      delta=schedule_end_date-schedule_start_date
+      schedule_days=delta.days+1
 
     else:
+      schedule_days=0
+      reservation["schedule_end_date"]=str(n["end_date"])
+      reservation["schedule_start_date"]=str(n["start_date"])
 
-                        schedule_days=0
-                        reservation["schedule_end_date"]=None
-                        reservation["schedule_start_date"]=None
+
+    reservation["active"]="unknown"
+    if schedule_start_date < datetime.today():
+        if schedule_end_date > datetime.today():
+          reservation["active"]="Running"
+    if schedule_start_date>datetime.today():
+      reservation["active"]="por emitir"
+    if schedule_end_date<datetime.today():
+      reservation["active"]="Emitida"
 
     print("")
     print("---------------------")
@@ -316,8 +329,9 @@ for row in campaigns:  #for each campaign to analyze
     print("end:"+ str(n["end_date"]))
     print("Campaign Days "+ str(reservation["days"]))
 
+
     sql= "INSERT INTO campaign_analysis (schedule_days, schedules, schedule_start_date, schedule_end_date, SAP_id, country, campaign, name,reservation_id, start_date, end_date, saturation, duration_msec, active, days, description,total_screens_order) VALUES (%s,%s,%s,%s,%s, %s, %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
-    val= (schedule_days,num_schedules,reservation["schedule_start_date"], reservation["schedule_end_date"],reservation["SAP_ID"], country, campaign_name,campaign_name,reservation_id,str(n["start_date"]),str(n["end_date"]),str(n["saturation"]),n["duration_msec"],reservation["active"],reservation["days"], "Broadsign data" , "null" )
+    val= (schedule_days,num_schedules,reservation["schedule_start_date"], reservation["schedule_end_date"],reservation["SAP_ID"], country, reservation["name"],reservation["name"],reservation_id,str(n["start_date"]),str(n["end_date"]),str(n["saturation"]),n["duration_msec"],reservation["active"],reservation["days"], "Broadsign data" , "null" )
     mycursor.execute(sql,val)
     mydb.commit()
 
