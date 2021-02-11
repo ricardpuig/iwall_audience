@@ -335,6 +335,7 @@ for row in campaigns:  #for each campaign to analyze
     mycursor.execute(sql,val)
     mydb.commit()
 
+    campaign_name=reservation["name"]
 
   #Performance report:
   print("")
