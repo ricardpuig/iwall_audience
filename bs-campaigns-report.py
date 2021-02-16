@@ -179,7 +179,8 @@ df_reservations = df_reservations[~df_reservations['name'].str.contains("AUTOPRO
 df_reservations = df_reservations[~df_reservations['name'].str.contains("CORPORATIVO", na = False) ]
 df_reservations = df_reservations[~df_reservations['name'].str.contains("CORPORATIVA", na = False) ]
 df_reservations = df_reservations[~df_reservations['name'].str.contains("PROMO", na = False) ]
-
+df_reservations = df_reservations[~df_reservations['name'].str.contains("TEST", na = False) ]
+df_reservations = df_reservations[~df_reservations['name'].str.contains("OFICINA", na = False) ]
 
 #select campaigns to analyze
 if all_campaigns:
