@@ -314,12 +314,12 @@ for row in campaigns:  #for each campaign to analyze
 
 
     reservation["active"]="unknown"
-    if schedule_start_date < datetime.today():
-        if schedule_end_date > datetime.today():
+    if schedule_start_date <= datetime.today():
+        if schedule_end_date >= datetime.today():
           reservation["active"]="Running"
-    if schedule_start_date>datetime.today():
+    if schedule_start_date>=datetime.today():
       reservation["active"]="por emitir"
-    if schedule_end_date<datetime.today():
+    if schedule_end_date<=datetime.today():
       reservation["active"]="Emitida"
 
     print("")
