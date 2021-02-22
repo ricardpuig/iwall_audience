@@ -283,6 +283,8 @@ for row in campaigns:  #for each campaign to analyze
     data_schedules=json.loads(s.text)
     num_schedules=0
 
+
+
     for o in data_schedules["schedule"]:
 
       if o["active"] == True:
@@ -301,12 +303,20 @@ for row in campaigns:  #for each campaign to analyze
           schedule_end_date=schedule_fecha_fin
 
 
-
+    reservation["active"]="unknown"     
     if num_schedules>0:
       reservation["schedule_end_date"]=str(schedule_end_date)       
       reservation["schedule_start_date"]=str(schedule_start_date)
       delta=schedule_end_date-schedule_start_date
       schedule_days=delta.days+1
+   
+      if schedule_start_date <= datetime.today():
+          if schedule_end_date >= datetime.today():
+            reservation["active"]="Running"
+      if schedule_start_date>=datetime.today():
+        reservation["active"]="por emitir"
+      if schedule_end_date<=datetime.today():
+        reservation["active"]="Emitida"
 
     else:
       schedule_days=0
@@ -314,14 +324,7 @@ for row in campaigns:  #for each campaign to analyze
       reservation["schedule_start_date"]=str(n["start_date"])
 
 
-    reservation["active"]="unknown"
-    if schedule_start_date <= datetime.today():
-        if schedule_end_date >= datetime.today():
-          reservation["active"]="Running"
-    if schedule_start_date>=datetime.today():
-      reservation["active"]="por emitir"
-    if schedule_end_date<=datetime.today():
-      reservation["active"]="Emitida"
+ 
 
     print("")
     print("---------------------")
