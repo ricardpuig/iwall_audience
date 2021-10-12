@@ -189,7 +189,7 @@ if all_campaigns:
 
 
   #removed already analyzed campaigns that have been finished
-  sql_select_analyzed= "SELECT reservation_id, name from campaign_analysis where active<>'Emitida'"
+  sql_select_analyzed= "SELECT reservation_id, name from campaign_analysis where active='Emitida'"
 
   mycursor.execute(sql_select_analyzed)
   records_0= mycursor.fetchall()
@@ -437,7 +437,7 @@ for row in campaigns:  #for each campaign to analyze
 
      except: 
         print("***********Error decoding JSON!!!!")
-        continue
+        
 
   #print campaign_display_unit_performance
   print ("")
