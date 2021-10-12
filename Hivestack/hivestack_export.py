@@ -12,11 +12,18 @@ from datetime import date
 import sys
 
 url_field_report= "https://api.broadsign.com:10889/rest/field_report/v4/by_domain_id?domain_id=17244398"
+
+
 url_player_status= 'https://api.broadsign.com:10889/rest/monitor_poll/v2?domain_id=17244398'
 url_host_by_id= 'https://api.broadsign.com:10889/rest/host/v14/by_id?domain_id=17244398'
 url_container_info= 'https://api.broadsign.com:10889/rest/container/v9/by_id?domain_id=17244398'
 url_incident_report= "https://api.broadsign.com:10889/rest/incident/v3/by_id?domain_id=17244398"
 url_display_unit_by_id="https://api.broadsign.com:10889/rest/display_unit/v12/by_id?domain_id=17244398"
+
+
+
+
+
 
 
 
@@ -48,49 +55,29 @@ for n in data["field_report"]:
 		except: 
 			player_id=None
 		if player_id:
-			player_field_report['player_id']=player_id
-
-		try: 
-			hostname=re.findall('Hostname : (.*)\n', fr)[0]
-		except: 
-			hostname=None
-		if hostname:
-			player_field_report['hostname']=hostname
-
-		try: 
-			player_version=re.findall('Player Version : (.*)\n', fr)[0]
-		except: 
-			player_version=None
-		if player_version:
-			player_field_report['player_version']=player_version
-
-		try: 
-			os_version=re.findall('OS Version : (.*)\n', fr)[0]
-		except: 
-			os_version=None
-		if os_version:
-			player_field_report['os_version']=os_version
+			player_field_report['Screen ID']=player_id
 
 		try: 
 			screen_resolution=re.findall('Screen Resolution : (.*)\n', fr)[0]
+			screen_resolution_x=screen_resolution.split("x")[0]
 		except: 
-			screen_resolution=None
-		if screen_resolution:
-			player_field_report['screen_resolution']=screen_resolution
+			screen_resolution_x=None
+
+
+		if screen_resolution_x:
+			player_field_report['screen_width']=screen_resolution_x
+
 
 		try: 
-			chromium_version=re.findall('Chromium Version : (.*)\n', fr)[0]
+			screen_resolution=re.findall('Screen Resolution : (.*)\n', fr)[0]
+			screen_resolution_y=screen_resolution.split("x")[1]
 		except: 
-			chromium_version=None
-		if chromium_version:
-			player_field_report['chromium_version']=chromium_version
+			screen_resolution_y=None
 
-		try: 
-			disk_usg=re.findall('Disk Usage : (.*)\n', fr)[0]
-		except: 
-			disk_usg=None
-		if disk_usg:
-			player_field_report['disk_usage']=disk_usg
+
+		if screen_resolution_y:
+			player_field_report['screen_height']=screen_resolution_y
+
 
 
 		try: 
@@ -162,9 +149,9 @@ for n in data["field_report"]:
 
 df_field_report = pd.DataFrame(field_report)
 
-df_field_report.to_sql('player_status', con = engine, if_exists = 'append', chunksize = 1000)
 
-	#get DU name from player ID
+df_field_report.to_csv('hivestack_players', index=True)
+
 
 
 

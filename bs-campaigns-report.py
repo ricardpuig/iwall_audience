@@ -91,17 +91,12 @@ reservation={}
 malls={}
 reservations=[]
 
-
-
 if country=="SPAIN":
-  container_ids=["49461537"]
-
+  container_ids=["106135296"]
 
 
 if country=="COLOMBIA":
   container_ids=['120956285']
-
-
 
 if country=="PERU":
   container_ids=['60141576']
@@ -156,6 +151,8 @@ for m in container_ids:
                 reservations.append(reservation)
                 
                 reservation={}
+    
+
             
 #convert reservations to dataframe            
 df_reservations = pd.DataFrame(reservations)
