@@ -153,7 +153,7 @@ for m in container_ids:
                 reservation={}
     
 
-            
+
 #convert reservations to dataframe            
 df_reservations = pd.DataFrame(reservations)
 
@@ -185,6 +185,21 @@ if all_campaigns:
   print("Selecting current month campaigns") 
   df_reservations = df_reservations[(df_reservations['year'] ==current_year)] 
   #df_reservations = df_reservations[(df_reservations['month'] ==current_month)] 
+
+
+
+  #removed already analyzed campaigns that have been finished
+  sql_select_analyzed= "SELECT reservation_id, name from campaign_analysis where active<>'Emitida'"
+
+  mycursor.execute(sql_select_analyzed)
+  records_0= mycursor.fetchall()
+
+  for row_0 in records_0:  #for each display unit
+
+      print("Removing already analyzed campaign ",row_0[0], " with name ", row_0[1])
+      df_reservations = df_reservations[~df_reservations['campaign_id'].str.contains(str(row_0[0]), na = False) ]
+
+
 else:
   print("Getting campaigns from name ", campaigns_to_analyze)
   df_reservations = df_reservations[df_reservations['name'].str.contains(campaigns_to_analyze, na = False) ]
@@ -201,6 +216,9 @@ campaign_daily_performance={}
 campaign_daily_audience={};
 campaign_display_unit_performance={};
 campaign_display_unit_audience={};
+
+
+
 
 for row in campaigns:  #for each campaign to analyze
 
@@ -221,9 +239,6 @@ for row in campaigns:  #for each campaign to analyze
 
   #get reservation data
   for n in data["reservation"]:
-
-
-
 
 
     reservation["name"]=str(n["name"].encode('utf-8', errors ='ignore'))
@@ -396,8 +411,10 @@ for row in campaigns:  #for each campaign to analyze
      #get mall name from this display unit
      url_display_unit_info=url_display_unit_info+"&ids=" +str(n["display_unit_id"]);
      s=requests.get(url_display_unit_info,headers={'Accept': 'application/json','Authorization': auth});
-     data_name=json.loads(s.text)
-     for m in data_name["display_unit"]:
+     
+     try: 
+        data_name=json.loads(s.text)
+        for m in data_name["display_unit"]:
           url_container_id=url_container_id+"&ids=" +str(m["container_id"]);
           campaign_display_unit_performance["container_id"]=m["container_id"]
           campaign_display_unit_performance["screen_count"]=m["host_screen_count"]
@@ -410,14 +427,17 @@ for row in campaigns:  #for each campaign to analyze
               campaign_display_unit_performance["mall_name"]=o["name"].encode('utf-8', errors ='ignore')
               print("Repetitions for site "+ str(o["name"])+ " and Display unit " + str(m["name"]) + ":" +str(n["total"]) + " ( " + str(m["host_screen_count"]) +" screens)" )
 
-     campaign_display_unit_performance["reservation_id"]=n["reservable_id"]
-     campaign_display_unit_performance["repetitions"]=n["total"]
+        campaign_display_unit_performance["reservation_id"]=n["reservable_id"]
+        campaign_display_unit_performance["repetitions"]=n["total"]
 
-     sql= "INSERT INTO campaign_display_unit_performance (campaign, display_unit_id, container_id, screen_count, display_unit_name, mall_name, total_impressions, repetitions, reservation_id) VALUES (%s, %s,%s,%s,%s,%s,%s,%s,%s)"
-     val= (campaign_name, n["display_unit_id"],m["container_id"],m["host_screen_count"],str(m["name"]),o["name"].encode('utf-8', errors ='ignore'),n["total_impressions"],n["total"],n["reservable_id"])
-     mycursor.execute(sql,val)
-     mydb.commit()
+        sql= "INSERT INTO campaign_display_unit_performance (campaign, display_unit_id, container_id, screen_count, display_unit_name, mall_name, total_impressions, repetitions, reservation_id) VALUES (%s, %s,%s,%s,%s,%s,%s,%s,%s)"
+        val= (campaign_name, n["display_unit_id"],m["container_id"],m["host_screen_count"],str(m["name"]),o["name"].encode('utf-8', errors ='ignore'),n["total_impressions"],n["total"],n["reservable_id"])
+        mycursor.execute(sql,val)
+        mydb.commit()
 
+     except: 
+        print("***********Error decoding JSON!!!!")
+        continue
 
   #print campaign_display_unit_performance
   print ("")
