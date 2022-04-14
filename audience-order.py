@@ -6,7 +6,7 @@ import mysql.connector
 from datetime import datetime
 from datetime import date
 
-print ("Order to Audience database \n ")
+print ("Order / campaign planning to Audience database \n ")
 
 #URLS endpoints----------
 
@@ -36,78 +36,101 @@ mydb = mysql.connector.connect(
 
 mycursor = mydb.cursor()
 
+state= 0
 
-with open('order.csv',"rU") as csv_file:
+with open('Audience-order-nissan-oct.csv',"rU") as csv_file:
     csv_reader = csv.reader(csv_file, delimiter=';')
     line_count = 0
     for row in csv_reader:
+
         if line_count == 0:
                 #reservation_id
-                 reservation_id = row[1]
-                 mycursor.execute("DELETE FROM campaign_order WHERE reservation_id LIKE "+str(reservation_id))
-                 mycursor.execute("DELETE FROM campaign_order_items WHERE reservation_id LIKE "+str(reservation_id))
-                 print "Reservation : " + str(reservation_id)
-                 sql= "INSERT INTO campaign_order (reservation_id,name) VALUES (%s,%s)"
-                 val= (row[1],"new")
-                 mycursor.execute(sql,val)
-                 mydb.commit()
-        if line_count == 1:
-                print " Campaign_name : " + str(row[1])
+                reservation_id = int(row[1])
+                print("Processing campaign: ", reservation_id)
+
+               
+
+                query= "DELETE FROM campaign_order WHERE reservation_id={id}".format(id=reservation_id)
+                mycursor.execute(query)
+                mydb.commit()
+
+                query= "DELETE FROM campaign_order_items WHERE reservation_id={id}".format(id=reservation_id)
+                mycursor.execute(query)
+                mydb.commit()
+
+                print("Reservation : ", str(reservation_id))
+                sql= "INSERT INTO campaign_order (reservation_id,name) VALUES (%s,%s)"
+                val= (row[1],"new")
+                mycursor.execute(sql,val)
+                mydb.commit()
+        if str(row[0]) == "NOMBRE":
+                print("Campaign_name : ", str(row[1]))
                 sql= "UPDATE campaign_order SET name=%s WHERE reservation_id=%s"
                 val= (row[1], reservation_id)
                 mycursor.execute(sql,val)
                 mydb.commit()
 
-        if line_count == 2:
-                print "Start date :" + str(row[1])
+        if str(row[0]) == "FECHA INICIO":
+                print("Start date :" , str(row[1]))
                 sql= "UPDATE campaign_order SET start_date=%s WHERE reservation_id=%s"
                 val= (row[1], reservation_id)
+                start_date= row[1]
                 mycursor.execute(sql,val)
                 mydb.commit()
-        if line_count == 3:
-                print "End date" + str(row[1])
+        if str(row[0]) == "FECHA FIN":
+                print ("End date" , str(row[1]))
                 sql= "UPDATE campaign_order SET end_date=%s WHERE reservation_id=%s"
                 val= (row[1], reservation_id)
                 mycursor.execute(sql,val)
                 mydb.commit()
-        if line_count == 4:
-                print "Agencia" + str(row[1])
-                sql= "UPDATE campaign_order SET agency=%s WHERE reservation_id=%s"
-                val= (row[1], reservation_id)
-                mycursor.execute(sql,val)
-                mydb.commit()
-        if line_count == 5:
-                print "Anunciante" + str(row[1])
+                end_date=row[1]
+ 
+        if str(row[0]) == "ANUNCIANTE":
+                print ("Anunciante" , str(row[1]))
                 sql= "UPDATE campaign_order SET anunciante=%s WHERE reservation_id=%s"
                 val= (row[1], reservation_id)
                 mycursor.execute(sql,val)
                 mydb.commit()
-        if line_count == 6:
-                print "Negociado" + str(row[1])
+        if str(row[0]) == "NEGOCIADO CON":
+                print ("Negociado" , str(row[1]))
                 sql= "UPDATE campaign_order SET negociado=%s WHERE reservation_id=%s"
                 val= (row[1], reservation_id)
                 mycursor.execute(sql,val)
                 mydb.commit()
-        if line_count == 7:
-                print "Importe" + str(row[1])
+        if str(row[0]) == "IMPORTE TOTAL":
+                print ("Importe" , str(row[1]))
                 sql= "UPDATE campaign_order SET importe_total=%s WHERE reservation_id=%s"
                 val= (row[1], reservation_id)
                 mycursor.execute(sql,val)
                 mydb.commit()
-        if line_count >=9:
-                print "MALL" + str(row[0])
-                print "numero pantallas: " + str(row[1])
+        if str(row[0]) == "OBSERVACIONES":
+                print ("Observaciones" , str(row[1]))
+                sql= "UPDATE campaign_order SET observaciones=%s WHERE reservation_id=%s"
+                val= (row[1], reservation_id)
+                mycursor.execute(sql,val)
+                mydb.commit()
+
+        if str(row[0]) == "CARAS CONTRATADAS":
+                print ("Caras" , str(row[1]))
+                sql= "UPDATE campaign_order SET total_screens=%s WHERE reservation_id=%s"
+                val= (row[1], reservation_id)
+                mycursor.execute(sql,val)
+                mydb.commit()
+
+        if str(row[0]) == "CENTRO COMERCIAL":
+                if state == 0:
+                        state=1 
+                        print("mall screens")          
+                        continue       
+        if state==1:
+                print ("MALL" , str(row[0]))
+                print ("Numero pantallas: " , str(row[1]))
                 if row[1] > "0":
-                    sql= "INSERT INTO campaign_order_items (reservation_id, mall_name, start_date, end_date, screen_count,broadsign_container_id) VALUES (%s,%s,%s,%s,%s,%s)"
-                    val= (reservation_id, str(row[0]), str(row[3]), str(row[4]), row[1],row[2] )
+                    sql= "INSERT INTO campaign_order_items (reservation_id, mall_id, screen_count, start_date, end_date) VALUES (%s,%s,%s,%s,%s)"
+                    val= (reservation_id, str(row[2]),str(row[1]) , start_date, end_date )
                     mycursor.execute(sql,val)
                     mydb.commit()
-        #if line_count == 5:
-        #if line_count == 6:
-        #if line_count == 7:
-        #if line_count == 8:
-        #if line_count == 9:
-        #if line_count > 9:
+        
         line_count += 1
 
 mycursor.close()

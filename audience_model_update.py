@@ -18,7 +18,7 @@ import pandas as pd
 
 host = "ec2-52-18-248-109.eu-west-1.compute.amazonaws.com"
 user = "root"
-passwd = "sonaeRootMysql2017"
+passwd = "SonaeRootMysql2021!"
 db = "audience"
 port = 3306
 

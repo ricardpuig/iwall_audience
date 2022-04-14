@@ -73,7 +73,7 @@ def occupancy_report(db_connection, country):
 
 
 
-db_connection_str = 'mysql+pymysql://root:sonaeRootMysql2017@ec2-52-18-248-109.eu-west-1.compute.amazonaws.com/audience'
+db_connection_str = 'mysql+pymysql://root:SonaeRootMysql2021!@ec2-52-18-248-109.eu-west-1.compute.amazonaws.com/audience'
 db_connection = create_engine(db_connection_str)
 
 

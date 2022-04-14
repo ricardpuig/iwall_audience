@@ -22,7 +22,7 @@ url_display_unit_by_id="https://api.broadsign.com:10889/rest/display_unit/v12/by
 
 engine = create_engine("mysql+pymysql://{user}:{pw}@ec2-52-18-248-109.eu-west-1.compute.amazonaws.com/{db}"
                        .format(user="root",
-                               pw="sonaeRootMysql2017",
+                               pw="SonaeRootMysql2021!",
                                db="audience"))
 
 #Authorization

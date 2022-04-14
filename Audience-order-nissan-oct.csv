@@ -1,0 +1,76 @@
+﻿Broadsign ID campaigns;516357324;Especificar identificadores de Broadsign de la campaña separados por comas (se obtienen del excel de campañas columna  broadsign IDs)
+NOMBRE;NISSAN SEPT;
+FECHA INICIO;27/9/21;Fomato dd/mm/yyyy . Fecha inicio acuerdo (poner la primera fecha de emisión si la campaña se emite en varios períodos) 
+FECHA FIN;3/10/21;Fomato dd/mm/yyyy . Fecha fin acuerdo ( poner la ultima fecha de emision de la última campañas si se emite en varios períodos) 
+AGENCIA;;Si se quiere especificar ( sino en blanco para que no salga) 
+ANUNCIANTE;;Si se quiere especificar ( sino en blanco para que no salga) 
+NEGOCIADO CON;;Si se quiere especificar ( sino en blanco para que no salga) 
+;;
+;;
+IMPORTE TOTAL;0;Importe total campaña (0 si no se quiere especificar ni obtener CPM obtenido de la campaña)
+;;
+OBSERVACIONES;;Si se quiere especificar alguna observación en el report de campaña ( frecuencia, pases estimados iniciales, etc…) 
+;;
+;;
+SAP ID Campañas;;Identificadores campaña en SAP ( opcional aunque recomendable para tracking) . Si hay más de uno separar por comas
+;;
+CARAS CONTRATADAS;177;Formulado ( no tocar) Son las caras que saldran en el report como totales contratadas
+CENTRO COMERCIAL;CARAS CONTRATADAS;Identificador interno mall
+Albacenter;12;3
+Conquistadores;6;13
+L'Illa Diagonal;30;2
+El Parque de Ciudad Real;11;16
+Espacio Coruña;9;19
+TSO Coruña;10;50
+El Rosal;10;18
+Espacio Leon;10;20
+As Termas;12;10
+La Villa;8;101
+Las Piramides;1;102
+Añaza;13;100
+Luz de Castilla;12;31
+Max Center/Ocio;13;34
+Zubiarte;20;54
+;;#N/D
+;;#N/D
+;;#N/D
+;;#N/D
+;;#N/D
+;;#N/D
+;;#N/D
+;;#N/D
+;;#N/D
+;;#N/D
+;;#N/D
+;;#N/D
+;;#N/D
+;;#N/D
+;;#N/D
+;;
+;;
+;;
+;;
+;;
+;;
+;;
+;;
+;;
+;;
+;;
+;;
+;;
+;;
+;;
+;;
+;;
+;;
+;;
+;;
+;;
+;;
+;;
+;;
+;;
+;;
+;;
+;;
