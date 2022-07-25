@@ -32,10 +32,35 @@ def occupancy_report(db_connection, country):
 	df=df[~df['name'].str.contains("Corporativa ")]
 	df=df[~df['name'].str.contains("test ")]
 	df=df[~df['name'].str.contains("TEST")]
+	df=df[~df['name'].str.contains("ALCORES")]
+	df=df[~df['name'].str.contains("ALBACENTER")]
+	df=df[~df['name'].str.contains("Unity")]
+	df=df[~df['name'].str.contains("AS TERMAS")]
+	df=df[~df['name'].str.contains("EL PASEO")]
+	df=df[~df['name'].str.contains("EL ROSAL")]
+	df=df[~df['name'].str.contains("AS TERMAS")]
+	df=df[~df['name'].str.contains("FINESTRELLES")]
+	df=df[~df['name'].str.contains("ESPACIO LEON")]
+	df=df[~df['name'].str.contains("GP2 Anual")]
+	df=df[~df['name'].str.contains("GVV ANUAL")]
+	df=df[~df['name'].str.contains("GRAN VIA 2 ANUAL")]
+	df=df[~df['name'].str.contains("DIAGONAL corp")]
+	df=df[~df['name'].str.contains("CAM AIRE SIN VIRUS")]
+	df=df[~df['name'].str.contains("ANUAL")]
+	df=df[~df['name'].str.contains("anual")]
+
+
+
+
+
+
+
+
 
 
 
 	df=df[~df['name'].str.contains("Programmatic")]
+	df=df[~df['name'].str.contains("PROGRAMMATIC")]
 	df=df[~df['name'].str.contains("CORTINILLA")]
 	df=df[~df['mall'].str.contains("CIRCUITO CENTROS COMERCIALES SPAIN")]
 	df=df[~df['mall'].str.contains("CIRCUITO CENTROS COMERCIALES PERU")]

@@ -11,7 +11,8 @@ import sys
 
 from sqlalchemy import create_engine
 from datetime import datetime, timedelta
-
+import datetime
+from dateutil.relativedelta import relativedelta
 
 def delete_all_campaign_data():
 
@@ -257,21 +258,23 @@ def generate_default_audience_data(mycursor, mall_id, all_malls):
       malls_info=df_mall.to_dict('records')
       mall=malls_info[0]
 
+      model_behavior=mall['mall_model_behavior']
+      print("Creating Audience Data for mall ", mall['name'], "(", m,")",  " behavior: ", model_behavior, " type ", mall['mall_model_type'], " Default impressions: ", mall['default_screen_day_impressions'])
+
       #get default model 
       query = "SELECT * from mall_default_models  WHERE mall_type = {type}".format(type=mall['mall_model_type'])
       df_model = pd.read_sql_query(query, engine)
       
-
       #get data updated data from cameras
       model_info=df_model.to_dict('records')
       model=model_info[0]
 
       #build default audience data for the current year
-
       #dates create 
       begin_date = '2022-01-01'
       end_date= '2022-12-31'
 
+      print("Creating dates from ", begin_date , " to ", end_date)
       df_audience_impressions=pd.DataFrame({'mall_id' : mall['id'], 'date':pd.date_range(start=begin_date, end=end_date)})
       df_audience_segments=pd.DataFrame({'mall_id' : mall['id'], 'date':pd.date_range(start=begin_date, end=end_date)})
       
@@ -279,21 +282,25 @@ def generate_default_audience_data(mycursor, mall_id, all_malls):
       #get the overall multiplier from screen types
       num_screens=mall['screens']
       default_screen_impressions=mall['default_screen_day_impressions']
-      type_deviation=mall['screen_type_deviation']
+      type_deviation=mall['screen_type_deviation_type1_high_visibility']
+      type_deviation2=mall['screen_type_deviation_type3_low_visibility']
 
 
-      overall_daily=(mall['screens_type1']*default_screen_impressions*type_deviation) + \
-          (mall['screens_type2']*default_screen_impressions) + \
-          (mall['screens_type3']*default_screen_impressions*(1+type_deviation))
+      #type 1 : top screens, 
+      #type 2 : average screens
+      #type 3: low visibility screens
 
 
+      overall_daily=(mall['screens_type1_high_visibility']*default_screen_impressions*(1+type_deviation)) + \
+          (mall['screens_type2_default_visibility']*default_screen_impressions) + \
+          (mall['screens_type3_low_visibility']*default_screen_impressions*type_deviation2)
       
       hourly_str= model['hourly']
       hourly_str= hourly_str.replace(",", ".")
       hourly=hourly_str.split(':')
       hourly=list(np.float_(hourly))
 
-      print("Hourly model", hourly)
+      print("\nHourly model-----", hourly)
 
       weekday_str=model['weekday']
 
@@ -301,16 +308,27 @@ def generate_default_audience_data(mycursor, mall_id, all_malls):
       weekday=weekday_str.split(':')
       weekday=list(np.float_(weekday))
 
-      print("weekday model", weekday)
+      print("\nWeekday model-----", weekday)
 
       weekly_str=model['weekly']
       weekly_str=weekly_str.replace(",",".")
       weekly=weekly_str.split(':')
       weekly=list(np.float_(weekly))
 
-      print("Weekly model: ", weekly)
+      print("\nWeekly model------- ", weekly)
+
+      monthly_str=model['monthly']
+      monthly_str=monthly_str.replace(",",".")
+      monthly=monthly_str.split(':')
+      monthly=list(np.float_(monthly))
+
+      print("\nMonthly model: ", monthly)
+
+     
 
       df_audience_impressions['total_impressions']=overall_daily
+
+      print("\nOverall daily impressions for mall: ", overall_daily)
 
       #do weekday adjustements
       df_audience_impressions['date']=pd.to_datetime(df_audience_impressions['date'], format="%Y-%m-%d")
@@ -330,13 +348,25 @@ def generate_default_audience_data(mycursor, mall_id, all_malls):
 
       df_audience_impressions['weekly_multiplier']=1.0
 
+      date = datetime.date(2022, 1, 1) 
 
+      print(df_audience_impressions)
       
-
+      
       i = 1
       while i < 53:
-       df_audience_impressions['weekly_multiplier']=np.where(df_audience_impressions['week'] == i, weekly[i-1], df_audience_impressions['weekly_multiplier'])
-       i += 1
+        res = date + relativedelta(weeks = +i)
+        index_month=int(res.month)
+        print("Week: ", i , " Month: ", index_month)
+        if model_behavior=="WEEKLY":
+          df_audience_impressions['weekly_multiplier']=np.where(df_audience_impressions['week'] == i, weekly[i-1], df_audience_impressions['weekly_multiplier'])
+        elif model_behavior=="MONTHLY":
+          df_audience_impressions['weekly_multiplier']=np.where(df_audience_impressions['week'] == i, monthly[index_month-1], df_audience_impressions['weekly_multiplier'])
+        else:
+          print("Mall model behavior not defined")
+          exit(1)
+        i += 1
+      print(df_audience_impressions)
 
       df_audience_impressions['total_impressions']=df_audience_impressions['total_impressions']*df_audience_impressions['weekday_multiplier']
       df_audience_impressions['total_impressions']=df_audience_impressions['total_impressions']*df_audience_impressions['weekly_multiplier']
@@ -1056,15 +1086,15 @@ if (option == "all") or (option =="name") or (option == "id") or (option =="find
             reservation["duration_msec"]=str(n["duration_msec"])
             reservation["start_time"]=str(n["start_time"])
             reservation["start_date"]=str(n["start_date"])
-            fecha_inicio=datetime.strptime(str(n["start_date"]),"%Y-%m-%d")
-            fecha_fin=datetime.strptime(str(n["end_date"]),"%Y-%m-%d")
+            fecha_inicio=datetime.datetime.strptime(str(n["start_date"]),"%Y-%m-%d")
+            fecha_fin=datetime.datetime.strptime(str(n["end_date"]),"%Y-%m-%d")
             reservation["active"]="unknown"
-            if fecha_inicio < datetime.today():
-                    if fecha_fin > datetime.today():
+            if fecha_inicio < datetime.datetime.today():
+                    if fecha_fin > datetime.datetime.today():
                             reservation["active"]="Running"
-            if fecha_inicio>datetime.today():
+            if fecha_inicio>datetime.datetime.today():
                     reservation["active"]="por emitir"
-            if fecha_fin<datetime.today():
+            if fecha_fin<datetime.datetime.today():
                     reservation["active"]="Emitida"
             delta=fecha_fin-fecha_inicio
             reservation["days"]=0
@@ -1076,7 +1106,7 @@ if (option == "all") or (option =="name") or (option == "id") or (option =="find
             #reservation["name"]=n["name"].encode('utf-8', errors ='ignore')
             reservation["name"]=n["name"]
             reservation["country"]=country
-            reservation["last_updated"]=datetime.today().strftime("%m/%d/%Y, %H:%M:%S")
+            reservation["last_updated"]=datetime.datetime.today().strftime("%m/%d/%Y, %H:%M:%S")
             #reservation["mall"]=malls[m]
             name=n["name"].encode('utf-8', errors ='ignore')
             #if re.findall('\$(.*)\$',name):
@@ -1226,8 +1256,8 @@ for row in campaigns:  #for each campaign to analyze
     reservation["duration_msec"]=str(n["duration_msec"])
     reservation["start_time"]=str(n["start_time"])
     reservation["start_date"]=str(n["start_date"])
-    fecha_inicio=datetime.strptime(str(n["start_date"]),"%Y-%m-%d")
-    fecha_fin=datetime.strptime(str(n["end_date"]),"%Y-%m-%d")
+    fecha_inicio=datetime.datetime.strptime(str(n["start_date"]),"%Y-%m-%d")
+    fecha_fin=datetime.datetime.strptime(str(n["end_date"]),"%Y-%m-%d")
  
     delta=fecha_fin-fecha_inicio
     reservation["days"]=0
@@ -1280,8 +1310,8 @@ for row in campaigns:  #for each campaign to analyze
 
       if o["active"] == True:
         num_schedules=num_schedules +1
-        schedule_fecha_inicio=datetime.strptime(str(o["start_date"]),"%Y-%m-%d")
-        schedule_fecha_fin=datetime.strptime(str(o["end_date"]),"%Y-%m-%d")
+        schedule_fecha_inicio=datetime.datetime.strptime(str(o["start_date"]),"%Y-%m-%d")
+        schedule_fecha_fin=datetime.datetime.strptime(str(o["end_date"]),"%Y-%m-%d")
 
 
         if schedule_start_date=="":
@@ -1301,12 +1331,12 @@ for row in campaigns:  #for each campaign to analyze
       delta=schedule_end_date-schedule_start_date
       schedule_days=delta.days+1
    
-      if schedule_start_date <= datetime.today():
-          if schedule_end_date >= datetime.today():
+      if schedule_start_date <= datetime.datetime.today():
+          if schedule_end_date >= datetime.datetime.today():
             reservation["active"]="Running"
-      if schedule_start_date>=datetime.today():
+      if schedule_start_date>=datetime.datetime.today():
         reservation["active"]="por emitir"
-      if schedule_end_date<=datetime.today():
+      if schedule_end_date<=datetime.datetime.today():
         reservation["active"]="Emitida"
 
     else:

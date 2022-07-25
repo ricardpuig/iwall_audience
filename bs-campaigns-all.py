@@ -17,7 +17,7 @@ print ("Broadsign Campaign- POLL \n ")
 
 #URLS -----------
 
-url_reservation_by_display_unit= 'https://api.broadsign.com:10889/rest/reservation/v20/by_du_folder?domain_id=17244398&current_only=false';
+url_reservation_by_display_unit= 'https://api.broadsign.com:10889/rest/reservation/v20/by_du_folder?domain_id=17244398&current_only=false&start_date=2021-12-01&end_date=2022-12-31';
 url_container_info= 'https://api.broadsign.com:10889/rest/container/v9/by_id?domain_id=17244398';
 url_display_unit_info= 'https://api.broadsign.com:10889/rest/display_unit/v12/by_id?domain_id=17244398';
 
