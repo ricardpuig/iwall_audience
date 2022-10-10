@@ -1,0 +1,1 @@
+{"device":"","tstamp":"1663020031","type":"video_watch_detail","data":[{"person":4053,"gender":"unknown","age":"Unknown","tstamps_inCamera":[{"id_inCam":1,"tstamp_in":"1663020027","tstamp_out":"1663020031"}],"time_inCamera":3.5,"tstamps_watching":[{"id_watch":1,"tstamp_in":"1663020028","tstamp_out":"1663020029"}],"time_watching":1.2,"distance":195.7}]}

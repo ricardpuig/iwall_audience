@@ -1,0 +1,1 @@
+{"device":"","tstamp":"1663015368","type":"video_watch_detail","data":[{"person":3121,"gender":"male","age":"Young","tstamps_inCamera":[{"id_inCam":1,"tstamp_in":"1663015365","tstamp_out":"1663015368"}],"time_inCamera":2.3,"tstamps_watching":[{"id_watch":1,"tstamp_in":"1663015366","tstamp_out":"1663015368"}],"time_watching":1.7,"distance":239.7}]}
