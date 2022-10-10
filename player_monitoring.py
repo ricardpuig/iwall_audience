@@ -303,7 +303,7 @@ else:
 					player_field_report['last_checkin_time']= local_time
 					print("local time: ", local_time)
 					dt_localtime = datetime.strptime(local_time, "%Y-%m-%dT%H:%M:%S")
-					print("last check in (minutes)	: ", int((datetime.now() - dt_localtime).total_seconds()/60))
+					print("last check in (minutes)	: ", int((datetime.now(pytz.timezone('Europe/Madrid')) - dt_localtime).total_seconds()/60))
 					player_field_report['last_checkin_min']= int((datetime.now() - dt_localtime).total_seconds()/60)
 
 				try: 
@@ -319,8 +319,8 @@ else:
 					player_field_report['started_time']= started_on
 					print("Started:  ", started_on)
 					dt_localtime = datetime.strptime(started_on, "%Y-%m-%dT%H:%M:%S")
-					print("Started ( minutes)	: ", int((datetime.now() - dt_localtime).total_seconds()/60))
-					player_field_report['started_min']= int((datetime.now() - dt_localtime).total_seconds()/60)
+					print("Started ( minutes)	: ", int((datetime.now(pytz.timezone('Europe/Madrid')) - dt_localtime).total_seconds()/60))
+					player_field_report['started_min']= int((datetime.now(pytz.timezone('Europe/Madrid')) - dt_localtime).total_seconds()/60)
 
 				try: 
 					if re.search('Number of frames',fr):
