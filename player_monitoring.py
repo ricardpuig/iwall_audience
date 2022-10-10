@@ -303,13 +303,14 @@ else:
 					print("**Local Time")
 					player_field_report['last_checkin_time']= local_time
 					server_time= datetime.now()
-					server_time=server_time.replace(tzinfo=pytz.timezone('Europe/Madrid'))				
+					server_time=server_time.replace(tzinfo=pytz.timezone('US/Hawaii'))			
 					dt_localtime = datetime.strptime(local_time, "%Y-%m-%dT%H:%M:%S")
 					print("Localtime pre ", dt_localtime)
 					dt_localtime=dt_localtime.replace(tzinfo=pytz.timezone('Europe/Madrid'))
 					print("Broadsign time: ", dt_localtime, " Server time:", server_time)
 					print("last check in (minutes)	: ", (server_time - dt_localtime).total_seconds()/60)
 					player_field_report['last_checkin_min']= int((server_time - dt_localtime).total_seconds()/60)
+					input()
 
 
 				try: 
