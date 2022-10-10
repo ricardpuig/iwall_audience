@@ -332,7 +332,7 @@ else:
 					dt_localtime=dt_localtime.replace(tzinfo=pytz.timezone('Europe/Madrid'))
 					print("Started ( minutes)	: ", int((server_time - dt_localtime).total_seconds()/60))
 					player_field_report['started_min']= int((server_time - dt_localtime).total_seconds()/60)
-					input()
+					
 
 				try: 
 					if re.search('Number of frames',fr):
