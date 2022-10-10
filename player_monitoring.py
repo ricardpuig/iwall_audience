@@ -1,5 +1,6 @@
 # Get Current player status and information from Broadsign
 from dis import dis
+from threading import local
 from time import time
 import requests
 import json
@@ -301,10 +302,15 @@ else:
 				if local_time:
 					print("**Local Time")
 					player_field_report['last_checkin_time']= local_time
-					print("local time: ", local_time)
+					server_time= datetime.now()
+					server_time=server_time.replace(tzinfo=pytz.timezone('Europe/Madrid'))				
 					dt_localtime = datetime.strptime(local_time, "%Y-%m-%dT%H:%M:%S")
-					print("last check in (minutes)	: ", int((datetime.now(pytz.timezone('Europe/Madrid')) - dt_localtime).total_seconds()/60))
-					player_field_report['last_checkin_min']= int((datetime.now() - dt_localtime).total_seconds()/60)
+					print("Localtime pre ", dt_localtime)
+					dt_localtime=dt_localtime.replace(tzinfo=pytz.timezone('Europe/Madrid'))
+					print("Broadsign time: ", dt_localtime, " Server time:", server_time)
+					print("last check in (minutes)	: ", (server_time - dt_localtime).total_seconds()/60)
+					player_field_report['last_checkin_min']= int((server_time - dt_localtime).total_seconds()/60)
+
 
 				try: 
 					if re.search('Started On:',fr):
@@ -318,9 +324,15 @@ else:
 					print("**Started")
 					player_field_report['started_time']= started_on
 					print("Started:  ", started_on)
+
+					server_time= datetime.now()
+					server_time=server_time.replace(tzinfo=pytz.timezone('Europe/Madrid'))				
+
 					dt_localtime = datetime.strptime(started_on, "%Y-%m-%dT%H:%M:%S")
-					print("Started ( minutes)	: ", int((datetime.now(pytz.timezone('Europe/Madrid')) - dt_localtime).total_seconds()/60))
-					player_field_report['started_min']= int((datetime.now(pytz.timezone('Europe/Madrid')) - dt_localtime).total_seconds()/60)
+					dt_localtime=dt_localtime.replace(tzinfo=pytz.timezone('Europe/Madrid'))
+					print("Started ( minutes)	: ", int((server_time - dt_localtime).total_seconds()/60))
+					player_field_report['started_min']= int((server_time - dt_localtime).total_seconds()/60)
+					input()
 
 				try: 
 					if re.search('Number of frames',fr):
