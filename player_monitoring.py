@@ -7,6 +7,7 @@ import json
 import re
 import pymysql
 from sqlalchemy import create_engine
+import mysql.connector
 import pandas as pd
 import numpy as np
 import logging as log
@@ -34,75 +35,121 @@ engine = create_engine("mysql+pymysql://{user}:{pw}@ec2-52-18-248-109.eu-west-1.
                                pw="SonaeRootMysql2021!",
                                db="audience"))
 
-email_to_send="dept_tecnico@iwallinshop.com"
-client = Courier(auth_token="pk_prod_K7J1AFSG4JMXWWMX60Q22DVSKGM3")
+email_to_send="rpuig@iwallinshop.com"
+client = Courier(auth_token="pk_prod_6S1S6BVGGXMEB5Q8TSVHDN59NY8D")
 auth = "Bearer e03b2732ac76e3a954e4be0c280a04a3";
-report_template= "F2NBTA95JNMNQ5HTN5BJE2BHEB0V"
+report_template= "8Y3M47W2PFMNS0HMPN3F6CB0QSYM"
 alarm_template  = "Q7X9P35YYQ4PBPH91GM56A31D63Y"
 
+#database connector
+mydb = mysql.connector.connect(
+  host="ec2-52-18-248-109.eu-west-1.compute.amazonaws.com",
+  #host="54.38.184.204",
+  user="root",
+  #user="iwall",
+  #database="netmon",
+  #passwd= "iwalldigitalsignage",
+  passwd="SonaeRootMysql2021!",
+  database="audience"
+)
+mycursor = mydb.cursor()
+
+#player lists
 black_players=[]
 no_screens_players=[]
 missing_players=[]
 offline_players=[]
 no_campaigns_players=[]
 main_player_status = []
+temp_wifi_players =[]
+discarded_players =[]
 
-du_container_blacklist=[29260926, 218235499, 393035747, 530310388]
-du_id_whitelist=['49566815', '49769862', '49759421', '49566815', '67029762', '185093713' ]
+
+#filtering players:
+du_container_blacklist=[]
+du_id_whitelist=[]
+temporary_players=[]
+wifi_players=[]
+sunday_du_container_blacklist=[]
+morning_blacklist_players=[]
+critical_players=[]
+player_container_blacklist=[]
+
+
+def load_filtering_players():
+	#load player filters
+    sql_select = "SELECT broadsign_id, type from player_monitoring_filtering"
+    mycursor.execute(sql_select)
+    records= mycursor.fetchall()    
+    for row_0 in records:  #for each result
+		#load wifi players
+        if row_0[1] =="WIFI_PLAYER":
+           wifi_players.append(row_0[0])
+        if row_0[1] =="DU_CONTAINER_ID_BLACKLIST":
+           du_container_blacklist.append(row_0[0])
+        if row_0[1] =="DU_ID_WHITELIST":
+           du_id_whitelist.append(row_0[0])
+        if row_0[1] =="TEMPORARY_PLAYER":
+           temporary_players.append(row_0[0])
+        if row_0[1] =="CRITICAL_PLAYER":
+           critical_players.append(row_0[0])
+        if row_0[1] =="PLAYER_CONTAINER_ID_BLACKLIST":
+           player_container_blacklist.append(row_0[0])
+
 
 def report_valid():
 	player_status_report =""
 	valid = False
 	current_time_madrid=  datetime.now(pytz.timezone('Europe/Madrid'))
-	if current_time_madrid.hour >=10 and current_time_madrid.hour<=11:
+	if current_time_madrid.hour ==11 :
 		player_status_report= "MORNING"
 		valid= True
 	current_time_colombia=  datetime.now(pytz.timezone('America/Bogota'))
-	if current_time_madrid.hour >=10 and current_time_madrid.hour<=11:
+	if current_time_madrid.hour ==11 :
 		player_status_report="MORNING"
 		valid= True
 	current_time_peru=  datetime.now(pytz.timezone('America/Lima'))
-	if current_time_madrid.hour >=10 and current_time_madrid.hour<=11:
+	if current_time_madrid.hour ==11 :
 		player_status_report= "MORNING"
 		valid= True
 
-
-	if current_time_madrid.hour >=14 and current_time_madrid.hour<=15:
+	if current_time_madrid.hour ==14 :
 		player_status_report= "AFTERNOON"
 		valid= True
 	current_time_colombia=  datetime.now(pytz.timezone('America/Bogota'))
-	if current_time_madrid.hour >=14 and current_time_madrid.hour<=15:
+	if current_time_madrid.hour ==14 :
 		player_status_report= "AFTERNOON"
 		valid= True
 	current_time_peru=  datetime.now(pytz.timezone('America/Lima'))
-	if current_time_madrid.hour >=14 and current_time_madrid.hour<=15:
+	if current_time_madrid.hour ==14 :
 		player_status_report= "AFTERNOON"
 		valid= True
 
 
-	if current_time_madrid.hour >=16 and current_time_madrid.hour<=18:
+	if current_time_madrid.hour ==18:
 		player_status_report= "NIGHT"
 		valid= True
 	current_time_colombia=  datetime.now(pytz.timezone('America/Bogota'))
-	if current_time_madrid.hour >=16 and current_time_madrid.hour<=18:
+	if current_time_madrid.hour ==18:
 		player_status_report="NIGHT"
 		valid= True
 	current_time_peru=  datetime.now(pytz.timezone('America/Lima'))
-	if current_time_madrid.hour >=16 and current_time_madrid.hour<=18:
+	if current_time_madrid.hour ==18 :
 		player_status_report= "NIGHT"
 		valid= True
 	return valid, player_status_report
+
 
 def checkin_alarm(player_field_report):
 
 	time_missing=""
 	if  player_field_report['last_checkin_min']>60:
 		if player_field_report['last_checkin_min']>2940:
-			time_missing=str((player_field_report['last_checkin_min']/60)/24)+ " dias!. \n La última vez en línea fue : " + str(player_field_report['last_checkin_time']) 	
+			time_missing=str(round((player_field_report['last_checkin_min']/60)/24,1))+ " dias!. \n La última vez en línea fue : " + str(player_field_report['last_checkin_time']) 	
 		else:
-			time_missing=str(player_field_report['last_checkin_min']/60)+ " horas!. \n La última vez en línea fue : " + str(player_field_report['last_checkin_time']) 
+			time_missing=str(round(player_field_report['last_checkin_min']/60,1))+ " horas!. \n La última vez en línea fue : " + str(player_field_report['last_checkin_time']) 
 	else:
-		time_missing=str(player_field_report['last_checkin_min']) + " minutos!"
+		time_missing=str(round(player_field_report['last_checkin_min'],1)) + " minutos!"
 	
 
 	resp = client.send_message(
@@ -112,8 +159,8 @@ def checkin_alarm(player_field_report):
 					},
 					"template": alarm_template,
 						"data": {
-							"mall": player_field_report['container_name'] + "- " + str(player_field_report["player_screens"]) + " pant.",
-							"title": "OFF ",
+							"mall": player_field_report['container_name'] + "- " + str(player_field_report["player_screens"]) + " pant",
+							"title": "MISSING! ",
 							"message" : "Player no ha dado señales desde hace " + time_missing,
 							"player" : player_field_report['player_name']
 						},
@@ -128,8 +175,8 @@ def blackscreen_alarm(player_field_report):
 					},
 					"template": alarm_template,
 						"data": {
-							"mall": player_field_report['container_name'] + "- " + str(player_field_report["player_screens"]) + " pant.",
-							"title": "Black",
+							"mall": player_field_report['container_name'] + "- " + str(player_field_report["player_screens"]) + " pant",
+							"title": "BLACK!",
 							"message" : "Player posiblemente en negro ",
 							"player" : player_field_report['player_name']
 						},
@@ -144,8 +191,8 @@ def no_contents_alarm(player_field_report):
 					},
 					"template": alarm_template,
 						"data": {
-							"mall": player_field_report['container_name'] + "- " + str(player_field_report["player_screens"]) + " pant.",
-							"title": "No content",
+							"mall": player_field_report['container_name'] + "- " + str(player_field_report["player_screens"]) + " pant",
+							"title": "NO CONTENT!",
 							"message" : "Player posiblemente sin contenido ",
 							"player" : player_field_report['player_name']
 						},
@@ -170,15 +217,19 @@ def alarms_check(player_field_report):
 	print("Alarms check: ")
 	print("Player Field Report:  " , player_field_report)
 
-	if player_field_report['du_container_id'] in du_container_blacklist:
-		print("Alarms for this DU disabled")
+
+
+	if (str(player_field_report['player_container_id']) in player_container_blacklist)or (str(player_field_report['du_container_id']) in du_container_blacklist) or (player_field_report['player_id'] in wifi_players) or (player_field_report['player_id'] in temporary_players):
+		print("Alarms for this player disabled")
+		discarded_players.append(player_field_report['player_id'])
+
 	else:
-		if player_field_report['last_checkin_min']>45 and player_field_report['last_checkin_min']<6000 and player_field_report['player_screens']>0:
+		if player_field_report['last_checkin_min']>60 and player_field_report['last_checkin_min']<6000 and player_field_report['player_screens']>0:
 			print("Sending Alarm for late check in")
-			missing_players.append(player_field_report['container_name']+ " : " + player_field_report['player_name'])
-			checkin_alarm(player_field_report)
+			missing_players.append(player_field_report['container_name']+ " : " + player_field_report['player_name'] + "\n ( hace " + str(player_field_report['last_checkin_min']) + " min )")
+			#checkin_alarm(player_field_report)
 			insert_alarm_db(player_field_report, "MISSING")
-		if player_field_report['num_frames']=='0' and player_field_report['last_checkin_min']<45 and player_field_report['player_screens']>0:
+		if player_field_report['num_frames']=='0' and player_field_report['last_checkin_min']<60 and player_field_report['player_screens']>0:
 			print("Num frames 0, probably in black ")
 			black_players.append(player_field_report['container_name']+ " : " + player_field_report['player_name'])
 			blackscreen_alarm(player_field_report)
@@ -187,13 +238,23 @@ def alarms_check(player_field_report):
 			print("No screens in player")
 			no_screens_players.append(player_field_report['container_name']+ " : " + player_field_report['player_name'])
 		if player_field_report['last_checkin_min']>6000 and player_field_report['player_screens']>0:
-			offline_players.append(player_field_report['container_name']+ " : " + player_field_report['player_name'])
+			offline_players.append( player_field_report['container_name']+ "\n Player: " + player_field_report['player_name'] + "\n ( desde " + player_field_report['last_checkin_time'] + ")")
 		if player_field_report['num_contents']==0 and player_field_report['player_screens']>0:
 			no_campaigns_players.append(player_field_report['container_name']+ " : " + player_field_report['player_name'])
-			no_contents_alarm(player_field_report)
+			#no_contents_alarm(player_field_report)
 
 		if player_field_report['display_unit_id'] in du_id_whitelist:
-			main_player_status.append(player_field_report['container_name']+ " : " + player_field_report['player_name'] + " Checkin " + str(player_field_report['last_checkin_min']) + " min ago " + " \n Contents to play: \n" + player_field_report['contents'] + "\n\n")
+			main_player_status.append(player_field_report['container_name']+ "\n Player:  " + player_field_report['player_name'] + "( Checkin " + str(player_field_report['last_checkin_min']) + " min ago)" + " \n Contents playing: \n" + player_field_report['contents'])
+
+	if player_field_report['player_id'] in critical_players:
+		main_player_status.append(player_field_report['container_name']+ "\n Player:  " + player_field_report['player_name'] + "( Checkin " + str(player_field_report['last_checkin_min']) + " min ago)" + " \n Contents playing: \n" + player_field_report['contents'])
+
+	if player_field_report['player_id'] in wifi_players:
+		temp_wifi_players.append("(WIFI) "+ player_field_report['container_name']+ "\n Player:  " + player_field_report['player_name'] + " \n ( Last Connected: el " + player_field_report['last_checkin_time'] + ")") 
+
+	if player_field_report['player_id'] in temporary_players:
+		temp_wifi_players.append("(TEMPORAL) " + player_field_report['container_name']+ "\n Player:  " + player_field_report['player_name'] + "\n ( Last Connected el " + player_field_report['last_checkin_time'] + ")") 
+
 
 
 	print("Black: ", black_players)
@@ -201,23 +262,41 @@ def alarms_check(player_field_report):
 	print("Missing: ", missing_players)
 	print("offline: ", offline_players)
 	print("No campaigns: ", no_campaigns_players)
-
+	
 
 def daily_report(report_type):
 	print("Sending report")
-
 
 	message1= ""
 	for p1 in missing_players:
 		message1 = message1 + "\n\n" + p1
 
 	message2= ""
-	for p1 in main_player_status:
-		message2 = message2 + "\n" + p1
+	for p1 in offline_players:
+		message2 = message2 + "\n\n" + p1
 
 	message3= ""
-	for p1 in offline_players:
-		message3 = message3 + "\n\n" + p1
+	for p1 in temp_wifi_players:
+		message3 = p1 + "\n\n" + message3
+
+	message4= ""
+	for p1 in main_player_status:
+		message4 = message4 + "\n\n" + p1
+
+	message5= ""
+	for p1 in black_players:
+		message5 = message5 + "\n\n" + p1
+
+	message6= ""
+	for p1 in no_screens_players:
+		message6 = message6 + "\n\n" + p1
+
+	message7= "Total players analizados: "+ str(len(field_report))  + ". Players descartados: " + str(len(discarded_players))
+	
+
+	server_time= datetime.now()
+	server_time=server_time.replace(tzinfo=pytz.timezone('Europe/Madrid'))	
+	fecha= server_time.strftime("%d %b, %Y a las %H:%M")
 
 	resp = client.send_message(
 				message={
@@ -227,9 +306,14 @@ def daily_report(report_type):
 					"template": report_template,
 						"data": {
 							"title": report_type,
+							"fecha": fecha,
 							"message1" : message1,
 							"message2" : message2,
 							"message3" : message3,
+							"message4" : message4,
+							"message5" : message5,
+							"message6" : message6,
+							"message7" : message7,
 						},
 				})
 	print(resp['requestId'])
@@ -242,7 +326,7 @@ else:
 
 if country=="SPAIN":
         container_ids=["21393898"]
-		#container_ids=["62401018"]
+		#container_ids=["218209735"]
 elif country=="COLOMBIA":
         container_ids=['135518539']
 elif country=="PERU":
@@ -251,19 +335,21 @@ else:
 	print("Country Missing, exiting....")
 	exit(1)
 
+
+
 print("Player Status Report - IWALL")
 print("Getting ", country , " player status")
+print("loading player filters from db")
+load_filtering_players()
 
+print("initialising field report")
 player_field_report={}
 field_report=[]
 
-valid, report_type= report_valid()
-valid=True
-if not valid:
-	print("Not valid report time")
-	exit()
-else:
-	for m in container_ids:
+valid_report, report_type= report_valid()
+valid_report=True
+
+for m in container_ids:
 		
 		url_field_report=url_field_report+"&parent_container_ids=" +m
 		
@@ -272,12 +358,12 @@ else:
 		s=requests.get(url_field_report,headers={'Accept': 'application/json','Authorization': auth})
 		data=json.loads(s.text)
 		
+
 		for n in data["field_report"]:
-			
+
 			fr=n['field_report']
 			if fr: 
-				print(fr)
-
+				#print(fr)
 				try: 
 					if re.search('Player Id:',fr):
 						player_id=re.findall('Player Id: (.*)\n', fr)[0]
@@ -301,18 +387,16 @@ else:
 			
 				if local_time:
 					print("**Local Time")
-					player_field_report['last_checkin_time']= local_time
-					server_time= datetime.now()
-					server_time=server_time.replace(tzinfo=pytz.timezone('US/Hawaii'))			
 					dt_localtime = datetime.strptime(local_time, "%Y-%m-%dT%H:%M:%S")
+					player_field_report['last_checkin_time']= dt_localtime.strftime("%d %b, %Y a las %H:%M")
+					server_time= datetime.now()
+					server_time=server_time.replace(tzinfo=pytz.timezone('Europe/Madrid'))			
 					print("Localtime pre ", dt_localtime)
 					dt_localtime=dt_localtime.replace(tzinfo=pytz.timezone('Europe/Madrid'))
 					print("Broadsign time: ", dt_localtime, " Server time:", server_time)
 					print("last check in (minutes)	: ", (server_time - dt_localtime).total_seconds()/60)
 					player_field_report['last_checkin_min']= int((server_time - dt_localtime).total_seconds()/60)
-					input()
-
-
+					
 				try: 
 					if re.search('Started On:',fr):
 						started_on=re.findall('Started On: (.*) \(', fr)[0]
@@ -476,6 +560,7 @@ else:
 							player_screens=m['nscreens']
 							player_mac1=m['primary_mac_address']
 							player_mac2=m['secondary_mac_address']
+							player_container_id=m['container_id']
 							
 				except: 
 
@@ -491,6 +576,7 @@ else:
 				player_field_report['player_screens']=player_screens
 				player_field_report['player_mac1']=player_mac1
 				player_field_report['player_mac2']=player_mac2
+				player_field_report['player_container_id']=player_container_id
 
 
 
