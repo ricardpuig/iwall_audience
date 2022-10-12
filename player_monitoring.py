@@ -35,7 +35,7 @@ engine = create_engine("mysql+pymysql://{user}:{pw}@ec2-52-18-248-109.eu-west-1.
                                pw="SonaeRootMysql2021!",
                                db="audience"))
 
-email_to_send="rpuig@iwallinshop.com"
+email_to_send="dept_tecnico@iwallinshop.com"
 client = Courier(auth_token="pk_prod_6S1S6BVGGXMEB5Q8TSVHDN59NY8D")
 auth = "Bearer e03b2732ac76e3a954e4be0c280a04a3";
 report_template= "8Y3M47W2PFMNS0HMPN3F6CB0QSYM"
@@ -295,8 +295,8 @@ def daily_report(report_type):
 	
 
 	server_time= datetime.now()
-	server_time=server_time.replace(tzinfo=pytz.timezone('Europe/Madrid'))	
-	fecha= server_time.strftime("%d %b, %Y a las %H:%M")
+	server_time=server_time.astimezone(pytz.timezone('utc'))
+	fecha=server_time.astimezone(pytz.timezone('Europe/Madrid')).strftime("%d %b, %Y a las %H:%M")
 
 	resp = client.send_message(
 				message={
@@ -349,6 +349,8 @@ field_report=[]
 valid_report, report_type= report_valid()
 valid_report=True
 
+
+
 for m in container_ids:
 		
 		url_field_report=url_field_report+"&parent_container_ids=" +m
@@ -389,13 +391,19 @@ for m in container_ids:
 					print("**Local Time")
 					dt_localtime = datetime.strptime(local_time, "%Y-%m-%dT%H:%M:%S")
 					player_field_report['last_checkin_time']= dt_localtime.strftime("%d %b, %Y a las %H:%M")
+					print("unware time object", dt_localtime)
+					dt_localtime = dt_localtime.replace(tzinfo=pytz.timezone('Etc/GMT-2'))
+					print("localized time zone", dt_localtime)
 					server_time= datetime.now()
-					server_time=server_time.replace(tzinfo=pytz.timezone('Europe/Madrid'))			
-					print("Localtime pre ", dt_localtime)
-					dt_localtime=dt_localtime.replace(tzinfo=pytz.timezone('Europe/Madrid'))
+					server_time=server_time.astimezone(pytz.timezone('utc'))
+					dt_localtime=dt_localtime.astimezone(pytz.UTC)
+					print("hora  espain", server_time.astimezone(pytz.timezone('Europe/Madrid')).strftime("%d %b, %Y a las %H:%M"))
+					
+					print("UTC converted", dt_localtime)
 					print("Broadsign time: ", dt_localtime, " Server time:", server_time)
 					print("last check in (minutes)	: ", (server_time - dt_localtime).total_seconds()/60)
 					player_field_report['last_checkin_min']= int((server_time - dt_localtime).total_seconds()/60)
+					
 					
 				try: 
 					if re.search('Started On:',fr):
@@ -411,10 +419,13 @@ for m in container_ids:
 					print("Started:  ", started_on)
 
 					server_time= datetime.now()
-					server_time=server_time.replace(tzinfo=pytz.timezone('Europe/Madrid'))				
-
+					server_time=server_time.astimezone(pytz.timezone('utc'))
+					
 					dt_localtime = datetime.strptime(started_on, "%Y-%m-%dT%H:%M:%S")
-					dt_localtime=dt_localtime.replace(tzinfo=pytz.timezone('Europe/Madrid'))
+					dt_localtime=dt_localtime.replace(tzinfo=pytz.timezone('Etc/GMT-2'))
+					dt_localtime=dt_localtime.astimezone(pytz.UTC)
+
+
 					print("Started ( minutes)	: ", int((server_time - dt_localtime).total_seconds()/60))
 					player_field_report['started_min']= int((server_time - dt_localtime).total_seconds()/60)
 					
