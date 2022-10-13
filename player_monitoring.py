@@ -74,6 +74,7 @@ sunday_du_container_blacklist=[]
 morning_blacklist_players=[]
 critical_players=[]
 player_container_blacklist=[]
+player_id_blacklist=[]
 
 
 def load_filtering_players():
@@ -95,6 +96,8 @@ def load_filtering_players():
            critical_players.append(row_0[0])
         if row_0[1] =="PLAYER_CONTAINER_ID_BLACKLIST":
            player_container_blacklist.append(row_0[0])
+		if row_0[1] =="PLAYER_ID_BLACKLIST":
+           player_id_blacklist.append(row_0[0])
 
 
 def report_valid():
@@ -219,7 +222,7 @@ def alarms_check(player_field_report):
 
 
 
-	if (str(player_field_report['player_container_id']) in player_container_blacklist)or (str(player_field_report['du_container_id']) in du_container_blacklist) or (player_field_report['player_id'] in wifi_players) or (player_field_report['player_id'] in temporary_players):
+	if (str(player_field_report['player_id']) in player_id_blacklist)or (str(player_field_report['player_container_id']) in player_container_blacklist)or (str(player_field_report['du_container_id']) in du_container_blacklist) or (player_field_report['player_id'] in wifi_players) or (player_field_report['player_id'] in temporary_players):
 		print("Alarms for this player disabled")
 		discarded_players.append(player_field_report['player_id'])
 
