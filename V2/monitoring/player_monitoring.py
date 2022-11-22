@@ -328,8 +328,8 @@ else:
 	exit(1)
 
 if country=="SPAIN":
-        container_ids=["21393898"]
-		#container_ids=["218209735"]
+        #container_ids=["21393898"]
+		container_ids=["62401031"]
 elif country=="COLOMBIA":
         container_ids=['135518539']
 elif country=="PERU":
@@ -392,10 +392,8 @@ for m in container_ids:
 			
 				if local_time:
 					print("**Local Time:", local_time)
-					input()
-					dt_localtime = datetime.strptime(local_time, "%Y-%m-%dT%H:%M:%S%z")
+					dt_localtime = datetime.strptime(local_time, "%Y-%m-%dT%H:%M:%S")
 					print(dt_localtime)
-					input()
 					player_field_report['last_checkin_time']= dt_localtime.strftime("%d %b, %Y a las %H:%M")
 					print("unware time object", dt_localtime)
 					dt_localtime = dt_localtime.replace(tzinfo=pytz.timezone('Etc/GMT-1'))
