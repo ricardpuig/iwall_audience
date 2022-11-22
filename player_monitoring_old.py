@@ -328,17 +328,16 @@ else:
 	exit(1)
 
 if country=="SPAIN":
-	container_ids=["21393898"]
-	email_to_send="dept_tecnico@iwallinshop.com"
+        container_ids=["21393898"]
+		#container_ids=["218209735"]
 elif country=="COLOMBIA":
-	container_ids=['135518539']
-	email_to_send="dept_tecnico_colombia@iwallinshop.com"
+        container_ids=['135518539']
 elif country=="PERU":
-	container_ids=['53704276']
-	email_to_send="dept_tecnico_peru@iwallinshop.com"
+        container_ids=['53704276']
 else:
 	print("Country Missing, exiting....")
 	exit(1)
+
 
 
 print("Player Status Report - IWALL")
@@ -393,8 +392,10 @@ for m in container_ids:
 			
 				if local_time:
 					print("**Local Time:", local_time)
-					dt_localtime = datetime.strptime(local_time, "%Y-%m-%dT%H:%M:%S")
+					input()
+					dt_localtime = datetime.strptime(local_time, "%Y-%m-%dT%H:%M:%S%z")
 					print(dt_localtime)
+					input()
 					player_field_report['last_checkin_time']= dt_localtime.strftime("%d %b, %Y a las %H:%M")
 					print("unware time object", dt_localtime)
 					dt_localtime = dt_localtime.replace(tzinfo=pytz.timezone('Etc/GMT-1'))

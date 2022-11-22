@@ -39,7 +39,6 @@ df = pd.read_csv(file_to_process, delimiter=";")
 df.to_sql('mall_traffic_data', engine, if_exists='append', index=False)
 
 #removing duplicated rows in case of ingesting same data
-
-#query="delete t1 FROM mall_traffic_data t1 INNER  JOIN mall_traffic_data t2 WHERE t1.mall_visits = t2.mall_visits AND t1.start_date = t2.start_date AND t1.end_date = t2.end_date AND t1.mall_id = t2.mall_id;"
-#mycursor.execute(query)
-#mydb.commit()
+query="delete t1 FROM mall_traffic_data t1 INNER  JOIN mall_traffic_data t2 WHERE t1.id< t2.id AND t1.mall_visits = t2.mall_visits AND t1.start_date = t2.start_date AND t1.end_date = t2.end_date AND t1.mall_id = t2.mall_id;"
+mycursor.execute(query)
+mydb.commit()
