@@ -1,24 +1,24 @@
 name,id
-Illa Diagonal,2
+L'Illa Diagonal,2
 Albacenter,3
-Alcores,4
-Alegra,5
-Almazara,6
-Anec Blau,7
+Los Alcores,4
+Alegra - Parque Comercial y de Ocio,5
+Almazara Plaza,6
+Ànecblau,7
 Arena Multiespacio,9
 As Termas,10
 Castellana 200,11
 Conquistadores,13
 Nuestro Bogotá,15
-El Parque,16
+El Parque de Ciudad Real,16
 El Paseo,17
 El Rosal,18
 Espacio Coruña,19
-Espacio Leon,20
-Gran Casa,24
+Espacio León,20
+GranCasa,24
 Gran Plaza 2,25
-Gran Via 2,26
-Gran Via de Vigo,27
+Gran Vía 2,26
+Gran Vía de Vigo,27
 La Farga,29
 Luz de Castilla,31
 Madrid Sur,32
@@ -29,25 +29,25 @@ Plaza Aluche,38
 Plaza Eboli,39
 Plaza Mayor,40
 Plaza Norte 2,41
-Plaza Rio 2,42
+Plaza Río 2,42
 Portal de la Marina,43
 El Restón,44
-TSO Getafe,45
-TSO las Rozas,46
-TSO SSRR,48
+Getafe The Style Outlets,45
+Las Rozas The Style Outlets,46
+San Sebastián de los Reyes The Style Outlets;,48
 Tres Aguas,49
-TSO Coruña,50
+Coruña The Style Outlets,50
 Valle Real,51
 Zubiarte,54
-Area Sur,55
+Área Sur,55
 Añaza (ext),56
 El Deleite,57
-Finestrelles,58
-Illa Diagonal (CAM),59
+Finestrelles Shopping Centre,58
+L'Illa Diagonal (CAM),59
 Nassica,60
 La Villa (ext),61
 Las Pirámides (ext),62
-Plaza Loranca,63
+Plaza Loranca 2,63
 Mogan Mall (ext),64
 Atlantis,65
 Centro Mayor,66
@@ -80,3 +80,8 @@ Molina Plaza,93
 Plaza San Miguel,94
 El Arcángel,95
 Plaza Moraleja,96
+Megaplaza Villa el Salvador,97
+Megaplaza Chorillos,98
+Larcomar,99
+Mall Aventura Chiclayo,100
+Parque Corredor,101

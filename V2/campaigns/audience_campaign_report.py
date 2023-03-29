@@ -777,7 +777,7 @@ def list_malls(mycursor, country):
             print("* " , str(container_name) , " MALL ID:", mall_id, " Screens broadsign:", screen_count, " Screens audience:", screens_audience)
 
 
-def convert_audience_impressions_to_impression_multiplier(day_impressions_audience, mall_screens, du_bs_screens, hours_range):
+def convert_audience_impressions_to_impression_multiplier(day_impressions_audience, mall_screens, du_bs_screens, hours_range, dwell_time):
   #convert audience impressions to impressions multiplier 
   #param  day impressions : impressiones por hora 09-24
   #       du_bs_screens : 
@@ -789,21 +789,22 @@ def convert_audience_impressions_to_impression_multiplier(day_impressions_audien
   print("broadsign Display unit screens: ", du_bs_screens)
   print("hour range: ", hours_range)
   print("Total Day Impressions: ", np.sum(day_impressions_audience))
-  print("Avg Day Impressions per screen in mall: ", np.sum(day_impressions_audience)/mall_screens)
+  print("Avg Day Impressions per screen in mall: ", np.sum(day_impressions_audience))
 
+  
   #l1 = numpy.array(day_impressions_audience)
   h1 = np.array(hours_range)
 
   print(h1)
 
   l1 = day_impressions_audience*h1  #just to the hours running
-  l1 = l1/mall_screens
-
-  factor = 300 
+  
+  factor = 3600 / dwell_time
 
   impression_multiplier = l1/factor
 
-  #print("impression Multiplier array: ", impression_multiplier)
+  print("impression Multiplier array: ", impression_multiplier)
+  
   return(impression_multiplier)
 
 def calculate_day_audience_impressions(imp_multiplier, du_day_repetitions):
@@ -934,7 +935,7 @@ try:
 except:
     arg_3  =""
 
-YEAR_TO_ANALYZE=2022
+YEAR_TO_ANALYZE=2023
 
 
 
@@ -1541,7 +1542,7 @@ for row in campaigns:  #for each campaign to analyze
 
       #Extracting mall id and number of screens for malls table
       print("Getting information from malls database:")
-      sql_select_getmall = "SELECT id, screens, default_screen_day_impressions, default_screen_day_views, name FROM malls WHERE broadsign_container_id='%s'" % (str(row_0[0]))
+      sql_select_getmall = "SELECT id, screens, default_screen_day_impressions, default_screen_day_views, name, dwell_time FROM malls WHERE broadsign_container_id='%s'" % (str(row_0[0]))
       mycursor.execute(sql_select_getmall)
       records_1= mycursor.fetchall()
       print("Number malls found: " + str(mycursor.rowcount))
@@ -1554,6 +1555,7 @@ for row in campaigns:  #for each campaign to analyze
               default_screen_day_impressions= rows_1[2]
               default_screen_day_views = rows_1[3]
               mall_name = rows_1[4]
+              dwell_time = rows_1[5]
       else:
           print("Error ************ - no container found in AUDIENCE MALLS DB!!!!!!!!!")
           mall_id = 0
@@ -1561,6 +1563,7 @@ for row in campaigns:  #for each campaign to analyze
           default_screen_day_impression = 10
           default_screen_day_views = 5
           mall_name = "NOT FOUND"
+          dwell_time = 12
           continue
       print("")
       print("+++++++++++++++++++++++++++++++")
@@ -1629,7 +1632,7 @@ for row in campaigns:  #for each campaign to analyze
             date_unformatted=day.split("-")
             day_formatted=date_unformatted[0]+"-"+date_unformatted[1]+"-"+date_unformatted[2]
             print("Day: ",  day_formatted)
-
+            
             # buscar numero de impresiones ese dia para ese display unit
             sql_select_total_imp= "SELECT * from audience_impressions WHERE date LIKE '%s' AND mall_id LIKE '%s'" %(str(day_formatted), str(mall_id))
             #print(sql_select_total_imp)
@@ -1638,7 +1641,10 @@ for row in campaigns:  #for each campaign to analyze
 
 
             #print(records_day_impressions)
-            day_impressions_audience=records_day_impressions[0][12:25]
+            try:
+              day_impressions_audience=records_day_impressions[0][12:25]
+            except:
+              day_impressions_audience = [0] * (25-12)
             #print(day_impressions_audience)
 
             #hours of campaign running ( now 9-24)
@@ -1648,15 +1654,12 @@ for row in campaigns:  #for each campaign to analyze
                 day_impressions= default_screen_day_impressions
                 day_impressions_audience= np.ones(15)*((day_impressions*row_0[2])/15)   #numero de pantallas del display unit
 
-            imp_multiplier = convert_audience_impressions_to_impression_multiplier(day_impressions_audience, mall_screens, du_bs_screens, hours_range)
-            imp_multiplier = imp_multiplier; 
-
-
+            imp_multiplier = convert_audience_impressions_to_impression_multiplier(day_impressions_audience, mall_screens, du_bs_screens, hours_range, dwell_time)
+            
             print("DU BS Repetitions: ", du_bs_repetitions, " total days: ", total_days)
             du_day_repetitions=du_bs_repetitions*repetition_distribution[day_index]
 
-           
-
+          
             du_day_campaign_impressions= calculate_day_audience_impressions(imp_multiplier, du_day_repetitions)
 
             du_day_campaign_impressions = int(du_day_campaign_impressions)

@@ -1,0 +1,71 @@
+uuid,id,name,day,weekday,visits
+091b8fd0-a5b1-4c59-acb2-40759e131801,3,Albacenter,20230109,monday,5967.0
+091b8fd0-a5b1-4c59-acb2-40759e131801,3,Albacenter,20230110,tuesday,5872.0
+091b8fd0-a5b1-4c59-acb2-40759e131801,3,Albacenter,20230111,wednesday,5859.0
+091b8fd0-a5b1-4c59-acb2-40759e131801,3,Albacenter,20230112,thursday,5575.0
+091b8fd0-a5b1-4c59-acb2-40759e131801,3,Albacenter,20230113,friday,5408.0
+091b8fd0-a5b1-4c59-acb2-40759e131801,3,Albacenter,20230114,saturday,6696.0
+091b8fd0-a5b1-4c59-acb2-40759e131801,3,Albacenter,20230115,sunday,0.0
+69dda3aa-efa6-4149-9481-3e1260141dc2,5,Alegra - Parque Comercial y de Ocio,20230109,monday,3593.0
+69dda3aa-efa6-4149-9481-3e1260141dc2,5,Alegra - Parque Comercial y de Ocio,20230110,tuesday,3447.0
+69dda3aa-efa6-4149-9481-3e1260141dc2,5,Alegra - Parque Comercial y de Ocio,20230111,wednesday,3336.0
+69dda3aa-efa6-4149-9481-3e1260141dc2,5,Alegra - Parque Comercial y de Ocio,20230112,thursday,3157.0
+69dda3aa-efa6-4149-9481-3e1260141dc2,5,Alegra - Parque Comercial y de Ocio,20230113,friday,3315.0
+69dda3aa-efa6-4149-9481-3e1260141dc2,5,Alegra - Parque Comercial y de Ocio,20230114,saturday,5052.0
+69dda3aa-efa6-4149-9481-3e1260141dc2,5,Alegra - Parque Comercial y de Ocio,20230115,sunday,3837.0
+91e8cf7c-ece3-4e27-9eed-4a146790bbb7,6,Almazara Plaza,20230109,monday,3933.0
+91e8cf7c-ece3-4e27-9eed-4a146790bbb7,6,Almazara Plaza,20230110,tuesday,4282.0
+91e8cf7c-ece3-4e27-9eed-4a146790bbb7,6,Almazara Plaza,20230111,wednesday,4217.0
+91e8cf7c-ece3-4e27-9eed-4a146790bbb7,6,Almazara Plaza,20230112,thursday,4545.0
+91e8cf7c-ece3-4e27-9eed-4a146790bbb7,6,Almazara Plaza,20230113,friday,4827.0
+91e8cf7c-ece3-4e27-9eed-4a146790bbb7,6,Almazara Plaza,20230114,saturday,4524.0
+91e8cf7c-ece3-4e27-9eed-4a146790bbb7,6,Almazara Plaza,20230115,sunday,0.0
+d04597e6-51fd-457d-a302-12e381a71361,7,Ànecblau,20230109,monday,9415.0
+d04597e6-51fd-457d-a302-12e381a71361,7,Ànecblau,20230110,tuesday,9295.0
+d04597e6-51fd-457d-a302-12e381a71361,7,Ànecblau,20230111,wednesday,9349.0
+d04597e6-51fd-457d-a302-12e381a71361,7,Ànecblau,20230112,thursday,8428.0
+d04597e6-51fd-457d-a302-12e381a71361,7,Ànecblau,20230113,friday,9567.0
+d04597e6-51fd-457d-a302-12e381a71361,7,Ànecblau,20230114,saturday,10245.0
+d04597e6-51fd-457d-a302-12e381a71361,7,Ànecblau,20230115,sunday,12829.0
+c52d5f56-1f93-40dd-a167-d60d9a103807,55,Área Sur,20230109,monday,17806.0
+c52d5f56-1f93-40dd-a167-d60d9a103807,55,Área Sur,20230110,tuesday,14979.0
+c52d5f56-1f93-40dd-a167-d60d9a103807,55,Área Sur,20230111,wednesday,14330.0
+c52d5f56-1f93-40dd-a167-d60d9a103807,55,Área Sur,20230112,thursday,15940.0
+c52d5f56-1f93-40dd-a167-d60d9a103807,55,Área Sur,20230113,friday,16564.0
+c52d5f56-1f93-40dd-a167-d60d9a103807,55,Área Sur,20230114,saturday,26217.0
+c52d5f56-1f93-40dd-a167-d60d9a103807,55,Área Sur,20230115,sunday,0.0
+4916aafd-1c0b-4e27-b2b0-61f7755fb4f3,9,Arena Multiespacio,20230109,monday,8074.0
+4916aafd-1c0b-4e27-b2b0-61f7755fb4f3,9,Arena Multiespacio,20230110,tuesday,8051.0
+4916aafd-1c0b-4e27-b2b0-61f7755fb4f3,9,Arena Multiespacio,20230111,wednesday,7822.0
+4916aafd-1c0b-4e27-b2b0-61f7755fb4f3,9,Arena Multiespacio,20230112,thursday,7246.0
+4916aafd-1c0b-4e27-b2b0-61f7755fb4f3,9,Arena Multiespacio,20230113,friday,8513.0
+4916aafd-1c0b-4e27-b2b0-61f7755fb4f3,9,Arena Multiespacio,20230114,saturday,14682.0
+4916aafd-1c0b-4e27-b2b0-61f7755fb4f3,9,Arena Multiespacio,20230115,sunday,5796.0
+c61e2cc5-ff63-4fe8-aa4a-abf1b1d7be16,10,As Termas,20230109,monday,16747.0
+c61e2cc5-ff63-4fe8-aa4a-abf1b1d7be16,10,As Termas,20230110,tuesday,15370.0
+c61e2cc5-ff63-4fe8-aa4a-abf1b1d7be16,10,As Termas,20230111,wednesday,14705.0
+c61e2cc5-ff63-4fe8-aa4a-abf1b1d7be16,10,As Termas,20230112,thursday,13482.0
+c61e2cc5-ff63-4fe8-aa4a-abf1b1d7be16,10,As Termas,20230113,friday,15394.0
+c61e2cc5-ff63-4fe8-aa4a-abf1b1d7be16,10,As Termas,20230114,saturday,18601.0
+c61e2cc5-ff63-4fe8-aa4a-abf1b1d7be16,10,As Termas,20230115,sunday,0.0
+f066cf28-e91c-4ce3-a0e9-e87370fd0445,11,Castellana 200,20230109,monday,1542.0
+f066cf28-e91c-4ce3-a0e9-e87370fd0445,11,Castellana 200,20230110,tuesday,1563.0
+f066cf28-e91c-4ce3-a0e9-e87370fd0445,11,Castellana 200,20230111,wednesday,1562.0
+f066cf28-e91c-4ce3-a0e9-e87370fd0445,11,Castellana 200,20230112,thursday,1898.0
+f066cf28-e91c-4ce3-a0e9-e87370fd0445,11,Castellana 200,20230113,friday,1453.0
+f066cf28-e91c-4ce3-a0e9-e87370fd0445,11,Castellana 200,20230114,saturday,1354.0
+f066cf28-e91c-4ce3-a0e9-e87370fd0445,11,Castellana 200,20230115,sunday,1204.0
+135cd769-31c8-4240-a5af-adf6a132aaec,13,Conquistadores,20230109,monday,1315.0
+135cd769-31c8-4240-a5af-adf6a132aaec,13,Conquistadores,20230110,tuesday,1555.0
+135cd769-31c8-4240-a5af-adf6a132aaec,13,Conquistadores,20230111,wednesday,1394.0
+135cd769-31c8-4240-a5af-adf6a132aaec,13,Conquistadores,20230112,thursday,1294.0
+135cd769-31c8-4240-a5af-adf6a132aaec,13,Conquistadores,20230113,friday,1494.0
+135cd769-31c8-4240-a5af-adf6a132aaec,13,Conquistadores,20230114,saturday,1496.0
+135cd769-31c8-4240-a5af-adf6a132aaec,13,Conquistadores,20230115,sunday,1060.0
+0c2639f4-bec1-428e-abad-c95a3a78de58,50,Coruña The Style Outlets,20230109,monday,9429.0
+0c2639f4-bec1-428e-abad-c95a3a78de58,50,Coruña The Style Outlets,20230110,tuesday,9112.0
+0c2639f4-bec1-428e-abad-c95a3a78de58,50,Coruña The Style Outlets,20230111,wednesday,8598.0
+0c2639f4-bec1-428e-abad-c95a3a78de58,50,Coruña The Style Outlets,20230112,thursday,8044.0
+0c2639f4-bec1-428e-abad-c95a3a78de58,50,Coruña The Style Outlets,20230113,friday,8211.0
+0c2639f4-bec1-428e-abad-c95a3a78de58,50,Coruña The Style Outlets,20230114,saturday,10196.0
+0c2639f4-bec1-428e-abad-c95a3a78de58,50,Coruña The Style Outlets,20230115,sunday,0.0

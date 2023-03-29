@@ -1,0 +1,5 @@
+screen_id,start_date,end_date,start_time,end_time,mon,tue,wed,thu,fri,sat,sun,demography_type,total,males,females,males_12,males_18,males_25,males_35,males_45,males_55,males_65,females_12,females_18,females_25,females_35,females_45,females_55,females_65
+broadsign.com:example,2017-01-01,2017-12-31,00:00:00,12:00:00,1,1,1,1,1,0,0,advanced,100,50,50,0,0,0,50,0,0,0,0,0,0,25,25,0,0
+broadsign.com:example,2017-01-01,2017-12-31,12:00:01,18:00:00,1,1,1,1,0,0,0,basic,50,,,,,,,,,,,,,,,,
+broadsign.com:example,2017-01-01,2017-12-31,12:00:01,18:00:00,0,0,0,0,1,0,0,advanced,100,50,50,0,0,0,50,0,0,0,0,0,0,25,25,0,0
+broadsign.com:example,2017-01-01,2017-12-31,12:00:00,23:59:59,0,0,0,0,0,1,1,advanced,100,50,50,0,0,0,50,0,0,0,0,0,0,25,25,0,0

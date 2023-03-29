@@ -63,13 +63,13 @@ def alarms_check(df_report):
 	message_to_send= message_to_send + "\n"
 
 	#check player version
-	df_versions=df_report.loc[df_report['player_version'].str.contains("13.0.")]
+	df_versions=df_report.loc[df_report['player_version'].str.startswith("13.0.")]
 	if len(df_versions)>0: 
 		message_to_send= message_to_send + "\n" + "Player Version too old (13.0): " + str(df_versions['player_id'].to_list())
-	df_versions=df_report.loc[df_report['player_version'].str.contains("12.0")]
+	df_versions=df_report.loc[df_report['player_version'].str.startswith("12.0")]
 	if len(df_versions)>0: 
 		message_to_send= message_to_send + "\n" + "Player Version too old (12): " + str(df_versions['player_id'].to_list())
-	df_versions=df_report.loc[df_report['player_version'].str.contains("11.1")]
+	df_versions=df_report.loc[df_report['player_version'].str.startswith("11.1")]
 	if len(df_versions)>0: 
 		message_to_send= message_to_send + "\n" + "Player Version too old (11): " + str(df_versions['player_id'].to_list())
 	
@@ -80,6 +80,7 @@ def alarms_check(df_report):
 		message_to_send= message_to_send + "\n" + "Player OS version too old: " + str(df_versions['player_id'].to_list())
 
 	message_to_send= message_to_send + "\n"
+
 	#check player screens
 	df_versions=df_report.loc[df_report['player_screens']==0]
 	if len(df_versions)>0: 
@@ -161,8 +162,7 @@ if country=="SPAIN":
 		#container_ids=['136035622']
 elif country=="COLOMBIA":
         container_ids=['135518539']
-		#container_ids=['145094982']
-		
+		#container_ids=['145094982']	
 elif country=="PERU":
         container_ids=['53704276']
 else:
@@ -219,6 +219,16 @@ for m in container_ids:
 					player_version=re.findall('Player Version:(.*)\n', fr)[0]
 			except: 
 				player_version=None
+			
+			frame_id=False
+			try: 
+				if re.search('currently playing',fr):
+					frame_id=re.findall('Frame (.*) currently', fr)[0]
+			except: 
+				frame_id=None
+			if frame_id:
+				player_field_report['frame_id']=frame_id
+
 			if player_version:
 				print("**Player version found")
 				player_field_report['player_version']=player_version
@@ -466,7 +476,8 @@ for m in container_ids:
 	alarms_check(df_field_report)
 	#show(df_field_report)
 	#send to DB
-	query="DELETE FROM players"
+
+	query="DELETE FROM players where country='%s'" % (country)
 	mycursor.execute(query)
 	mydb.commit()
 	df_field_report.to_sql('players', engine, if_exists='append', index=False)
