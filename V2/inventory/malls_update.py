@@ -11,7 +11,6 @@ from datetime import datetime, timedelta
 from datetime import date
 import sys
 import mysql.connector
-from pandasgui import show
 from trycourier import Courier 
 import collections, functools, operator
 
@@ -87,8 +86,8 @@ for row in records:
       mall_info['mall_size']= "SMALL"
     '''
     
-    if mall_info['mall_size']!="CUSTOM":
-      mall_info['screen_exposure_area']= round(mall_info['sba'] * 0.25,0)
+    #if mall_info['mall_size']!="CUSTOM":
+    #  mall_info['screen_exposure_area']= round(mall_info['sba'] * 0.25,0)
  
     print("Mall Info: ", mall_info)
 

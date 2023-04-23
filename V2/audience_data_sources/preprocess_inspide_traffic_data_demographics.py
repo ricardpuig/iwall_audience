@@ -11,7 +11,6 @@ from datetime import datetime, timedelta
 from datetime import date
 import sys
 import mysql.connector
-from pandasgui import show
 from trycourier import Courier 
 import os
 

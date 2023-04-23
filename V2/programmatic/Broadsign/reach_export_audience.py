@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 from datetime import date
 import sys
 import mysql.connector
-from pandasgui import show
+
 
 
 
@@ -108,7 +108,7 @@ for row in records:
             reach_screen['start_date']="2020-01-01"
             reach_screen['end_date']="2025-12-31"
             reach_screen['start_time']=str(row3[2])+":00:00"
-            reach_screen['end_time']=str(row3[2])+":00:59"
+            reach_screen['end_time']=str(row3[2])+":59:59"
 
             reach_screen['mon']=1 if row3[1]==0 else 0
             reach_screen['tue']=1 if row3[1]==1 else 0

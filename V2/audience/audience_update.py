@@ -11,7 +11,6 @@ from datetime import datetime, timedelta
 from datetime import date
 import sys
 import mysql.connector
-from pandasgui import show
 from trycourier import Courier 
 from dateutil.relativedelta import relativedelta
 from sklearn import preprocessing
@@ -45,21 +44,24 @@ weekday=[]
 impressions_model=[]
 impressions_hour=0
 
-def hourly_impact_calculation(hourly_visits, screen_density, screen_visibility_index, exposure_area):
+def hourly_impact_calculation(hourly_visits, screen_density, screen_visibility_index, exposure_area, mall_visit_time_min):
   
   #modelo actual 
   #asumimos que la persona se mueve a una velocidad de 1km/h. puede cubrir hasta 1000m de trayecto en 1hora en todo el mall
 
   #durante su estancia en el centro comercial de media. 
   
-  if exposure_area>LARGE_MALL_EXPOSURE_AREA_THRESHOLD:
-    mall_visit_time_min=MALL_VISIT_TIME_LARGE
-  elif exposure_area>SMALL_MALL_EXPOSURE_AREA_THRESHOLD:
-    mall_visit_time_min=MALL_VISIT_TIME_MEDIUM
-  else:
-    mall_visit_time_min=MALL_VISIT_TIME_SMALL
 
-  print("mall visit time: ", mall_visit_time_min)
+  if not mall_visit_time_min:
+    if exposure_area>LARGE_MALL_EXPOSURE_AREA_THRESHOLD:
+      mall_visit_time_min=MALL_VISIT_TIME_LARGE
+    elif exposure_area>SMALL_MALL_EXPOSURE_AREA_THRESHOLD:
+      mall_visit_time_min=MALL_VISIT_TIME_MEDIUM
+    else:
+      mall_visit_time_min=MALL_VISIT_TIME_SMALL
+
+  
+  print("mall visit time ( in min ): ", mall_visit_time_min)
 
   travelled_meters = WALKING_SPEED_KMH * 1000 * (mall_visit_time_min/60)
   travelled_surface = travelled_meters * CORRIDOR_WIDTH
@@ -71,7 +73,7 @@ def hourly_impact_calculation(hourly_visits, screen_density, screen_visibility_i
   exposure= hourly_visits*(travelled_surface/exposure_area)*screen_visibility_index*K_FACTOR
 
   print("Hourly ", hourly_visits , " Exposure ", exposure)
-
+  print ("\n")
 
 
   return round(exposure,0)
@@ -136,13 +138,14 @@ mycursor = mydb.cursor()
 update_report = []
 
 print("Audience Update script")
-sql= "SELECT DISTINCT id,name FROM malls where active=1 and country='SPAIN'"
+sql= "SELECT DISTINCT id,name FROM malls where active=1 and country='COLOMBIA'"
 #sql= "SELECT DISTINCT id,name FROM malls where id=15"
 mycursor.execute(sql)
 records= mycursor.fetchall()
 
 for row in records:  #for each result
    
+
     print("\n")
     print("Updating Audience data for ", row[1])
     print("----------------------------------------------------------")
@@ -177,7 +180,7 @@ for row in records:  #for each result
     #getting mall default data
     #***********************************
 
-    sql= "SELECT name,screens, screens_type1_high_visibility, screens_type2_default_visibility, screens_type3_low_visibility, screen_exposure_area, num_locales, dwell_time, screen_visibility FROM malls  WHERE id=%s" % (row[0])
+    sql= "SELECT name,screens, screens_type1_high_visibility, screens_type2_default_visibility, screens_type3_low_visibility, screen_exposure_area, num_locales, dwell_time, screen_visibility, avg_mall_visit_time_min FROM malls  WHERE id=%s" % (row[0])
     mycursor.execute(sql)
     records_mall_data= mycursor.fetchall()
     for row_2 in records_mall_data:
@@ -187,7 +190,7 @@ for row in records:  #for each result
       print("Screens high visibility: ", row_2[2])
       print("Screens default visibility: ", row_2[3])
       print("Screens low visibility: ", row_2[4])
-
+      
       #check screens visibility if not used default
       mall_name=row_2[0]
       low_vis=row_2[4]
@@ -199,6 +202,10 @@ for row in records:  #for each result
       locales= row_2[6]
       dwell_time = row_2[7]
       screen_visibility_index = row_2[8]
+      avg_mall_visit_tine_min= row_2[9]
+
+      print("Avg mall visit time (in min):", avg_mall_visit_tine_min)
+
 
       print("Screens Density ( screens every 1000m2): ", screen_density, " locales: ", locales, " Dwell (sec): ", dwell_time)
 
@@ -230,7 +237,7 @@ for row in records:  #for each result
         inspide_hourly_mean= df_inspide['visits'].mean()
    
         #IMPACT FORIMULA
-        inspide_hourly_impacts = hourly_impact_calculation(inspide_hourly_mean, screen_density, screen_visibility_index,screen_exposure_area )
+        inspide_hourly_impacts = hourly_impact_calculation(inspide_hourly_mean, screen_density, screen_visibility_index,screen_exposure_area,avg_mall_visit_tine_min )
         inspide_daily_impacts = inspide_hourly_impacts * OPENING_HOURS
 
         #preprocess inspide data
@@ -336,29 +343,41 @@ for row in records:  #for each result
       mall_data_estimated_hourly_impacts= 0 
       mall_data_estimated_daily_impacts= 0
 
+      print("\nMall footfall data statistics: ")
+      print("---------------------------------")
+
       if sum(df_mall_traffic_data['period'] == 'HOURLY') >0:
         df_mall_traffic_data_hourly = df_mall_traffic_data.drop(df_mall_traffic_data[df_mall_traffic_data.period != 'HOURLY'].index)
-        mall_data_estimated_hourly_impacts = hourly_impact_calculation( df_mall_traffic_data_hourly['mall_visits'].mean() , screen_density, screen_visibility_index, screen_exposure_area )
+        mall_data_estimated_hourly_impacts = hourly_impact_calculation( df_mall_traffic_data_hourly['mall_visits'].mean() , screen_density, screen_visibility_index, screen_exposure_area,avg_mall_visit_tine_min )
         mall_data_estimated_daily_impacts =mall_data_estimated_hourly_impacts * OPENING_HOURS
+        print("- Average Mall visits (HOURLY): ", df_mall_traffic_data_hourly['mall_visits'].mean())
+
 
       if sum(df_mall_traffic_data['period'] == 'DAILY') >0:
         df_mall_traffic_data_daily = df_mall_traffic_data.drop(df_mall_traffic_data[df_mall_traffic_data.period != 'DAILY'].index)
-        mall_data_estimated_hourly_impacts = hourly_impact_calculation((df_mall_traffic_data_daily['mall_visits'].mean()/OPENING_HOURS) , screen_density, screen_visibility_index, screen_exposure_area)
+        mall_data_estimated_hourly_impacts = hourly_impact_calculation((df_mall_traffic_data_daily['mall_visits'].mean()/OPENING_HOURS) , screen_density, screen_visibility_index, screen_exposure_area,avg_mall_visit_tine_min)
         mall_data_estimated_daily_impacts =mall_data_estimated_hourly_impacts * OPENING_HOURS
+        print("- Average Mall visits (DAILY): ", df_mall_traffic_data_daily['mall_visits'].mean())
+        print("- Average Mall visits (HOURLY): ", df_mall_traffic_data_daily['mall_visits'].mean()/OPENING_HOURS)
         
       if sum(df_mall_traffic_data['period'] == 'MONTHLY') >0:
         df_mall_traffic_data_monthly = df_mall_traffic_data.drop(df_mall_traffic_data[df_mall_traffic_data.period != 'MONTHLY'].index)
-        mall_data_estimated_hourly_impacts = hourly_impact_calculation ((df_mall_traffic_data_monthly['mall_visits'].mean()/(30*OPENING_HOURS)) , screen_density, screen_visibility_index, screen_exposure_area)
+        mall_data_estimated_hourly_impacts = hourly_impact_calculation ((df_mall_traffic_data_monthly['mall_visits'].mean()/(30*OPENING_HOURS)) , screen_density, screen_visibility_index, screen_exposure_area,avg_mall_visit_tine_min)
         mall_data_estimated_daily_impacts =mall_data_estimated_hourly_impacts * OPENING_HOURS
+        print("- Average Mall visits (MONTHLY): ", df_mall_traffic_data_monthly['mall_visits'].mean())
+        print("- Average Mall visits (DAILY): ", df_mall_traffic_data_monthly['mall_visits'].mean()/30)
+        print("- Average Mall visits (HOURLY): ", df_mall_traffic_data_monthly['mall_visits'].mean()/(30*OPENING_HOURS))
+
 
       if sum(df_mall_traffic_data['period'] == 'YEARLY') >0:
         df_mall_traffic_data_yearly = df_mall_traffic_data.drop(df_mall_traffic_data[df_mall_traffic_data.period != 'YEARLY'].index)
-        mall_data_estimated_hourly_impacts = hourly_impact_calculation ( (df_mall_traffic_data_yearly['mall_visits'].mean()/(365*OPENING_HOURS)) , screen_density, screen_visibility_index, screen_exposure_area)
+        mall_data_estimated_hourly_impacts = hourly_impact_calculation ( (df_mall_traffic_data_yearly['mall_visits'].mean()/(365*OPENING_HOURS)) , screen_density, screen_visibility_index, screen_exposure_area,avg_mall_visit_tine_min)
         mall_data_estimated_daily_impacts =mall_data_estimated_hourly_impacts * OPENING_HOURS
+        print("- Average Mall visits (YEARLY): ", df_mall_traffic_data_yearly['mall_visits'].mean())
+        print("- Average Mall visits (DAILY): ", df_mall_traffic_data_yearly['mall_visits'].mean()/365)
+        print("- Average Mall visits (HOURLY): ", df_mall_traffic_data_yearly['mall_visits'].mean()/(365*OPENING_HOURS))
 
       #preprocess inspide data
-      print("\nMall footfall data statistics: ")
-      print("---------------------------------")
       print("- Estimated hourly Impacts: ", round(mall_data_estimated_hourly_impacts, 0))
       print("- Estimated daily Impacts: ",round(mall_data_estimated_daily_impacts,0) )
       print("\n")
@@ -588,7 +607,7 @@ for row in records:  #for each result
       print("\n")
 
       #get default model 
-      query = "SELECT monthly, weekly, hourly, weekday from mall_default_models  WHERE id = %s" % (row[0])
+      query = "SELECT monthly, weekly, hourly, weekday from mall_default_models  WHERE id = %s" % (alias_id)
       df_default_model = pd.read_sql_query(query, engine)
       
       if len(df_default_model)==0:
@@ -607,7 +626,7 @@ for row in records:  #for each result
       hourly=hourly_str.split(':')
       hourly=list(np.float_(hourly))
 
-      print("\nHourly model:", hourly)
+      print("\nHourly model:\n", hourly)
 
       weekday_str=model['weekday']
 
@@ -615,27 +634,30 @@ for row in records:  #for each result
       weekday=weekday_str.split(':')
       weekday=list(np.float_(weekday))
 
-      print("\nWeekday model:", weekday)
+      print("\nWeekday model:\n", weekday)
 
       weekly_str=model['weekly']
       weekly_str=weekly_str.replace(",",".")
       weekly=weekly_str.split(':')
       weekly=list(np.float_(weekly))
 
-      print("\nWeekly model: ", weekly)
+      print("\nWeekly model:\n ", weekly)
 
       monthly_str=model['monthly']
       monthly_str=monthly_str.replace(",",".")
       monthly=monthly_str.split(':')
       monthly=list(np.float_(monthly))
 
-      print("\nMonthly model: ", monthly)
+      print("\nMonthly model:\n ", monthly)
 
       #create datafrane 
       begin_date = START_DATE
       end_date= END_DATE
 
-      print("Creating dates from ", begin_date , " to ", end_date)
+      print("\n")
+
+      print("MODEL CREATION: Creating dates from ", begin_date , " to ", end_date)
+
       df_default_mall_model=pd.DataFrame({'mall_id' : str(row[0]), 'date':pd.date_range(start=begin_date, end=end_date, freq='H')})
       df_default_mall_model['hour']=df_default_mall_model['date'].dt.hour
       df_default_mall_model['month']=df_default_mall_model['date'].dt.month
