@@ -53,13 +53,15 @@ mycursor = mydb.cursor()
 
 print("Updating and checking mall information")
 
-sql_select = "SELECT id, name, num_display_units, broadsign_container_id, screens, screens_type1_high_visibility, screens_type2_default_visibility, screens_type3_low_visibility, sba, num_locales, screen_type_deviation_type1_high_visibility, screen_type_deviation_type3_low_visibility, mall_size, screen_exposure_area from malls"
+sql_select = "SELECT id, name, num_display_units, broadsign_container_id, screens, screens_type1_high_visibility, screens_type2_default_visibility, screens_type3_low_visibility, sba, num_locales, screen_type_deviation_type1_high_visibility, screen_type_deviation_type3_low_visibility, mall_size, screen_exposure_area, external from malls"
 print(sql_select)
 mycursor.execute(sql_select)
 records= mycursor.fetchall()
 
 mall_info={}
 for row in records:  
+
+    num_screens = 0
 
     print("Updating mall ", row[1], " id ", row[0])
     mall_info['id']=row[0]
@@ -76,6 +78,7 @@ for row in records:
     mall_info['modifier_low_vis']=row[11]
     mall_info['screen_exposure_area']=row[13]
     mall_info['mall_size']=row[12]
+    mall_info['external']=row[14]
 
     '''
     if mall_info['sba']>40000:
@@ -130,11 +133,15 @@ for row in records:
     if len(players_info)==0:
       comments= "No players in mall"
     
-    if num_screens==0:
-      active_mall = 0
+    if mall_info['external']==0:
+      if num_screens==0:
+        active_mall = 0
+      else:
+        active_mall = 1
     else:
+      num_screens= mall_info['screens']
       active_mall = 1
-  
+
     mall_info['num_display_units']=len(players_info)
     
     sql= "update malls set address=%s, active=%s, screens=%s, screens_type1_high_visibility=%s, screens_type2_default_visibility=%s, screens_type3_low_visibility=%s,  num_display_units=%s, geolocation_lat=%s, geolocation_long=%s, opening_hours=%s, closing_hours=%s, screen_density=%s, comments=%s, screen_visibility=%s, mall_size=%s, screen_exposure_area=%s where id=%s"
