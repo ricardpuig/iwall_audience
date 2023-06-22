@@ -147,7 +147,7 @@ def checkin_alarm(player_field_report):
 
 	time_missing=""
 	if  player_field_report['last_checkin_min']>60:
-		if player_field_report['last_checkin_min']>2940:
+		if player_field_report['last_checkin_min']>5000:
 			time_missing=str(round((player_field_report['last_checkin_min']/60)/24,1))+ " dias!. \n La última vez en línea fue : " + str(player_field_report['last_checkin_time']) 	
 		else:
 			time_missing=str(round(player_field_report['last_checkin_min']/60,1))+ " horas!. \n La última vez en línea fue : " + str(player_field_report['last_checkin_time']) 
@@ -392,6 +392,9 @@ for m in container_ids:
 					local_time=None      
 			
 				if local_time:
+
+					if len(local_time)>21:
+						local_time=local_time[:-6]
 					print("**Local Time:", local_time)
 					dt_localtime = datetime.strptime(local_time, "%Y-%m-%dT%H:%M:%S")
 					print(dt_localtime)

@@ -138,13 +138,14 @@ mycursor = mydb.cursor()
 update_report = []
 
 print("Audience Update script")
-sql= "SELECT DISTINCT id,name FROM malls where active=1 and country='COLOMBIA'"
-#sql= "SELECT DISTINCT id,name FROM malls where id=15"
+sql= "SELECT DISTINCT id,name FROM malls where active=1 and country='SPAIN'"
+#sql= "SELECT DISTINCT id,name FROM malls where id=78"
 mycursor.execute(sql)
 records= mycursor.fetchall()
 
 for row in records:  #for each result
    
+    multiplicador_medio = 1
 
     print("\n")
     print("Updating Audience data for ", row[1])
@@ -174,7 +175,8 @@ for row in records:  #for each result
       alias_id=26
     if row[0]==103: #LEDS PARQUE CORREDOR
       alias_id=101
-      
+    if row[0]==78: #LEDS PARQUE CORREDOR
+      alias_id=43
     
     #***********************************
     #getting mall default data
@@ -299,14 +301,14 @@ for row in records:  #for each result
 
 
     print("Getting available demographics inspide data for the mall")
-    sql= "SELECT p_income_0, p_income_1,p_income_2,p_income_3 FROM inspide_data_incomes  WHERE mall_id=%s" % (alias_id)
+    sql= "SELECT low, medium_low,medium,medium_high, high FROM inspide_data_incomes  WHERE mall_id=%s" % (alias_id)
     df_inspide_dem = pd.read_sql_query(sql, engine)
     if len(df_inspide_dem)>0:
       print("Success: * demographics inspide data available")  
-      inspide_D= df_inspide_dem['p_income_0'].mean()
-      inspide_C= df_inspide_dem['p_income_1'].mean()
-      inspide_B= df_inspide_dem['p_income_2'].mean()
-      inspide_A= df_inspide_dem['p_income_3'].mean()
+      inspide_D= df_inspide_dem['low'].mean()
+      inspide_C= df_inspide_dem['medium_low'].mean()
+      inspide_B= df_inspide_dem['medium_high'].mean()+ df_inspide_dem['medium'].mean()
+      inspide_A= df_inspide_dem['high'].mean()
       
 
       print("Updating default data with inspide new averages")
@@ -745,6 +747,13 @@ for row in records:  #for each result
       df_mall_model_updated['impression_multiplier']=round((df_mall_model_updated['impacts']*(dwell_time/AD_SLOT_DURATION))/(3600/AD_SLOT_DURATION),2)
       #*********************************
 
+
+      multiplicador_medio= df_mall_model_updated['impression_multiplier'].mean()
+      
+      sql= "update malls set multiplicador_medio=%s  where id=%s"
+      val= (float(round(multiplicador_medio,2)), row[0])
+      mycursor.execute(sql,val)
+      mydb.commit()
 
       print(df_mall_model_updated)
       

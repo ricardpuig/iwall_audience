@@ -230,7 +230,7 @@ for m in container_ids:
 
 			if player_version:
 				print("**Player version found")
-				player_field_report['player_version']=player_version
+				player_field_report['player_version']=player_version.strip()
 			try: 
 				if re.search('OS Version :',fr):
 					os_version=re.findall('OS Version :(.*)\n', fr)[0]
@@ -255,7 +255,7 @@ for m in container_ids:
 
 			if screen_resolution:
 				print("**Screen Resolution found")
-				player_field_report['screen_resolution']=screen_resolution
+				player_field_report['screen_resolution']=screen_resolution.strip()
 			try: 
 				if re.search('Chromium Version :',fr):
 					chromium_version=re.findall('Chromium Version :(.*)\n', fr)[0]
@@ -265,7 +265,7 @@ for m in container_ids:
 				chromium_version=None
 			if chromium_version:
 				print("**Chromium version found")
-				player_field_report['chromium_version']=chromium_version
+				player_field_report['chromium_version']=chromium_version.strip()
 
 			try: 
 				if re.search('Display Unit Id :',fr):

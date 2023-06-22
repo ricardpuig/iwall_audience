@@ -8,11 +8,21 @@ import logging as log
 from datetime import datetime, timedelta
 from datetime import date
 import sys
+from statistics import mean
 
 from sqlalchemy import create_engine
 from datetime import datetime, timedelta
 import datetime
 from dateutil.relativedelta import relativedelta
+
+PONDERACION_DIARIA=0.57
+DUPLICIDAD_2_SEMANAS=0.63
+DUPLICIDAD_3_SEMANAS=0.53
+DUPLICIDAD_4_SEMANAS=0.44
+DUPLICIDAD_5_SEMANAS=0.34
+CORRECCION_DUPLICIDAD=0.24
+
+
 
 def delete_all_campaign_data():
 
@@ -938,7 +948,6 @@ except:
 YEAR_TO_ANALYZE=2023
 
 
-
 #URLS -----------
 url_reservation_by_display_unit= 'https://api.broadsign.com:10889/rest/reservation/v20/by_du_folder?domain_id=17244398&current_only=false';
 url_container_info= 'https://api.broadsign.com:10889/rest/container/v9/by_id?domain_id=17244398';
@@ -1221,7 +1230,7 @@ if (option == "all") or (option =="name") or (option == "id") or (option =="find
 
 
 print("Press a key to proceed...")
-input()
+#input()
 
 print("\n  \n")
 print("Beginning Analysis")
@@ -1231,6 +1240,7 @@ for row in campaigns:  #for each campaign to analyze
   print("Analyzing reservation ID  " + str(row))
   reservation_id=row
 
+  
   delete_campaign_data(row)
 
   campaign_name=df_reservations.loc[df_reservations['campaign_id'] == row].name[0]
@@ -1938,10 +1948,106 @@ for row in campaigns:  #for each campaign to analyze
           except: 
             print("Error updating daily audience male_child")
 
-
-    
+  
   except Exception as e:
     print("Error audience: ", str(e))
+
+  
+
+  #
+  if country=="SPAIN":
+    #calculate unique users with inspide data
+    print("\n")
+    print("Calculating unique users")
+    
+    sql_select_days= "SELECT played_on from campaign_daily_performance where reservation_id='%s'" % (str(reservation_id))
+    mycursor.execute(sql_select_days)
+    records_days= mycursor.fetchall()
+
+
+    all_visits_count = 0
+    num_days = len(records_days)
+    if num_days<=7: #1 semana
+      duplicity_percentage = 1
+    if num_days >7 and num_days <=14:
+      duplicity_percentage = DUPLICIDAD_2_SEMANAS
+    if num_days >14 and num_days <=21 :
+      duplicity_percentage = DUPLICIDAD_3_SEMANAS
+    if num_days >21 and num_days <=28 :
+      duplicity_percentage = DUPLICIDAD_4_SEMANAS
+    if num_days >28 and num_days<=35: 
+      duplicity_percentage = DUPLICIDAD_5_SEMANAS
+    if num_days >35:
+      duplicity_percentage = CORRECCION_DUPLICIDAD
+
+
+    print("Duplicity percentage : ", duplicity_percentage)
+
+    for row_day in records_days:
+
+      print("calculating unique users for day ", row_day[0] )
+      campaign_day=row_day[0]
+      container_id_list=[]   # evitar duplicados por varios display units 
+      
+      sql_select_containers= "SELECT container_id, mall_name, total_unique_visits, display_unit_id from campaign_display_unit_performance where reservation_id='%s'" % (str(reservation_id))
+      mycursor.execute(sql_select_containers)
+      records_containers= mycursor.fetchall()
+      for row_container in records_containers:
+        print("Container ",row_container[0], "  mall name ", row_container[1])
+        if not  row_container[0] in  container_id_list:
+          if row_container[2] is None:
+            container_visits = 0
+          else:
+            container_visits= int(row_container[2])
+          container_id_list.append(row_container[0])
+          sql_select_mall= "SELECT id, name from malls where broadsign_container_id='%s'" % (str(row_container[0]))
+          mycursor.execute(sql_select_mall)
+          records_mall= mycursor.fetchall()
+          for records_mall in records_mall:
+            print("found mall id ", records_mall[0], " name ", records_mall[1])
+            #get inspide visits
+            sql_select_visits= "SELECT visits from inspide_data where mall_id='%s' and DATE(start_date)='%s'" % (str(records_mall[0]),row_day[0] )
+            mycursor.execute(sql_select_visits)
+            records_visits= mycursor.fetchall()
+            daily_visits=0
+            for records_visit in records_visits:
+              print("Visits: ", row_day[0], " : ", records_visit[0])
+              daily_visits=daily_visits + int(records_visit[0])
+            #calculate average and apply IMC extrapolation 
+            daily_unique = daily_visits*PONDERACION_DIARIA
+            print(" unique daily:", daily_unique )
+            all_visits_count = all_visits_count + daily_unique
+            container_visits= container_visits + daily_unique
+            if container_visits > 0: 
+              sql= "UPDATE campaign_display_unit_performance SET  total_unique_visits=%s WHERE reservation_id=%s AND container_id=%s AND display_unit_id=%s"
+              val= (str(int(container_visits)),str(reservation_id), str(row_container[0]), str(row_container[3]))              
+              mycursor.execute(sql,val)
+              mydb.commit()    
+    
+    sql_select_containers= "SELECT container_id, mall_name, total_unique_visits, display_unit_id from campaign_display_unit_performance where reservation_id='%s'" % (str(reservation_id))
+    mycursor.execute(sql_select_containers)
+    records_containers= mycursor.fetchall()
+    for row_container in records_containers:
+      if not row_container[2] is None: 
+              sql= "UPDATE campaign_display_unit_performance SET  total_unique_visits=%s WHERE reservation_id=%s AND container_id=%s AND display_unit_id=%s"
+              val= (str(int(row_container[2]*duplicity_percentage)),str(reservation_id), str(row_container[0]), str(row_container[3]))              
+              mycursor.execute(sql,val)
+              mydb.commit()    
+
+    sql= "UPDATE campaign_analysis SET  total_unique_visits=%s WHERE reservation_id=%s"
+    val= (str(int(all_visits_count*duplicity_percentage)),str(reservation_id))
+            
+    mycursor.execute(sql,val)
+    mydb.commit()    
+
+
+
+
+
+  '''
+  except Exception as e:
+    print("Error calculating unique users: ", str(e))
+  '''
 
 
 mycursor.close()
