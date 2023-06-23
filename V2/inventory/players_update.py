@@ -200,7 +200,7 @@ for m in container_ids:
 						
 			if player_id:
 				print("**Player ID found")
-				player_field_report['player_id']=player_id
+				player_field_report['player_id']=player_id 
 			try: 
 				if re.search('Hostname :',fr):
 					hostname=re.findall('Hostname :(.*)\n', fr)[0]
@@ -375,6 +375,7 @@ for m in container_ids:
 						geolocation = m['geolocation']
 						zipcode= m['zipcode']
 						address=m['address']
+						du_type_id= m['display_unit_type_id']
 
 				except: 
 
@@ -392,32 +393,45 @@ for m in container_ids:
 				player_field_report['latitude']=re.search('\,(.*)\)', geolocation).group(1)
 				player_field_report['zipcode']=zipcode
 				player_field_report['address']=address
+				player_field_report['display_unit_type_id']=du_type_id
 
-				
 				#info for diplay unit type
-
 				try:
-					url_display_unit_types=url_display_unit_type+"&ids="+display_unit_id
+					url_display_unit_types=url_display_unit_type+"&ids="+str(du_type_id)
 					print(url_display_unit_types)
 
 					s=requests.get(url_display_unit_types,headers={'Accept': 'application/json','Authorization': auth})
 					data3=json.loads(s.text)
 					print(data3)
+					orientation=""
+					res_height=""
+					res_width=""
+					display_type_name=""
 					for m in data3["display_unit_type"]:
 						orientation=m['orientation']
 						res_height = m['res_height']
 						res_width = m['res_width']
 						display_type_name= m['name']
+					
 				except:
+					print("Error getting display type info")
 					orientation=""
 					res_height=""
 					res_width=""
 					display_type_name=""
 				
-				#player_field_report['orientation']=orientation
-				#player_field_report['res_height']=res_height
-				#player_field_report['res_width']=res_width
-				#player_field_report['display_type_name']=display_type_name
+				
+				player_field_report['display_type_res_width']=res_width
+				player_field_report['display_type_res_height']=res_height
+				player_field_report['display_type_name']=display_type_name
+
+				if "#RES_" in player_name:
+					player_field_report['ad_resolution']=re.search('\#RES_(.*)\#', player_name).group(1)
+				else:
+					player_field_report['ad_resolution']=str(res_width)+"x"+str(res_height)
+
+
+
 				#extract container name
 
 				container_name=""
@@ -472,12 +486,9 @@ for m in container_ids:
 
 
 	df_field_report = pd.DataFrame(field_report)
-	alarms_check(df_field_report)
-	#show(df_field_report)
-	#send to DB
 
-	query="DELETE FROM players where country='%s'" % (country)
-	mycursor.execute(query)
-	mydb.commit()
+	#query="DELETE FROM players where country='%s'" % (country)
+	#mycursor.execute(query)
+	#mydb.commit()
 	df_field_report.to_sql('players', engine, if_exists='append', index=False)
 
