@@ -487,8 +487,8 @@ for m in container_ids:
 
 	df_field_report = pd.DataFrame(field_report)
 
-	#query="DELETE FROM players where country='%s'" % (country)
-	#mycursor.execute(query)
-	#mydb.commit()
+	query="DELETE FROM players where country='%s'" % (country)
+	mycursor.execute(query)
+	mydb.commit()
 	df_field_report.to_sql('players', engine, if_exists='append', index=False)
 
