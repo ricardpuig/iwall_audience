@@ -64,7 +64,6 @@ main_player_status = []
 temp_wifi_players =[]
 discarded_players =[]
 
-
 #filtering players:
 du_container_blacklist=[]
 du_id_whitelist=[]
@@ -75,6 +74,7 @@ morning_blacklist_players=[]
 critical_players=[]
 player_container_blacklist=[]
 player_id_blacklist=[]
+corporate_players=[]
 
 
 def load_filtering_players():
@@ -227,20 +227,23 @@ def alarms_check(player_field_report):
 		discarded_players.append(player_field_report['player_id'])
 
 	else:
-		if player_field_report['last_checkin_min']>60 and player_field_report['last_checkin_min']<6000 and player_field_report['player_screens']>0:
+		if player_field_report['last_checkin_min']>60 and player_field_report['last_checkin_min']<1000 and player_field_report['player_screens']>0:
 			print("Sending Alarm for late check in")
-			missing_players.append(player_field_report['container_name']+ " : " + player_field_report['player_name'] + "\n ( hace " + str(player_field_report['last_checkin_min']) + " min )")
+
+
+			missing_players.append(player_field_report['container_name']+ " : \n" + player_field_report['player_name'] + "\n ( hace " + str(player_field_report['last_checkin_min']) + " min )")
 			#checkin_alarm(player_field_report)
 			insert_alarm_db(player_field_report, "MISSING")
 		if player_field_report['num_frames']=='0' and player_field_report['last_checkin_min']<60 and player_field_report['player_screens']>0:
 			print("Num frames 0, probably in black ")
-			black_players.append(player_field_report['container_name']+ " : " + player_field_report['player_name'])
+			black_players.append(player_field_report['container_name']+ " :\n " + player_field_report['player_name'])
 			blackscreen_alarm(player_field_report)
 			#insert_alarm_db(player_field_report, "BLACK")
 		if player_field_report['player_screens']==0 :
 			print("No screens in player")
-			no_screens_players.append(player_field_report['container_name']+ " : " + player_field_report['player_name'])
-		if player_field_report['last_checkin_min']>6000 and player_field_report['player_screens']>0:
+			no_screens_players.append(player_field_report['container_name']+ " : \n" + player_field_report['player_name'])
+		
+		if player_field_report['last_checkin_min']>1000 and player_field_report['player_screens']>0:
 			offline_players.append( player_field_report['container_name']+ "\n Player: " + player_field_report['player_name'] + "\n ( desde " + player_field_report['last_checkin_time'] + ")")
 		if player_field_report['num_contents']==0 and player_field_report['player_screens']>0:
 			no_campaigns_players.append(player_field_report['container_name']+ " : " + player_field_report['player_name'])
@@ -278,10 +281,6 @@ def daily_report(report_type):
 	for p1 in offline_players:
 		message2 = message2 + "\n\n" + p1
 
-	message3= ""
-	for p1 in temp_wifi_players:
-		message3 = p1 + "\n\n" + message3
-
 	message4= ""
 	for p1 in main_player_status:
 		message4 = message4 + "\n\n" + p1
@@ -312,7 +311,6 @@ def daily_report(report_type):
 							"fecha": fecha,
 							"message1" : message1,
 							"message2" : message2,
-							"message3" : message3,
 							"message4" : message4,
 							"message5" : message5,
 							"message6" : message6,
@@ -346,7 +344,8 @@ print("Getting ", country , " player status")
 print("loading player filters from db")
 load_filtering_players()
 
-print("initialising field report")
+print("initialising field report \n")
+
 player_field_report={}
 field_report=[]
 
@@ -359,14 +358,11 @@ for m in container_ids:
 		
 		url_field_report=url_field_report+"&parent_container_ids=" +m
 		
-		#print("Field Report request: ", url_field_report)
-		#print(url_reservation_container)
 		s=requests.get(url_field_report,headers={'Accept': 'application/json','Authorization': auth})
 		data=json.loads(s.text)
 		
 
 		for n in data["field_report"]:
-
 			fr=n['field_report']
 			if fr: 
 				#print(fr)
@@ -379,9 +375,10 @@ for m in container_ids:
 					player_id=None      
 			
 				if player_id:
-					print("**Player ID found")
+					
 					player_field_report['device_id']= "broadsign.com:" + str(player_id)
 					player_field_report['player_id']=player_id
+					print("* Player ID found: ", player_id )
 
 				try: 
 					if re.search('Local Time:',fr):
@@ -395,17 +392,17 @@ for m in container_ids:
 
 					if len(local_time)>21:
 						local_time=local_time[:-6]
-					print("**Local Time:", local_time)
+					print("Local Time:", local_time)
 					dt_localtime = datetime.strptime(local_time, "%Y-%m-%dT%H:%M:%S")
 					print(dt_localtime)
 					player_field_report['last_checkin_time']= dt_localtime.strftime("%d %b, %Y a las %H:%M")
 					print("unware time object", dt_localtime)
-					dt_localtime = dt_localtime.replace(tzinfo=pytz.timezone('Etc/GMT-1'))
+					dt_localtime = dt_localtime.replace(tzinfo=pytz.timezone('Etc/GMT-2'))
 					print("localized time zone", dt_localtime)
 					server_time= datetime.now()
 					server_time=server_time.astimezone(pytz.timezone('utc'))
 					dt_localtime=dt_localtime.astimezone(pytz.UTC)
-					print("hora  espain", server_time.astimezone(pytz.timezone('Europe/Madrid')).strftime("%d %b, %Y a las %H:%M"))
+					print("Server Time Madrid", server_time.astimezone(pytz.timezone('Europe/Madrid')).strftime("%d %b, %Y a las %H:%M"))
 					
 					print("UTC converted", dt_localtime)
 					print("Broadsign time: ", dt_localtime, " Server time:", server_time)
@@ -563,6 +560,8 @@ for m in container_ids:
 				player_field_report['private_ip']=private_ip
 				player_field_report['poll_last_utc']=poll_last_utc
 
+				
+
 
 				print("host details")
 
@@ -588,7 +587,10 @@ for m in container_ids:
 						player_screens=""
 						player_mac1=""
 						player_mac2=""
-						
+
+
+				if "PC_0095" in player_name:  #weirdo player
+					continue
 
 				player_field_report['player_active']=player_active
 				player_field_report['player_name']=player_name
@@ -597,8 +599,22 @@ for m in container_ids:
 				player_field_report['player_mac2']=player_mac2
 				player_field_report['player_container_id']=player_container_id
 
+				if "#CORP#" in player_name:
+					print("Corporate player adding to list")
+					corporate_players.append(player_id)
 
+				if "#CRITICAL#" in player_name:
+					print("Critical player adding to list")
+					critical_players.append(player_id)
 
+				if "#TEMP#" in player_name:
+					print("Temporal player adding to list")
+					temporary_players.append(player_id)
+
+				if "#WIFI#" in player_name:
+					print("Temporal player adding to list")
+					wifi_players.append(player_id)
+        
 				#content to play
 				print("Content scheduled to play now")
 				try:

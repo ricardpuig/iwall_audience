@@ -1,10 +1,16 @@
 #! /bin/bash
 
-python3 audience_campaign_report.py id SPAIN 797230547
-python3 audience_campaign_report.py id SPAIN 802025889
-python3 audience_campaign_report.py id SPAIN 801793276
-python3 audience_campaign_report.py id SPAIN 801793506
-python3 audience_campaign_report.py id SPAIN 801793626
-python3 audience_campaign_report.py id SPAIN 801793692
-python3 audience_campaign_report.py id SPAIN 801793828
+python3 audience_campaign_report.py id SPAIN 803151403
+python3 audience_campaign_report.py id SPAIN 797162758
+python3 audience_campaign_report.py id SPAIN 797163414
+python3 audience_campaign_report.py id SPAIN 797162812
+python3 audience_campaign_report.py id SPAIN 797162730
+python3 audience_campaign_report.py id SPAIN 797163937
+python3 audience_campaign_report.py id SPAIN 797164205
+python3 audience_campaign_report.py id SPAIN 797164336
+python3 audience_campaign_report.py id SPAIN 797164389
+python3 audience_campaign_report.py id SPAIN 797164987
+python3 audience_campaign_report.py id SPAIN 797165013
+
+
 
