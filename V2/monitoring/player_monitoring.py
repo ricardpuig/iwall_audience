@@ -327,6 +327,7 @@ else:
 
 if country=="SPAIN":
 	container_ids=["21393898"]
+	#container_ids=["805686088"]
 	email_to_send="dept_tecnico@iwallinshop.com"
 elif country=="COLOMBIA":
 	container_ids=['135518539']
@@ -360,7 +361,6 @@ for m in container_ids:
 		
 		s=requests.get(url_field_report,headers={'Accept': 'application/json','Authorization': auth})
 		data=json.loads(s.text)
-		
 
 		for n in data["field_report"]:
 			fr=n['field_report']
@@ -386,54 +386,7 @@ for m in container_ids:
 					elif re.search('Local Time :',fr):
 						local_time=re.findall('Local Time : (.*) \(', fr)[0]
 				except:
-					local_time=None      
-			
-				if local_time:
-
-					if len(local_time)>21:
-						local_time=local_time[:-6]
-					print("Local Time:", local_time)
-					dt_localtime = datetime.strptime(local_time, "%Y-%m-%dT%H:%M:%S")
-					print(dt_localtime)
-					player_field_report['last_checkin_time']= dt_localtime.strftime("%d %b, %Y a las %H:%M")
-					print("unware time object", dt_localtime)
-					dt_localtime = dt_localtime.replace(tzinfo=pytz.timezone('Etc/GMT-2'))
-					print("localized time zone", dt_localtime)
-					server_time= datetime.now()
-					server_time=server_time.astimezone(pytz.timezone('utc'))
-					dt_localtime=dt_localtime.astimezone(pytz.UTC)
-					print("Server Time Madrid", server_time.astimezone(pytz.timezone('Europe/Madrid')).strftime("%d %b, %Y a las %H:%M"))
-					
-					print("UTC converted", dt_localtime)
-					print("Broadsign time: ", dt_localtime, " Server time:", server_time)
-					print("last check in (minutes)	: ", (server_time - dt_localtime).total_seconds()/60)
-					player_field_report['last_checkin_min']= int((server_time - dt_localtime).total_seconds()/60)
-					
-					
-				try: 
-					if re.search('Started On:',fr):
-						started_on=re.findall('Started On: (.*) \(', fr)[0]
-					elif re.search('Started On :',fr):
-						started_on=re.findall('Started On : (.*) \(', fr)[0]
-				except:
-					started_on=None      
-			
-				if started_on:
-					print("**Started")
-					player_field_report['started_time']= started_on
-					print("Started:  ", started_on)
-
-					server_time= datetime.now()
-					server_time=server_time.astimezone(pytz.timezone('utc'))
-					
-					dt_localtime = datetime.strptime(started_on, "%Y-%m-%dT%H:%M:%S")
-					dt_localtime=dt_localtime.replace(tzinfo=pytz.timezone('Etc/GMT-1'))
-					dt_localtime=dt_localtime.astimezone(pytz.UTC)
-
-
-					print("Started ( minutes)	: ", int((server_time - dt_localtime).total_seconds()/60))
-					player_field_report['started_min']= int((server_time - dt_localtime).total_seconds()/60)
-					
+					local_time=None      					
 
 				try: 
 					if re.search('Number of frames',fr):
@@ -587,6 +540,84 @@ for m in container_ids:
 						player_screens=""
 						player_mac1=""
 						player_mac2=""
+
+
+							
+				if local_time:
+
+					if len(local_time)>21:
+						local_time=local_time[:-6]
+					print("Local Time:", local_time)
+					dt_localtime = datetime.strptime(local_time, "%Y-%m-%dT%H:%M:%S")
+					print(dt_localtime)
+					player_field_report['last_checkin_time']= dt_localtime.strftime("%d %b, %Y a las %H:%M")
+					print("unware time object", dt_localtime)
+					
+
+					if country == "SPAIN":
+						if player_container_id==805686088:
+							print("La Villa players, different timezone")
+							dt_localtime = dt_localtime.replace(tzinfo=pytz.timezone('Etc/GMT-1'))
+						else:
+							dt_localtime = dt_localtime.replace(tzinfo=pytz.timezone('Etc/GMT-2'))
+					if country == "PERU":
+						dt_localtime = dt_localtime.replace(tzinfo=pytz.timezone('Etc/GMT+5'))
+					if country == "COLOMBIA":
+						dt_localtime = dt_localtime.replace(tzinfo=pytz.timezone('Etc/GMT+5'))
+						
+						
+
+
+
+
+					print("localized time zone", dt_localtime)
+					server_time= datetime.now()
+					server_time=server_time.astimezone(pytz.timezone('utc'))
+					dt_localtime=dt_localtime.astimezone(pytz.UTC)
+					print("Server Time Madrid", server_time.astimezone(pytz.timezone('Europe/Madrid')).strftime("%d %b, %Y a las %H:%M"))
+					
+					print("UTC converted", dt_localtime)
+					print("Broadsign time: ", dt_localtime, " Server time:", server_time)
+					print("last check in (minutes)	: ", (server_time - dt_localtime).total_seconds()/60)
+					player_field_report['last_checkin_min']= int((server_time - dt_localtime).total_seconds()/60)
+					
+					
+				try: 
+					if re.search('Started On:',fr):
+						started_on=re.findall('Started On: (.*) \(', fr)[0]
+					elif re.search('Started On :',fr):
+						started_on=re.findall('Started On : (.*) \(', fr)[0]
+				except:
+					started_on=None      
+			
+				if started_on:
+					print("**Started")
+					player_field_report['started_time']= started_on
+					print("Started:  ", started_on)
+
+					server_time= datetime.now()
+					server_time=server_time.astimezone(pytz.timezone('utc'))
+					
+					dt_localtime = datetime.strptime(started_on, "%Y-%m-%dT%H:%M:%S")
+					
+					if country == "SPAIN":
+						if player_container_id==805686088:
+							print("La Villa players, different timezone")
+							dt_localtime = dt_localtime.replace(tzinfo=pytz.timezone('Etc/GMT-1'))
+						else:
+							dt_localtime = dt_localtime.replace(tzinfo=pytz.timezone('Etc/GMT-2'))
+					if country == "PERU":
+						dt_localtime = dt_localtime.replace(tzinfo=pytz.timezone('Etc/GMT+5'))
+					if country == "COLOMBIA":
+						dt_localtime = dt_localtime.replace(tzinfo=pytz.timezone('Etc/GMT+5'))
+						
+						
+					dt_localtime=dt_localtime.astimezone(pytz.UTC)
+
+
+					print("Started ( minutes)	: ", int((server_time - dt_localtime).total_seconds()/60))
+					player_field_report['started_min']= int((server_time - dt_localtime).total_seconds()/60)
+
 
 
 				if "PC_0095" in player_name:  #weirdo player
@@ -776,6 +807,7 @@ for m in container_ids:
 
 				field_report.append(player_field_report)
 				print("------------ \nPlayer Report:\n--------------------")
+			
 				print(player_field_report)
 
 				player_field_report={}
