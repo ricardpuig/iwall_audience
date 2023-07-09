@@ -467,7 +467,7 @@ for m in container_ids:
 				player_field_report['country']=country
 				
 				if player_field_report['display_unit_container_id']!="": 
-					sql_select = "SELECT id from malls where broadsign_container_id ={id}".format(id=player_field_report['display_unit_container_id'])
+					sql_select = "SELECT id from malls where broadsign_container_id ={id} or subnet1_broadsign_container_id ={id}  or subnet2_broadsign_container_id ={id} or subnet3_broadsign_container_id ={id}  ".format(id=player_field_report['display_unit_container_id'])
 					print(sql_select)
 					mycursor.execute(sql_select)
 					records= mycursor.fetchall()

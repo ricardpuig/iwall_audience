@@ -120,31 +120,31 @@ for row in records:
     screen_visibility_index = 1
 
     if num_screens>0:
-      if num_screens==mall_info['screens_type1_high_visibility'] + mall_info['screens_type2_default_visibility'] + mall_info['screens_type3_low_visibility']:
-        screen_visibility_index = 1
-        screen_visibility_index = round(((mall_info['modifier_high_vis']*mall_info['screens_type1_high_visibility']) + mall_info['screens_type2_default_visibility'] + (mall_info['modifier_low_vis']*mall_info['screens_type3_low_visibility']))/num_screens, 1)
-      else:
-        mall_info['screens_type3_low_visibility']=0
-        mall_info['screens_type2_default_visibility']= num_screens
-        mall_info['screens_type1_high_visibility']= 0 
-        screen_visibility_index = 1
 
+      try:
+        if num_screens==mall_info['screens_type1_high_visibility'] + mall_info['screens_type2_default_visibility'] + mall_info['screens_type3_low_visibility']:
+          None
+          #screen_visibility_index = round(((mall_info['modifier_high_vis']*mall_info['screens_type1_high_visibility']) + mall_info['screens_type2_default_visibility'] + (mall_info['modifier_low_vis']*mall_info['screens_type3_low_visibility']))/num_screens, 1)
+        else:
+          mall_info['screens_type3_low_visibility']=0
+          mall_info['screens_type2_default_visibility']= num_screens
+          mall_info['screens_type1_high_visibility']= 0 
+          
+      except: 
+          mall_info['screens_type3_low_visibility']=0
+          mall_info['screens_type2_default_visibility']= num_screens
+          mall_info['screens_type1_high_visibility']= 0 
+ 
 
     if len(players_info)==0:
       comments= "No players in mall"
     
-    if mall_info['external']==0:
-      if num_screens==0:
-        active_mall = 0
-      else:
-        active_mall = 1
-    else:
-      num_screens= mall_info['screens']
-      active_mall = 1
-
     mall_info['num_display_units']=len(players_info)
     
-    sql= "update malls set address=%s, active=%s, screens=%s, screens_type1_high_visibility=%s, screens_type2_default_visibility=%s, screens_type3_low_visibility=%s,  num_display_units=%s, geolocation_lat=%s, geolocation_long=%s, opening_hours=%s, closing_hours=%s, screen_density=%s, comments=%s, screen_visibility=%s, mall_size=%s, screen_exposure_area=%s where id=%s"
-    val= (address, active_mall, num_screens,mall_info['screens_type1_high_visibility'], mall_info['screens_type2_default_visibility'], mall_info['screens_type3_low_visibility'], len(players_info),latitude, longitude, "10:00", "22:00", round((num_screens / mall_info['screen_exposure_area']) * 1000, 2), comments, screen_visibility_index, mall_info['mall_size'], mall_info['screen_exposure_area'], mall_info['id'])
+    sql= "update malls set address=%s, screens=%s, screens_type1_high_visibility=%s, screens_type2_default_visibility=%s, screens_type3_low_visibility=%s,  num_display_units=%s, geolocation_lat=%s, geolocation_long=%s, opening_hours=%s, closing_hours=%s, screen_density=%s, comments=%s, mall_size=%s, screen_exposure_area=%s where id=%s"
+    val= (address,  num_screens,mall_info['screens_type1_high_visibility'], mall_info['screens_type2_default_visibility'], mall_info['screens_type3_low_visibility'], len(players_info),latitude, longitude, "10:00", "22:00", round((num_screens / mall_info['screen_exposure_area']) * 1000, 2), comments, mall_info['mall_size'], mall_info['screen_exposure_area'], mall_info['id'])
     mycursor.execute(sql, val)
     mydb.commit()
+
+    if mall_info['id']== 112:
+       input()
