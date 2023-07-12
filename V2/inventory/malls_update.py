@@ -141,10 +141,9 @@ for row in records:
     
     mall_info['num_display_units']=len(players_info)
     
-    sql= "update malls set address=%s, screens=%s, screens_type1_high_visibility=%s, screens_type2_default_visibility=%s, screens_type3_low_visibility=%s,  num_display_units=%s, geolocation_lat=%s, geolocation_long=%s, opening_hours=%s, closing_hours=%s, screen_density=%s, comments=%s, mall_size=%s, screen_exposure_area=%s where id=%s"
-    val= (address,  num_screens,mall_info['screens_type1_high_visibility'], mall_info['screens_type2_default_visibility'], mall_info['screens_type3_low_visibility'], len(players_info),latitude, longitude, "10:00", "22:00", round((num_screens / mall_info['screen_exposure_area']) * 1000, 2), comments, mall_info['mall_size'], mall_info['screen_exposure_area'], mall_info['id'])
+    sql= "update malls set  players=%s,  address=%s, screens=%s, screens_type1_high_visibility=%s, screens_type2_default_visibility=%s, screens_type3_low_visibility=%s,  num_display_units=%s, geolocation_lat=%s, geolocation_long=%s, opening_hours=%s, closing_hours=%s, screen_density=%s, comments=%s, mall_size=%s, screen_exposure_area=%s where id=%s"
+    val= ( len(records2) , address,  num_screens,mall_info['screens_type1_high_visibility'], mall_info['screens_type2_default_visibility'], mall_info['screens_type3_low_visibility'], len(players_info),latitude, longitude, "10:00", "22:00", round((num_screens / mall_info['screen_exposure_area']) * 1000, 2), comments, mall_info['mall_size'], mall_info['screen_exposure_area'], mall_info['id'])
     mycursor.execute(sql, val)
     mydb.commit()
 
-    if mall_info['id']== 112:
-       input()
+
