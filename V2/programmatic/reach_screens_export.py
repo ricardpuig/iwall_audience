@@ -13,10 +13,13 @@ from datetime import date
 import sys
 import mysql.connector
 
+
+VERSION = "-v.01"
+
 PUBLISHER_ID = 37
 VENUE_TYPES_ID = 60
 ALLOWED_AD_TYPES_ID ="1:2:4"
-AUDIENCE_DATA_SOURCES_ID=4
+AUDIENCE_DATA_SOURCES_ID="4:5"
 DEMOGRAPHY_TYPE= "basic"
 TAGS_ID_COLOMBIA = "11572"
 TAGS_ID_PERU =  "24731"
@@ -42,13 +45,11 @@ else:
 	exit(1)
 
 if country=="SPAIN":
-        container_ids=["21393898"]   #SPAIN PLAYER CONTAINER ID
-		#container_ids=['136035622']
+    None
 elif country=="COLOMBIA":
-        container_ids=['135518539']  #COLOMBIA PLAYER CONTAINER ID
-		#container_ids=['145094982']
+    None
 elif country=="PERU":
-        container_ids=['53704276']
+    None
 else:
 	print("Country Missing, exiting....")
 	exit(1)
@@ -60,10 +61,11 @@ df_players=df_players[df_players['country'] == country]
 
 df_players['publisher_id']=PUBLISHER_ID
 df_players['device_id']="broadsign.com:"+df_players['player_id']
-df_players['name']=df_players['programmatic_name']
+df_players['name']=df_players['programmatic_name']+VERSION
 df_players['resolution']=df_players['ad_resolution']
 df_players['latitude']=df_players['latitude']
 df_players['longitude']=df_players['longitude']
+
 if country == "SPAIN":
     df_players['tags:id']=TAGS_ID_SPAIN
 elif country =="COLOMBIA":
@@ -77,7 +79,7 @@ df_players['address']=df_players['address']
 df_players['bearing_direction']=""
 df_players['diagonal_size']=65
 df_players['diagonal_size_units']="inches"
-df_players['screen_type']=""
+df_players['screen_type']="103"
 df_players['venue_types:id']=VENUE_TYPES_ID
 df_players['allowed_ad_types:id']=ALLOWED_AD_TYPES_ID
 df_players['audience_data_sources:id']=AUDIENCE_DATA_SOURCES_ID

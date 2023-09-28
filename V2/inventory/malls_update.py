@@ -92,7 +92,7 @@ for row in records:
     #if mall_info['mall_size']!="CUSTOM":
     #  mall_info['screen_exposure_area']= round(mall_info['sba'] * 0.25,0)
  
-    print("Mall Info: ", mall_info)
+    #print("Mall Info: ", mall_info)
 
     players_info=[]
     player_info={}
@@ -115,7 +115,7 @@ for row in records:
       num_screens=num_screens + player_info['player_screens']
       players_info.append(player_info)
     
-    print("Players: ", players_info)
+    #print("Players: ", players_info)
 
     screen_visibility_index = 1
 

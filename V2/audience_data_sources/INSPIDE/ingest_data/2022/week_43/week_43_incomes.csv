@@ -1,4 +1,4 @@
-uuid;name;id;p_income_0;p_income_1;p_income_2;p_income_3
+uuid;name;id;low;medium_low;medium;medium_high;high
 091b8fd0-a5b1-4c59-acb2-40759e131801;Albacenter;3;49.83;49.46;0.56;0.15
 69dda3aa-efa6-4149-9481-3e1260141dc2;Alegra - Parque Comercial y de Ocio;5;62.99;23.78;10.55;2.67
 91e8cf7c-ece3-4e27-9eed-4a146790bbb7;Almazara Plaza;6;95.27;4.62;0.09;0.02

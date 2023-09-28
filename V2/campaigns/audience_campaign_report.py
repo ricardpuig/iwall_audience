@@ -1399,7 +1399,7 @@ for row in campaigns:  #for each campaign to analyze
     if n["total"]>100:
         campaign_daily_performance["total_impressions"]=n["total_impressions"]
         campaign_daily_performance["played_on"]=str(n["played_on"])
-        campaign_daily_performance["repetitions"]=n["total"]             #*******************************************************************
+        campaign_daily_performance["repetitions"]=n["total"]            #*******************************************************************
         campaign_daily_performance["reservation_id"]=n["reservable_id"]
 
         campaign_days.append(str(n["played_on"]));  #add days to array
@@ -1412,6 +1412,8 @@ for row in campaigns:  #for each campaign to analyze
         mydb.commit()
 
         repetition_distribution.append(n["total"])
+
+
 
   #calculate repetition_distribution_normalization
   total_reps= sum(repetition_distribution)
