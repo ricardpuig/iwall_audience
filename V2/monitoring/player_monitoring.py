@@ -58,6 +58,8 @@ mycursor = mydb.cursor()
 black_players=[]
 no_screens_players=[]
 missing_players=[]
+missing_corporate_players=[]
+missing_directory_players=[]
 offline_players=[]
 no_campaigns_players=[]
 main_player_status = []
@@ -75,6 +77,7 @@ critical_players=[]
 player_container_blacklist=[]
 player_id_blacklist=[]
 corporate_players=[]
+directory_players=[]
 
 
 def load_filtering_players():
@@ -220,46 +223,56 @@ def alarms_check(player_field_report):
 	print("Alarms check: ")
 	print("Player Field Report:  " , player_field_report)
 
-
-
-	if (str(player_field_report['player_id']) in player_id_blacklist)or (str(player_field_report['player_container_id']) in player_container_blacklist)or (str(player_field_report['du_container_id']) in du_container_blacklist) or (player_field_report['player_id'] in wifi_players) or (player_field_report['player_id'] in temporary_players):
+	if (str(player_field_report['player_id']) in player_id_blacklist)or (str(player_field_report['player_container_id']) in player_container_blacklist)or (str(player_field_report['du_container_id']) in du_container_blacklist) or (player_field_report['player_id'] in temporary_players):
 		print("Alarms for this player disabled")
 		discarded_players.append(player_field_report['player_id'])
 
 	else:
-		if player_field_report['last_checkin_min']>60 and player_field_report['last_checkin_min']<1000 and player_field_report['player_screens']>0:
-			print("Sending Alarm for late check in")
+
+		#alarms for ad player
+		if (str(player_field_report['player_id']) in corporate_players) or (str(player_field_report['player_id']) in directory_players):
+			None
+		else:
+
+			if player_field_report['last_checkin_min']>60 and player_field_report['last_checkin_min']<1000 and player_field_report['player_screens']>0:
+				missing_players.append(player_field_report['container_name']+ ": " + player_field_report['player_name'] + " \n(hace " + str(player_field_report['last_checkin_min']) + " min )")
+
+			if player_field_report['num_frames']=='0' and player_field_report['last_checkin_min']<60 and player_field_report['player_screens']>0:
+				black_players.append(player_field_report['container_name']+ ": " + player_field_report['player_name'])
+
+			if player_field_report['player_screens']==0 :
+				no_screens_players.append(player_field_report['container_name']+ " :" + player_field_report['player_name'])
+			
+			if player_field_report['last_checkin_min']>1000 and player_field_report['player_screens']>0:
+				offline_players.append( player_field_report['container_name']+ ": " + player_field_report['player_name'] + " \n( desde " + player_field_report['last_checkin_time'] + ")")
+				
+			if player_field_report['num_contents']==0 and player_field_report['player_screens']>0:
+				no_campaigns_players.append(player_field_report['container_name']+ " : " + player_field_report['player_name'])
 
 
-			missing_players.append(player_field_report['container_name']+ " : \n" + player_field_report['player_name'] + "\n ( hace " + str(player_field_report['last_checkin_min']) + " min )")
-			#checkin_alarm(player_field_report)
-			insert_alarm_db(player_field_report, "MISSING")
-		if player_field_report['num_frames']=='0' and player_field_report['last_checkin_min']<60 and player_field_report['player_screens']>0:
-			print("Num frames 0, probably in black ")
-			black_players.append(player_field_report['container_name']+ " :\n " + player_field_report['player_name'])
-			blackscreen_alarm(player_field_report)
-			#insert_alarm_db(player_field_report, "BLACK")
-		if player_field_report['player_screens']==0 :
-			print("No screens in player")
-			no_screens_players.append(player_field_report['container_name']+ " : \n" + player_field_report['player_name'])
-		
-		if player_field_report['last_checkin_min']>1000 and player_field_report['player_screens']>0:
-			offline_players.append( player_field_report['container_name']+ "\n Player: " + player_field_report['player_name'] + "\n ( desde " + player_field_report['last_checkin_time'] + ")")
-		if player_field_report['num_contents']==0 and player_field_report['player_screens']>0:
-			no_campaigns_players.append(player_field_report['container_name']+ " : " + player_field_report['player_name'])
-			#no_contents_alarm(player_field_report)
+		#alarms for corporate players
+		if (str(player_field_report['player_id']) in corporate_players):
 
-		if player_field_report['display_unit_id'] in du_id_whitelist:
-			main_player_status.append(player_field_report['container_name']+ "\n Player:  " + player_field_report['player_name'] + "( Checkin " + str(player_field_report['last_checkin_min']) + " min ago)" + " \n Contents playing: \n" + player_field_report['contents'])
+			if player_field_report['last_checkin_min']>60:
+				missing_corporate_players.append(player_field_report['container_name']+ ": " + player_field_report['player_name'] +  " \n( desde " + player_field_report['last_checkin_time'] + ")")
 
-	if player_field_report['player_id'] in critical_players:
-		main_player_status.append(player_field_report['container_name']+ "\n Player:  " + player_field_report['player_name'] + "( Checkin " + str(player_field_report['last_checkin_min']) + " min ago)" + " \n Contents playing: \n" + player_field_report['contents'])
+		#alarms for directory players
+		if (str(player_field_report['player_id']) in directory_players):
+
+			if player_field_report['last_checkin_min']>60:
+				missing_directory_players.append(player_field_report['container_name']+ ": " + player_field_report['player_name'] +  " \n( desde " + player_field_report['last_checkin_time'] + ")")
+
+
+
+	#if player_field_report['player_id'] in critical_players:
+	#	main_player_status.append(player_field_report['container_name']+ "\n Player:  " + player_field_report['player_name'] + "( Checkin " + str(player_field_report['last_checkin_min']) + " min ago)" + " \n Contents playing: \n" + player_field_report['contents'])
 
 	if player_field_report['player_id'] in wifi_players:
-		temp_wifi_players.append("(WIFI) "+ player_field_report['container_name']+ "\n Player:  " + player_field_report['player_name'] + " \n ( Last Connected: el " + player_field_report['last_checkin_time'] + ")") 
+		temp_wifi_players.append("(WIFI) "+ player_field_report['container_name']+ ":  " + player_field_report['player_name'] + "\n (Last Connected: el " + player_field_report['last_checkin_time'] + ")") 
 
 	if player_field_report['player_id'] in temporary_players:
-		temp_wifi_players.append("(TEMPORAL) " + player_field_report['container_name']+ "\n Player:  " + player_field_report['player_name'] + "\n ( Last Connected el " + player_field_report['last_checkin_time'] + ")") 
+		temp_wifi_players.append("(TEMPORAL) " + player_field_report['container_name']+ ":  " + player_field_report['player_name'] + " \n(Last Connected el " + player_field_report['last_checkin_time'] + ")") 
+
 
 
 
@@ -274,27 +287,56 @@ def daily_report(report_type):
 	print("Sending report")
 
 	message1= ""
-	for p1 in missing_players:
-		message1 = message1 + "\n\n" + p1
+	for c,p1 in enumerate(missing_players):
+		if c==0:
+			message1= p1
+		else:
+			message1 = message1 + "\n\n" + p1
 
 	message2= ""
-	for p1 in offline_players:
-		message2 = message2 + "\n\n" + p1
+	for c,p1 in enumerate(offline_players):
+		if c==0:
+			message2= p1
+		else:
+			message2 = message2 + "\n\n" + p1
 
-	message4= ""
-	for p1 in main_player_status:
-		message4 = message4 + "\n\n" + p1
+	message3= ""
+	for c,p1 in enumerate(temp_wifi_players):
+		if c==0:
+			message3= p1
+		else:
+			message3 = message3 + "\n\n" + p1
 
 	message5= ""
-	for p1 in black_players:
-		message5 = message5 + "\n\n" + p1
+	for c,p1 in enumerate(black_players):
+		if c==0:
+			message5= p1
+		else:
+			message5 = message5 + "\n\n" + p1
 
 	message6= ""
-	for p1 in no_screens_players:
-		message6 = message6 + "\n\n" + p1
+	for c,p1 in enumerate(no_screens_players):
+		if c==0:
+			message6= p1
+		else:
+			message6 = message6 + "\n\n" + p1
 
 	message7= "Total players analizados: "+ str(len(field_report))  + ". Players descartados: " + str(len(discarded_players))
 	
+	message8=""
+	for c, p1 in enumerate(missing_directory_players):
+		if c==0:
+			message8= p1
+		else:
+			message8 = message8 + "\n\n" + p1
+
+	message9=""
+	for c, p1 in enumerate(missing_corporate_players):
+		if c==0:
+			message9= p1
+		else:
+			message9 = message9 + "\n\n" + p1
+
 
 	server_time= datetime.now()
 	server_time=server_time.astimezone(pytz.timezone('utc'))
@@ -311,10 +353,12 @@ def daily_report(report_type):
 							"fecha": fecha,
 							"message1" : message1,
 							"message2" : message2,
-							"message4" : message4,
+							"message3" : message3,
 							"message5" : message5,
 							"message6" : message6,
 							"message7" : message7,
+							"message8" : message8,
+							"message9" : message9
 						},
 				})
 	print(resp['requestId'])
@@ -327,7 +371,7 @@ else:
 
 if country=="SPAIN":
 	container_ids=["21393898"]
-	#container_ids=["805686088"]
+	#container_ids=["218209735"]
 	email_to_send="dept_tecnico@iwallinshop.com"
 elif country=="COLOMBIA":
 	container_ids=['135518539']
@@ -645,6 +689,10 @@ for m in container_ids:
 				if "#WIFI#" in player_name:
 					print("Temporal player adding to list")
 					wifi_players.append(player_id)
+
+				if "#DIR#" in player_name:
+					print("Directory player adding to list")
+					directory_players.append(player_id)
         
 				#content to play
 				print("Content scheduled to play now")
