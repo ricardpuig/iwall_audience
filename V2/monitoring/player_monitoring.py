@@ -65,6 +65,7 @@ no_campaigns_players=[]
 main_player_status = []
 temp_wifi_players =[]
 discarded_players =[]
+no_access_players = []
 
 #filtering players:
 du_container_blacklist=[]
@@ -78,6 +79,7 @@ player_container_blacklist=[]
 player_id_blacklist=[]
 corporate_players=[]
 directory_players=[]
+not_connected_players=[]
 
 
 def load_filtering_players():
@@ -101,6 +103,7 @@ def load_filtering_players():
            player_container_blacklist.append(row_0[0])
         if row_0[1] =="PLAYER_ID_BLACKLIST":
            player_id_blacklist.append(row_0[0])
+
 
 
 def report_valid():
@@ -223,7 +226,7 @@ def alarms_check(player_field_report):
 	print("Alarms check: ")
 	print("Player Field Report:  " , player_field_report)
 
-	if (str(player_field_report['player_id']) in player_id_blacklist)or (str(player_field_report['player_container_id']) in player_container_blacklist)or (str(player_field_report['du_container_id']) in du_container_blacklist) or (player_field_report['player_id'] in temporary_players):
+	if (str(player_field_report['player_id']) in player_id_blacklist)or (str(player_field_report['player_container_id']) in player_container_blacklist)or (str(player_field_report['du_container_id']) in du_container_blacklist) or (player_field_report['player_id'] in temporary_players)  or (player_field_report['player_id'] in not_connected_players):
 		print("Alarms for this player disabled")
 		discarded_players.append(player_field_report['player_id'])
 
@@ -273,7 +276,8 @@ def alarms_check(player_field_report):
 	if player_field_report['player_id'] in temporary_players:
 		temp_wifi_players.append("(TEMPORAL) " + player_field_report['container_name']+ ":  " + player_field_report['player_name'] + " \n(Last Connected el " + player_field_report['last_checkin_time'] + ")") 
 
-
+	if player_field_report['player_id'] in not_connected_players:
+		no_access_players.append(player_field_report['container_name']+ ":  " + player_field_report['player_name'] + " \n(Last Connected el " + player_field_report['last_checkin_time'] + ")") 
 
 
 	print("Black: ", black_players)
@@ -337,6 +341,13 @@ def daily_report(report_type):
 		else:
 			message9 = message9 + "\n\n" + p1
 
+	message10=""
+	for c, p1 in enumerate(no_access_players):
+		if c==0:
+			message10= p1
+		else:
+			message10 = message10 + "\n\n" + p1
+
 
 	server_time= datetime.now()
 	server_time=server_time.astimezone(pytz.timezone('utc'))
@@ -358,7 +369,8 @@ def daily_report(report_type):
 							"message6" : message6,
 							"message7" : message7,
 							"message8" : message8,
-							"message9" : message9
+							"message9" : message9,
+							"message10" : message10
 						},
 				})
 	print(resp['requestId'])
@@ -371,7 +383,7 @@ else:
 
 if country=="SPAIN":
 	container_ids=["21393898"]
-	#container_ids=["218209735"]
+	#container_ids=["181220225"]
 	email_to_send="dept_tecnico@iwallinshop.com"
 elif country=="COLOMBIA":
 	container_ids=['135518539']
@@ -409,7 +421,7 @@ for m in container_ids:
 		for n in data["field_report"]:
 			fr=n['field_report']
 			if fr: 
-				#print(fr)
+				print(fr)
 				try: 
 					if re.search('Player Id:',fr):
 						player_id=re.findall('Player Id: (.*)\n', fr)[0]
@@ -423,6 +435,15 @@ for m in container_ids:
 					player_field_report['device_id']= "broadsign.com:" + str(player_id)
 					player_field_report['player_id']=player_id
 					print("* Player ID found: ", player_id )
+
+					if player_id == 0:
+						
+					
+						continue
+					if player_id == "0":
+		
+					
+						continue
 
 				try: 
 					if re.search('Local Time:',fr):
@@ -594,7 +615,8 @@ for m in container_ids:
 					print("Local Time:", local_time)
 					dt_localtime = datetime.strptime(local_time, "%Y-%m-%dT%H:%M:%S")
 					print(dt_localtime)
-					player_field_report['last_checkin_time']= dt_localtime.strftime("%d %b, %Y a las %H:%M")
+					#player_field_report['last_checkin_time']= dt_localtime.strftime("%d %b, %Y a las %H:%M")
+					player_field_report['last_checkin_time']= dt_localtime.strftime("%d %b, %Y")
 					print("unware time object", dt_localtime)
 					
 
@@ -610,9 +632,6 @@ for m in container_ids:
 						dt_localtime = dt_localtime.replace(tzinfo=pytz.timezone('Etc/GMT+5'))
 						
 						
-
-
-
 
 					print("localized time zone", dt_localtime)
 					server_time= datetime.now()
@@ -678,6 +697,10 @@ for m in container_ids:
 					print("Corporate player adding to list")
 					corporate_players.append(player_id)
 
+				if "#OFFLINE#" in player_name:
+					print("Corporate player adding to list")
+					not_connected_players.append(player_id)
+					
 				if "#CRITICAL#" in player_name:
 					print("Critical player adding to list")
 					critical_players.append(player_id)
