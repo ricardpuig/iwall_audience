@@ -623,13 +623,13 @@ for m in container_ids:
 					if country == "SPAIN":
 						if player_container_id==805686088:
 							print("La Villa players, different timezone")
-							dt_localtime = dt_localtime.replace(tzinfo=pytz.timezone('Etc/GMT-1'))
+							dt_localtime = dt_localtime.replace(tzinfo=pytz.timezone('Etc/GMT'))
 						else:
-							dt_localtime = dt_localtime.replace(tzinfo=pytz.timezone('Etc/GMT-2'))
+							dt_localtime = dt_localtime.replace(tzinfo=pytz.timezone('Etc/GMT-1'))
 					if country == "PERU":
-						dt_localtime = dt_localtime.replace(tzinfo=pytz.timezone('Etc/GMT+5'))
+						dt_localtime = dt_localtime.replace(tzinfo=pytz.timezone('Etc/GMT+4'))
 					if country == "COLOMBIA":
-						dt_localtime = dt_localtime.replace(tzinfo=pytz.timezone('Etc/GMT+5'))
+						dt_localtime = dt_localtime.replace(tzinfo=pytz.timezone('Etc/GMT+4'))
 						
 						
 
@@ -666,13 +666,13 @@ for m in container_ids:
 					if country == "SPAIN":
 						if player_container_id==805686088:
 							print("La Villa players, different timezone")
-							dt_localtime = dt_localtime.replace(tzinfo=pytz.timezone('Etc/GMT-1'))
+							dt_localtime = dt_localtime.replace(tzinfo=pytz.timezone('Etc/GMT'))
 						else:
-							dt_localtime = dt_localtime.replace(tzinfo=pytz.timezone('Etc/GMT-2'))
+							dt_localtime = dt_localtime.replace(tzinfo=pytz.timezone('Etc/GMT-1'))
 					if country == "PERU":
-						dt_localtime = dt_localtime.replace(tzinfo=pytz.timezone('Etc/GMT+5'))
+						dt_localtime = dt_localtime.replace(tzinfo=pytz.timezone('Etc/GMT+4'))
 					if country == "COLOMBIA":
-						dt_localtime = dt_localtime.replace(tzinfo=pytz.timezone('Etc/GMT+5'))
+						dt_localtime = dt_localtime.replace(tzinfo=pytz.timezone('Etc/GMT+4'))
 						
 						
 					dt_localtime=dt_localtime.astimezone(pytz.UTC)

@@ -551,7 +551,7 @@ for m in container_ids:
 					
 
 					#canarias time zone !
-					dt_localtime = dt_localtime.replace(tzinfo=pytz.timezone('Etc/GMT-1'))
+					dt_localtime = dt_localtime.replace(tzinfo=pytz.timezone('Etc/GMT'))
 						
 
 
@@ -588,7 +588,7 @@ for m in container_ids:
 					dt_localtime = datetime.strptime(started_on, "%Y-%m-%dT%H:%M:%S")
 					
 					
-					dt_localtime = dt_localtime.replace(tzinfo=pytz.timezone('Etc/GMT-1'))
+					dt_localtime = dt_localtime.replace(tzinfo=pytz.timezone('Etc/GMT'))
 					
 						
 					dt_localtime=dt_localtime.astimezone(pytz.UTC)
