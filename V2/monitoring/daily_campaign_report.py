@@ -170,15 +170,17 @@ def daily_report(daily_report):
 				})
 	print(resp['requestId'])
 
-def daily_campaign_analysis(db_connection, country):
+def daily_campaign_analysis(db_connection, country, df_campaigns):
 
 	#report general
 	today_campaigns_report={}
 	today_campaigns_details=[]
 
 	#load all SPAIN campaigns
-	sql_select_reservations= "SELECT * from broadsign_reservations where country='%s' " % (country)
-	df = pd.read_sql(sql_select_reservations, con=db_connection)
+	#sql_select_reservations= "SELECT * from broadsign_reservations where country='%s' " % (country)
+	#df = pd.read_sql(sql_select_reservations, con=db_connection)
+
+	df=df_campaigns
 	
 	#df['schedule_start_date']=pd.to_datetime(df['schedule_start_date'], format="%Y-%m-%d")
 	#df['schedule_end_date']=pd.to_datetime(df['schedule_end_date'], format="%Y-%m-%d")
@@ -187,8 +189,11 @@ def daily_campaign_analysis(db_connection, country):
 	print("Fecha Actual: ", fecha_actual)
 	today_campaigns_report['fecha']=fecha_actual.strftime("%Y-%m-%d")
 
+	print(df)
 	#campañas que inician hoy
-	df_hoy = df[df['start_date'] == fecha_actual]
+	df_hoy = df[df['start_date'] == fecha_actual.strftime("%Y-%m-%d")]
+
+	print(df_hoy)
 
 	# Iterar por cada fila
 	today_campaigns_id=df_hoy['campaign_id'].unique()
@@ -392,11 +397,12 @@ def daily_campaign_analysis(db_connection, country):
 				#print(json.dumps(data, indent=4))
 				for s in data["schedule"]:
 					if s['start_date']==date.today().strftime("%Y-%m-%d"):
+						running_campaigns_report={}
 						print("Schedule empieza hoy ",reservation["name"] )
 						running_campaigns_report['campaign_new_schedule']=s["name"]
 						running_campaigns_report['campaign_schedule_name']=reservation["name"]
 
-						running_campaigns_details.append(running_campaigns_report)
+						
 						new_schedules= new_schedules +1
 
 						
@@ -413,18 +419,88 @@ def daily_campaign_analysis(db_connection, country):
 						for p in data["campaign_performance"]:
 							if str(p["played_on"]) == date.today().strftime("%Y-%m-%d"):
 								running_campaigns_report['today_plays']=p["total"]
+
+						running_campaigns_details.append(running_campaigns_report)
+
 										
 	today_campaigns_report['new_schedules']= new_schedules
 	today_campaigns_report['schedules']=running_campaigns_details
 		
 	print(json.dumps(today_campaigns_report,indent=4))
 	daily_report(today_campaigns_report)
+
+def extract_current_campaigns():
+
+	start_date= "2023-01-01"
+	end_date= "2024-12-31"
+	auth = "Bearer e03b2732ac76e3a954e4be0c280a04a3";
+
+	url_reservation_by_display_unit= 'https://api.broadsign.com:10889/rest/reservation/v20/by_du_folder?domain_id=17244398&current_only=false&start_date='+start_date+'&end_date='+end_date;
+	url_reservation_container=url_reservation_by_display_unit+"&container_ids=106135296";
+	s=requests.get(url_reservation_container,headers={'Accept': 'application/json','Authorization': auth});
+	data=json.loads(s.text)
+
+	container_ids=[]
+	container_name=[]
+	reservation={}
+	malls={}
+	reservations=[]
+
+	print("analyzing reservations")
+	for n in data["reservation"]:
+			
+			insert=1
+			reservation["booking_state"]=str(n["booking_state"])
+			reservation["saturation"]=str(n["saturation"])
+			reservation["duration_msec"]=str(n["duration_msec"])
+			reservation["start_time"]=str(n["start_time"])
+			reservation["start_date"]=str(n["start_date"])
+			fecha_inicio=datetime.strptime(str(n["start_date"]),"%Y-%m-%d")
+			fecha_fin=datetime.strptime(str(n["end_date"]),"%Y-%m-%d")
+			reservation["active"]="unknown"
+			if fecha_inicio < datetime.today():
+					if fecha_fin > datetime.today():
+							reservation["active"]="Running"
+			if fecha_inicio>datetime.today():
+					reservation["active"]="por emitir"
+			if fecha_fin<datetime.today():
+					reservation["active"]="Emitida"
+			delta=fecha_fin-fecha_inicio
+			reservation["days"]=0
+			reservation["days"]=delta.days+1
+			reservation["end_time"]=str(n["end_time"])
+			reservation["end_date"]=str(n["end_date"])
+			reservation["campaign_id"]=str(n["id"])
+			reservation["state"]=str(n["state"])
+			reservation["name"]=n["name"]
+			reservation["country"]="SPAIN"
+			#reservation["last_updated"]=datetime.today().strftime("%m/%d/%Y, %H:%M:%S")
+			name=n["name"]
+			if re.findall('\$(.*)\$',name):
+					reservation["SAP_ID"]=re.findall('\$(.*)\$', name)[0]
+			else:
+					reservation["SAP_ID"]="not found"
+			schedule_start_date=""
+			schedule_end_date=""
+			schedule_days=0
+
+			reservations.append(reservation)
+			reservation={}
 	
+	df_reservations= pd.DataFrame(reservations)
+	print(df_reservations)
+
+	print(list(df_reservations))
+	return(df_reservations)
+		
 # -------------------------------------------------------------------------
 print("Launching daily campaign analysis")
 
 db_connection_str = 'mysql+pymysql://root:SonaeRootMysql2021!@ec2-52-18-248-109.eu-west-1.compute.amazonaws.com/audience'
 db_connection = create_engine(db_connection_str)
 
+#extract running campaigns
+df_campaigns=extract_current_campaigns()
+
 #launch today report
-daily_campaign_analysis(db_connection, "SPAIN")
+daily_campaign_analysis(db_connection, "SPAIN", df_campaigns)
