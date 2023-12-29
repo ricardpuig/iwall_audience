@@ -156,7 +156,7 @@ def daily_report(daily_report):
 	resp = client.send_message(
 				message={
 					"to": {
-						"email": "rpuig@iwallinshop.com",
+						"email": "dept_tecnico@iwallinshop.com",
 					},
 					"template": report_template,
 						"data": {
