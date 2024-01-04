@@ -338,8 +338,11 @@ def daily_campaign_analysis(db_connection, country, df_campaigns):
 						else:
 							print("Du with no screens")
 			else:
-				live_display_units_id.remove(n["display_unit_id"])
-
+				try:
+					live_display_units_id.remove(n["display_unit_id"])
+				except: 
+					print("display unit not in reservation")
+					
 			campaign_performance.append(campaign_display_unit_performance)
 
 		#error with remaining display units
