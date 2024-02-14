@@ -1,0 +1,37 @@
+#! /bin/bash
+
+python3 admobilize_api_ingest.py 6
+python3 admobilize_api_ingest.py 7
+python3 admobilize_api_ingest.py 8
+python3 admobilize_api_ingest.py 9
+python3 admobilize_api_ingest.py 10
+python3 admobilize_api_ingest.py 11
+python3 admobilize_api_ingest.py 12
+python3 admobilize_api_ingest.py 13
+python3 admobilize_api_ingest.py 14
+python3 admobilize_api_ingest.py 15
+python3 admobilize_api_ingest.py 16
+python3 admobilize_api_ingest.py 17
+python3 admobilize_api_ingest.py 18
+python3 admobilize_api_ingest.py 19
+python3 admobilize_api_ingest.py 20
+python3 admobilize_api_ingest.py 21
+python3 admobilize_api_ingest.py 22
+python3 admobilize_api_ingest.py 23
+python3 admobilize_api_ingest.py 24
+python3 admobilize_api_ingest.py 25
+python3 admobilize_api_ingest.py 26
+python3 admobilize_api_ingest.py 27
+python3 admobilize_api_ingest.py 28
+python3 admobilize_api_ingest.py 29
+python3 admobilize_api_ingest.py 30
+python3 admobilize_api_ingest.py 31
+python3 admobilize_api_ingest.py 32
+python3 admobilize_api_ingest.py 33
+python3 admobilize_api_ingest.py 34
+python3 admobilize_api_ingest.py 35
+python3 admobilize_api_ingest.py 36
+python3 admobilize_api_ingest.py 37
+python3 admobilize_api_ingest.py 38
+python3 admobilize_api_ingest.py 39
+python3 admobilize_api_ingest.py 40
