@@ -135,11 +135,17 @@ def daily_report(daily_report):
 							</tr>
 							
 					"""
-		message3_table="".join(
-						f"<tr><td>{schedule['campaign_schedule_name']}</td><td>{schedule['campaign_new_schedule']}</td><td>{schedule['today_plays']}</td></tr>"
-						for schedule in daily_report['schedules']
-			)
-		
+		try:
+			message3_table="".join(
+							f"<tr><td>{schedule['campaign_schedule_name']}</td><td>{schedule['campaign_new_schedule']}</td><td>{schedule['today_plays']}</td></tr>"
+							for schedule in daily_report['schedules']
+				)
+		except: 
+			message3_table="".join(
+							f"<tr><td>{schedule['campaign_schedule_name']}</td><td>{schedule['campaign_new_schedule']}</td><td>No data</td></tr>"
+							for schedule in daily_report['schedules']
+				)
+
 		message3 = message3_header + message3_table + "</table>"
 	else:
 		message3 = "Hoy no empiezan schedules"
@@ -419,9 +425,11 @@ def daily_campaign_analysis(db_connection, country, df_campaigns):
 						s=requests.get(url_campaign_performance,headers={'Accept': 'application/json','Authorization': auth});
 						data=json.loads(s.text)
 						#print(json.dumps(data, indent=4))
+						running_campaigns_report['today_plays']= 0
 						for p in data["campaign_performance"]:
 							if str(p["played_on"]) == date.today().strftime("%Y-%m-%d"):
 								running_campaigns_report['today_plays']=p["total"]
+							
 
 						running_campaigns_details.append(running_campaigns_report)
 

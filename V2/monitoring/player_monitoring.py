@@ -810,8 +810,12 @@ for m in container_ids:
 					player_field_report['screen_count']=screens	
 					player_field_report['display_unit_active']=du_active
 					player_field_report['geolocation']=geolocation
-					player_field_report['latitude']= re.search('\((.*)\,', geolocation).group(1)
-					player_field_report['longitude']=re.search('\,(.*)\)', geolocation).group(1)
+					try:
+						player_field_report['latitude']= re.search('\((.*)\,', geolocation).group(1)
+						player_field_report['longitude']=re.search('\,(.*)\)', geolocation).group(1)
+					except:
+						player_field_report['latitude']= "0"
+						player_field_report['longitude']="0"
 					player_field_report['zipcode']=zipcode
 					player_field_report['address']=address
 
