@@ -15,7 +15,7 @@ from trycourier import Courier
 from dateutil.relativedelta import relativedelta
 from sklearn import preprocessing
 from statistics import mean
-
+import math
 
 OPENING_HOURS= 12
 DENSITY_MULTIPLIER= 0.18
@@ -178,7 +178,7 @@ print("Starting Audience Update script")
 
 #loop through all sites in DB for the country 
 
-sql= "SELECT DISTINCT id,name FROM malls where active=1 and country='%s'" % (country)
+sql= "SELECT DISTINCT id,name FROM malls where active=1 and country='%s' and id='33'" % (country)
 
 
 #sql= "SELECT DISTINCT id,name FROM malls where active=1 and id=88"
@@ -1075,14 +1075,20 @@ for row in records:  #for each result
 
         
         updated_estimation_error_ratio= df_mall_model_updated['inspide_ratio'].mean()
-        #solo actualizar si el error estimación > 10 por ciento 
-        if updated_estimation_error_ratio>1.1 or updated_estimation_error_ratio < 0.9: 
 
-          sql= "update malls set estimation_error_ratio=%s  where id=%s"
-          val= (float(round(updated_estimation_error_ratio,2)), row[0])
-          mycursor.execute(sql,val)
-          mydb.commit()
-          print("Updated Average estimation error:", updated_estimation_error_ratio)
+        if not math.isinf(updated_estimation_error_ratio):
+          #solo actualizar si el error estimación > 10 por ciento 
+          if updated_estimation_error_ratio>1.1 or updated_estimation_error_ratio < 0.9: 
+            print("Updated Average estimation error:", updated_estimation_error_ratio, " ID ", row[0])
+            sql= "update malls set estimation_error_ratio='%s'  where id='%s'"
+            val= (updated_estimation_error_ratio, row[0])
+            mycursor.execute(sql,val)
+            mydb.commit()
+            input()
+        else:
+          updated_estimation_error_ratio=1
+          df_mall_model_updated['inspide_ratio']= 1
+          
 
 
         
