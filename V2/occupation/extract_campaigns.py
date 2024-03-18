@@ -12,7 +12,7 @@ import pymysql
 
 #fechas de análisis de campañas
 start_date= "2023-01-01"
-end_date= "2023-12-31"
+end_date= "2024-12-31"
 
 excluded_containers=['49461537', '21003047', '106135296','553165291', '553165135', '553165137']
 

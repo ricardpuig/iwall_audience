@@ -29,6 +29,8 @@ from trycourier import Courier
 
 
 report_template= "5NKZS4D4C54R69Q4NCNP3KPYBACD"
+report_template_comercial= "PQS4244E5J45VRHDVHV6BE0JV9HS"
+
 client = Courier(auth_token="pk_prod_6S1S6BVGGXMEB5Q8TSVHDN59NY8D")
 url_reservation_by_display_unit= 'https://api.broadsign.com:10889/rest/reservation/v20/by_du_folder?domain_id=17244398&current_only=false';
 url_container_info= 'https://api.broadsign.com:10889/rest/container/v9/by_id?domain_id=17244398';
@@ -131,7 +133,7 @@ def daily_report(daily_report):
 							<tr>
 								<th>Nueva schedule</th>
 								<th>Schedule</th>
-								<th>Plays hoy</th>
+								<th>Pases emitidos</th>
 							</tr>
 							
 					"""
@@ -175,6 +177,32 @@ def daily_report(daily_report):
 						},
 				})
 	print(resp['requestId'])
+
+	#enviar mail comercial
+	resp = client.send_message(
+				message={
+					"to": [
+						{
+						"email": "comercialspain@iwallinshop.com",
+						},
+						{
+						"email": "scano@iwallinshop.com",
+						},
+						{
+						"email": "rpuig@iwallinshop.com",
+						},
+					],	
+					"template": report_template_comercial,
+						"data": {
+							"fecha": fecha,
+							"message3" : message3,
+							"message5" : message5
+						},
+				})
+	print(resp['requestId'])
+
+
+
 
 def daily_campaign_analysis(db_connection, country, df_campaigns):
 
@@ -405,15 +433,14 @@ def daily_campaign_analysis(db_connection, country, df_campaigns):
 				data=json.loads(s.text)
 				#print(json.dumps(data, indent=4))
 				for s in data["schedule"]:
+					running_campaigns_report={}
 					if s['start_date']==date.today().strftime("%Y-%m-%d"):
-						running_campaigns_report={}
+						
 						print("Schedule empieza hoy ",reservation["name"] )
 						running_campaigns_report['campaign_new_schedule']=s["name"]
 						running_campaigns_report['campaign_schedule_name']=reservation["name"]
-
-						
+	
 						new_schedules= new_schedules +1
-
 						
 						print("Checking campaign Daily Performance...")
 						url_campaign_performance='https://api.broadsign.com:10889/rest/campaign_performance/v6/by_reservable_id?domain_id=17244398';
@@ -432,6 +459,7 @@ def daily_campaign_analysis(db_connection, country, df_campaigns):
 							
 
 						running_campaigns_details.append(running_campaigns_report)
+						running_campaigns_report={}
 
 										
 	today_campaigns_report['new_schedules']= new_schedules
