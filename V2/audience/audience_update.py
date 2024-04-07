@@ -17,16 +17,15 @@ from sklearn import preprocessing
 from statistics import mean
 import math
 
+
 OPENING_HOURS= 12
 DENSITY_MULTIPLIER= 0.18
 DEFAULT_DAILY_IMPACTS = 10000
 AD_SLOT_DURATION = 10
 K_FACTOR = 0.7   #FACTOR SPAIN 
 ADMOBILIZE_FACTOR = 1
-# K_FACTOR = 1   #FACTOR 
-
 WALKING_SPEED_KMH = 0.5  #in km/h
-CORRIDOR_WIDTH = 10
+CORRIDOR_WIDTH = 8
 
 LARGE_MALL_EXPOSURE_AREA_THRESHOLD = 6000
 SMALL_MALL_EXPOSURE_AREA_THRESHOLD = 4000
@@ -54,26 +53,16 @@ def hourly_impact_calculation(hourly_visits, screen_density, screen_visibility_i
 
   #durante su estancia en el centro comercial de media. 
   
-
-  if not mall_visit_time_min:
-    if exposure_area>LARGE_MALL_EXPOSURE_AREA_THRESHOLD:
-      mall_visit_time_min=MALL_VISIT_TIME_LARGE
-    elif exposure_area>SMALL_MALL_EXPOSURE_AREA_THRESHOLD:
-      mall_visit_time_min=MALL_VISIT_TIME_MEDIUM
-    else:
-      mall_visit_time_min=MALL_VISIT_TIME_SMALL
-
-  
   print("mall visit time ( in min ): ", mall_visit_time_min)
 
-  travelled_meters = WALKING_SPEED_KMH * 1000 * (mall_visit_time_min/60)
+  travelled_meters = WALKING_SPEED_KMH * 1000
   travelled_surface = travelled_meters * CORRIDOR_WIDTH
 
   print("Travelled meters ", travelled_meters)
   print("Travelled surface", travelled_surface, "exposure area ", exposure_area)
   
 
-  exposure= hourly_visits*(travelled_surface/exposure_area)*screen_visibility_index*K_FACTOR
+  exposure= hourly_visits*(travelled_surface/exposure_area)*screen_visibility_index
 
   print("Hourly ", hourly_visits , " Exposure ", exposure)
   print ("\n")
@@ -122,7 +111,19 @@ def lambda_model5(x):
       return x['source_data_x']
     else:
       return x['source_data_y']
+    
+def lambda_model6(x):
+    if  np.isnan(x['camera_ots']):
+      return x['default_impacts']
+    else:
+      return x['camera_ots']
 
+def lambda_model7(x):
+    if  np.isnan(x['camera_ots']):
+      return x['source_data_x']
+    else:
+      return "admobilize data"
+    
 def lambda_impressions(x):
     global impressions_model
     global impressions_hour
@@ -134,7 +135,6 @@ def lambda_impressions(x):
     impacts_2=list(filter(lambda item: item['day_of_week'] == day_of_week, impacts))
     impacts_3=list(filter(lambda item: item['hour'] == impressions_hour, impacts_2))    
     return(impacts_3[0]['impacts'])
-
 
 def lambda_multipliers(x):
     global impressions_model
@@ -165,6 +165,21 @@ mycursor = mydb.cursor()
 #update report
 update_report = []
 
+numero_de_argumentos = len(sys.argv) - 1
+
+if numero_de_argumentos == 1:
+    country= sys.argv[1]
+elif numero_de_argumentos == 2:
+    country= sys.argv[1]
+    mall_id= sys.argv[2]
+else:
+    print(f"Argumentos erroneos")
+
+
+
+
+
+
 
 if sys.argv[1]:
 	country= sys.argv[1]
@@ -172,13 +187,20 @@ else:
 	print("Country Missing, exiting....")
 	exit(1)
 
+try:
+  if len((sys.argv -1 )==2):
+    mall_id= sys.argv[2]
+except:
+  print("Analyzin all country")
 
 print("Starting Audience Update script")
 
 
 #loop through all sites in DB for the country 
-
-sql= "SELECT DISTINCT id,name FROM malls where active=1 and country='%s' and id='33'" % (country)
+if numero_de_argumentos == 2:
+  sql= "SELECT DISTINCT id,name FROM malls where active=1 and country='%s' and id='%s'" % (country, mall_id)
+elif numero_de_argumentos == 1:
+  sql= "SELECT DISTINCT id,name FROM malls where active=1 and country='%s'" % (country)
 
 
 #sql= "SELECT DISTINCT id,name FROM malls where active=1 and id=88"
@@ -215,6 +237,7 @@ for row in records:  #for each result
     screen_visibility_index = 1
     total_screens =0
 
+
     # check if LED alias #
     alias_id=row[0]
     if row[0]==74:  #LEDS CASTELLANA 200
@@ -235,7 +258,7 @@ for row in records:  #for each result
       alias_id=2
     if row[0]==119: #LEDS PLAZA NORTE 2
       alias_id=41
-    if row[0]==84: #VIdeowall Rambla Breña
+    if row[0]==84: #Videowall Rambla Breña
       alias_id=83
     if row[0]==86: #Videowall Rmbla Borja
       alias_id=85
@@ -245,12 +268,10 @@ for row in records:  #for each result
       alias_id=62
     if row[0]==141: #LED FERIAL
       alias_id=140
-      
-    
+          
     #********************************************
     #getting mall default data ( not using alias)
     #********************************************
-
     sql= "SELECT name,screens, screens_type1_high_visibility, screens_type2_default_visibility, screens_type3_low_visibility, screen_exposure_area, num_locales, dwell_time, screen_visibility, avg_mall_visit_time_min, cam_avg_daily_exposure, estimation_error_ratio FROM malls  WHERE id=%s" % (row[0])
     mycursor.execute(sql)
     records_mall_data= mycursor.fetchall()
@@ -504,58 +525,65 @@ for row in records:  #for each result
     #***********************************
     #admobilize source data
     #***********************************
-    print("Getting admobilize data for the mall: ")
+    print("Getting admobilize data for the mall if available...")
 
     sql= "SELECT deviceId, manual_adjustment  FROM admobilize_sensors  WHERE mall_id=%s" % (alias_id)
     mycursor.execute(sql)
     records_admobilize_sensors= mycursor.fetchall()
-    if len(records_admobilize_sensors)>0:
-            
-      admobilize_avg_hour_ots=[]
-      admobilize_avg_daily_ots=[]
 
-      available_admobilize_data=True
+
+    try:
+      if len(records_admobilize_sensors)>0:
+        print("**** Succcess devices available")
+              
+        admobilize_avg_hour_ots=[]
+        admobilize_avg_daily_ots=[]
+
+        available_admobilize_data=True
+        
+        for admobilize_s in records_admobilize_sensors:
+            manual_adjustment=admobilize_s[1]
+
+            sql= "SELECT fecha_hora, impresiones, deviceId FROM admobilize_impression_data  WHERE deviceId='%s' and DATE(fecha_hora)>='2023-01-01'" % (admobilize_s[0])
+            df_admobilize_data = pd.read_sql_query(sql, engine)
+            # Convertir la columna 'fecha_hora' al tipo datetime
+            df_admobilize_data['fecha_hora'] = pd.to_datetime(df_admobilize_data['fecha_hora'])
+
+            # Filtrar para mantener solo las filas entre las 10 de la mañana y las 10 de la noche
+            df_admobilize_data_filtrado = df_admobilize_data[(df_admobilize_data['fecha_hora'].dt.hour >= 10) & (df_admobilize_data['fecha_hora'].dt.hour <= 22)]
+            admobilize_hourly_mean= df_admobilize_data_filtrado['impresiones'].mean()*manual_adjustment
+            admobilize_daily_mean= admobilize_hourly_mean*OPENING_HOURS
+            admobilize_avg_daily_ots.append(int(admobilize_daily_mean))
+            admobilize_avg_hour_ots.append(int(admobilize_hourly_mean))
+
+
+        sql= "update malls set admobilize_hourly_avg_ots=%s, admobilize_data=1  where id=%s"
+        val= (int(mean(admobilize_avg_hour_ots)), row[0])
+        mycursor.execute(sql,val)
+        mydb.commit()
+
+        sql= "update malls set admobilize_daily_avg_ots=%s, admobilize_data=1 where id=%s"
+        val= (int(mean(admobilize_avg_daily_ots)),row[0])
+        mycursor.execute(sql,val)
+        mydb.commit()
       
-      for admobilize_s in records_admobilize_sensors:
+        print("- Admobilize data overall daily OTS avg: ", int(mean(admobilize_avg_daily_ots)))
+        print("- Admobilize data overall hourly OTS avg: ",int(mean(admobilize_avg_hour_ots)))
 
+        admobilize_data_estimated_hourly_impacts = hourly_admobilize_impact_calculation (int(mean(admobilize_avg_hour_ots)), screen_density, screen_visibility_index, screen_exposure_area,avg_mall_visit_tine_min)
+        admobilize_data_estimated_daily_impacts =admobilize_data_estimated_hourly_impacts * OPENING_HOURS
+  
+        print("- Admobilize data overall hourly screen impacts: ", admobilize_data_estimated_hourly_impacts)
+        print("- Admobilize data overall daily screen impacts: ",admobilize_data_estimated_daily_impacts)
+        print("\n")
+      
+      else:
+        print("No admobilize data available \n")
+    except: 
 
-        sql= "SELECT fecha_hora, impresiones, deviceId FROM admobilize_impression_data  WHERE deviceId='%s' and DATE(fecha_hora)>='2023-01-01'" % (admobilize_s[0])
-        df_admobilize_data = pd.read_sql_query(sql, engine)
-        # Convertir la columna 'fecha_hora' al tipo datetime
-        df_admobilize_data['fecha_hora'] = pd.to_datetime(df_admobilize_data['fecha_hora'])
-
-        # Filtrar para mantener solo las filas entre las 10 de la mañana y las 10 de la noche
-        df_admobilize_data_filtrado = df_admobilize_data[(df_admobilize_data['fecha_hora'].dt.hour >= 10) & (df_admobilize_data['fecha_hora'].dt.hour < 22)]
-        admobilize_hourly_mean= df_admobilize_data_filtrado['impresiones'].mean()
-        admobilize_daily_mean= admobilize_hourly_mean*OPENING_HOURS
-        admobilize_avg_daily_ots.append(int(admobilize_daily_mean))
-        admobilize_avg_hour_ots.append(int(admobilize_hourly_mean))
-
-
-      sql= "update malls set admobilize_hourly_avg_ots=%s, admobilize_data=1  where id=%s"
-      val= (int(mean(admobilize_avg_hour_ots)), row[0])
-      mycursor.execute(sql,val)
-      mydb.commit()
-
-      sql= "update malls set admobilize_daily_avg_ots=%s, admobilize_data=1 where id=%s"
-      val= (int(mean(admobilize_avg_daily_ots)),row[0])
-      mycursor.execute(sql,val)
-      mydb.commit()
-    
-      print("- Admobilize data overall daily OTS avg: ", int(mean(admobilize_avg_daily_ots)))
-      print("- Admobilize data overall hourly OTS avg: ",int(mean(admobilize_avg_hour_ots)))
-
-      admobilize_data_estimated_hourly_impacts = hourly_admobilize_impact_calculation (int(mean(admobilize_avg_hour_ots)), screen_density, screen_visibility_index, screen_exposure_area,avg_mall_visit_tine_min)
-      admobilize_data_estimated_daily_impacts =admobilize_data_estimated_hourly_impacts * OPENING_HOURS
- 
-      print("- Admobilize data overall hourly screen impacts: ", admobilize_data_estimated_hourly_impacts)
-      print("- Admobilize data overall daily screen impacts: ",admobilize_data_estimated_daily_impacts)
-      print("\n")
+      print("error processing admobilize data")
 
       
-
-    else:
-      print("No admobilize data available \n")
 
 
     #***********************************
@@ -619,18 +647,27 @@ for row in records:  #for each result
       print("Note: default data not available!") 
 
 
-
+    #select daily impacts based on data availability 
+    #priority : 
+    # 1- INSPIDE
+    # 2- ADMOBILIZE 
+    # 3- MALL FOOTFALL
+    # 4 -DEFAULT   
     flag_no_audience=False
     if inspide_daily_impacts > 0:
+      print("using hourly impacts from inspide")
       daily_impacts = inspide_daily_impacts
       hourly_impacts= inspide_hourly_impacts
     elif admobilize_data_estimated_daily_impacts>0:
+      print("using hourly impacts from admobilize")
       daily_impacts = admobilize_data_estimated_daily_impacts
       hourly_impacts=  admobilize_data_estimated_hourly_impacts
     elif mall_data_estimated_daily_impacts > 0 :
+      print("using hourly impacts from footfall data")
       daily_impacts = mall_data_estimated_daily_impacts
       hourly_impacts= round(mall_data_estimated_hourly_impacts, 0)
     elif default_screen_day_impressions>0:
+      print("using default as hourly impacts")
       daily_impacts = default_screen_day_impressions
       hourly_impacts= round(default_screen_day_impressions/OPENING_HOURS, 0)
     else:
@@ -640,8 +677,10 @@ for row in records:  #for each result
       hourly_impacts=daily_impacts/12
     
   
+    #***************************************
     mall_daily_impacts = daily_impacts
     mall_hourly_impacts = hourly_impacts
+    #***************************************
 
 
     #*************************************
@@ -659,7 +698,6 @@ for row in records:  #for each result
 
       #df_inspide=df_inspide[df_inspide['month'] > 1]
       #df_inspide=df_inspide[df_inspide['year'] == 2024]
-      
       #pd.set_option('display.max_rows', None)
 
       print(df_inspide)
@@ -690,7 +728,7 @@ for row in records:  #for each result
 
 
       #get default model 
-      query = "SELECT monthly, weekly, hourly, weekday from mall_default_models  WHERE name = 'default'"
+      query = "SELECT monthly, weekly, hourly, weekday from mall_default_models  WHERE  id = '%s'" % (row_2[7]) 
       df_default_model = pd.read_sql_query(query, engine)
         
       #get data updated data 
@@ -782,127 +820,131 @@ for row in records:  #for each result
     #*************************************
     if available_admobilize_data:
 
-      '''  
-
-      print("Updating default mall model behavior using admobilize data")
-      print("Default - mall type: ", mall_model_type )
+      if not available_inspide_data:  # only if inspide model has not been created.
 
 
-      df_admobilize_data_grouped['timestamp']=df_admobilize_data_grouped.index
-      df_admobilize_data_grouped['timestamp']= pd.to_datetime(df_admobilize_data['timestamp'])
+        print("Updating default mall model behavior using admobilize data")
+        print("Default - mall type: ", mall_model_type )
+                
+        df_admobilize_data['hour']=df_admobilize_data['fecha_hora'].dt.hour
+        df_admobilize_data['weekday']=df_admobilize_data['fecha_hora'].dt.weekday
+        df_admobilize_data['weekofyear']=df_admobilize_data['fecha_hora'].dt.weekofyear
+        df_admobilize_data['month']=df_admobilize_data['fecha_hora'].dt.month
+        df_admobilize_data['year']=df_admobilize_data['fecha_hora'].dt.year
 
-      print(df_admobilize_data_grouped)
+        print(df_admobilize_data)
+
+        #limpieza de datos no validos - por debajo de un 30 por ciento de la media no los tenemos en cuenta
+        df_admobilize_data = df_admobilize_data.loc[df_admobilize_data['impresiones'] >= admobilize_hourly_mean*0.3]
+
+        print(df_admobilize_data)
+
+
+
+        df_admobilize_daily= df_admobilize_data.groupby(df_admobilize_data['weekday'])['impresiones'].mean()
+        df_max_scaled_weekday = df_admobilize_daily/df_admobilize_daily.abs().mean()  
+        print("\nScaled Weekday Model= ", df_max_scaled_weekday)
       
-      df_admobilize_data_grouped['weekday']=df_admobilize_data_grouped['timestamp'].dt.weekday
-      df_admobilize_data_grouped['weekofyear']=df_admobilize_data_grouped['timestamp'].dt.weekofyear
-      df_admobilize_data_grouped['month']=df_admobilize_data_grouped['timestamp'].dt.month
-
-      print(df_admobilize_data_grouped)
-
-
-      df_admobilize_daily= df_admobilize_data_grouped.groupby(df_admobilize_data_grouped['weekday'])['isImpression'].mean()
-      df_max_scaled_weekday = df_admobilize_daily/df_admobilize_daily.abs().mean()  
-      print("\nScaled Weekday Model= ", df_max_scaled_weekday)
-      
-      df_admobilize_daily= df_admobilize_data_grouped.groupby(df_admobilize_data_grouped['weekofyear'])['isImpression'].mean()
-      df_max_scaled_weekofyear = df_admobilize_daily/df_admobilize_daily.abs().mean()
-      print("\nScaled weekof year  Model= ", df_max_scaled_weekofyear)
-
-      df_admobilize_daily= df_admobilize_data_grouped.groupby(df_admobilize_data_grouped['month'])['isImpression'].mean()
-      df_max_scaled_month = df_admobilize_daily/df_admobilize_daily.abs().mean()
-      print("\nScaled month Model= ", df_max_scaled_month)
-
-      df_admobilize_data_grouped = df_admobilize_data_grouped.drop('weekday', axis=1)
-      df_admobilize_data_grouped = df_admobilize_data_grouped.drop('weekofyear', axis=1)
-      df_admobilize_data_grouped = df_admobilize_data_grouped.drop('month', axis=1)
-
-
-      #get default model 
-      query = "SELECT monthly, weekly, hourly, weekday from mall_default_models  WHERE name = 'default'"
-      df_default_model = pd.read_sql_query(query, engine)
+        df_admobilize_daily= df_admobilize_data.groupby(df_admobilize_data['hour'])['impresiones'].mean()
+        df_max_scaled_hour = df_admobilize_daily/df_admobilize_daily.abs().mean()  
+        print("\nScaled hourly Model= ", df_max_scaled_hour)
         
-      #get data updated data 
-      model_info=df_default_model.to_dict('records')
-      model=model_info[0]
+        df_admobilize_daily= df_admobilize_data.groupby(df_admobilize_data['weekofyear'])['impresiones'].mean()
+        df_max_scaled_weekofyear = df_admobilize_daily/df_admobilize_daily.abs().mean()
+        print("\nScaled weekof year  Model= ", df_max_scaled_weekofyear)
 
-      hourly_str=model['hourly']
-      hourly_str=hourly_str.replace(",",".")
-      hourly=hourly_str.split(':')
-      hourly=list(np.float_(hourly))
+        df_admobilize_daily= df_admobilize_data.groupby(df_admobilize_data['month'])['impresiones'].mean()
+        df_max_scaled_month = df_admobilize_daily/df_admobilize_daily.abs().mean()
+        print("\nScaled month Model= ", df_max_scaled_month)
 
-      print("\nDefault Hourly model: ", hourly)
-      print("\nUpdated Hourly model: ", hourly)
-
-      hourly_model=map(str, hourly)
-      hourly_model_db = ':'.join(hourly_model)
-      #print(hourly_model_db)
-
-      weekday_str=model['weekday']
-      weekday_str=weekday_str.replace(",",".")
-      weekday=weekday_str.split(':')
-      weekday=list(np.float_(weekday))
-
-      print("\nnDefault Weekday model: ", weekday)
-
-      for i, v in df_max_scaled_weekday.items():
-        #print('index: ', i, 'value: ', v)
-        weekday[i]=v
-
-      print("\nUpdated Weekday model: ", weekday)
-
-      weekday_model=map(str, weekday)
-      weekday_model_db = ':'.join(weekday_model)
-      #print(weekday_model_db)
+        df_admobilize_data = df_admobilize_data.drop('weekday', axis=1)
+        df_admobilize_data = df_admobilize_data.drop('weekofyear', axis=1)
+        df_admobilize_data = df_admobilize_data.drop('month', axis=1)
 
 
+        #get default model 
+        query = "SELECT monthly, weekly, hourly, weekday from mall_default_models  WHERE id = '%s'" % (mall_model_type) 
+        df_default_model = pd.read_sql_query(query, engine)
+          
+        #get data updated data 
+        model_info=df_default_model.to_dict('records')
+        model=model_info[0]
 
-      weekly_str=model['weekly']
-      weekly_str=weekly_str.replace(",",".")
-      weekly=weekly_str.split(':')
-      weekly=list(np.float_(weekly))
+        hourly_str=model['hourly']
+        hourly_str=hourly_str.replace(",",".")
+        hourly=hourly_str.split(':')
+        hourly=list(np.float_(hourly))
 
-      print("\nDefault Weekly model: ", weekly)
+        print("\nDefault Hourly model: ", hourly)
+        print("\nUpdated Hourly model: ", hourly)
 
-      for i, v in df_max_scaled_weekofyear.items():
-        #print('index: ', i, 'value: ', v)
-        weekly[i-1]=v
+        hourly_model=map(str, hourly)
+        hourly_model_db = ':'.join(hourly_model)
+        #print(hourly_model_db)
 
-      print("\nUpdated Weekly model: ", weekly)
+        weekday_str=model['weekday']
+        weekday_str=weekday_str.replace(",",".")
+        weekday=weekday_str.split(':')
+        weekday=list(np.float_(weekday))
 
-      weekly_model=map(str, weekly)
-      weekly_model_db = ':'.join(weekly_model)
-      #print(weekly_model_db)
+        print("\nnDefault Weekday model: ", weekday)
 
-      monthly_str=model['monthly']
-      monthly_str=monthly_str.replace(",",".")
-      monthly=monthly_str.split(':')
-      monthly=list(np.float_(monthly))
+        for i, v in df_max_scaled_weekday.items():
+          #print('index: ', i, 'value: ', v)
+          weekday[i]=v
 
+        print("\nUpdated Weekday model: ", weekday)
 
-      print("\nDefault monthly model: ", monthly)
-      for i, v in df_max_scaled_month.items():
-        #print('index: ', i, 'value: ', v)
-        monthly[i-1]=v
-
-      print("\nUpdated Monthly model: ", monthly)
-  
-      monthly_model=map(str, monthly)
-      monthly_model_db = ':'.join(monthly_model)
-      #print(monthly_model_db)
-
-      #update database with new model
-      sql= "DELETE FROM mall_default_models  WHERE id=%s" % (row[0])
-      mycursor.execute(sql)
-      mydb.commit()
-
-      sql= "insert into mall_default_models (name, monthly, weekly, hourly, weekday, id) values (%s, %s, %s, %s, %s, %s )"
-      val= (mall_name, monthly_model_db,weekly_model_db, hourly_model_db, weekday_model_db, row[0] )
-      mycursor.execute(sql, val)
-      mydb.commit()
-      '''
+        weekday_model=map(str, weekday)
+        weekday_model_db = ':'.join(weekday_model)
+        #print(weekday_model_db)
 
 
 
+        weekly_str=model['weekly']
+        weekly_str=weekly_str.replace(",",".")
+        weekly=weekly_str.split(':')
+        weekly=list(np.float_(weekly))
+
+        print("\nDefault Weekly model: ", weekly)
+
+        for i, v in df_max_scaled_weekofyear.items():
+          #print('index: ', i, 'value: ', v)
+          weekly[i-1]=v
+
+        print("\nUpdated Weekly model: ", weekly)
+
+        weekly_model=map(str, weekly)
+        weekly_model_db = ':'.join(weekly_model)
+        #print(weekly_model_db)
+
+        monthly_str=model['monthly']
+        monthly_str=monthly_str.replace(",",".")
+        monthly=monthly_str.split(':')
+        monthly=list(np.float_(monthly))
+
+
+        print("\nDefault monthly model: ", monthly)
+        for i, v in df_max_scaled_month.items():
+          #print('index: ', i, 'value: ', v)
+          monthly[i-1]=v
+
+        print("\nUpdated Monthly model: ", monthly)
+    
+        monthly_model=map(str, monthly)
+        monthly_model_db = ':'.join(monthly_model)
+        #print(monthly_model_db)
+
+        #update database with new model
+        sql= "DELETE FROM mall_default_models  WHERE id=%s" % (row[0])
+        mycursor.execute(sql)
+        mydb.commit()
+
+        sql= "insert into mall_default_models (name, monthly, weekly, hourly, weekday, id) values (%s, %s, %s, %s, %s, %s )"
+        val= (mall_name, monthly_model_db,weekly_model_db, hourly_model_db, weekday_model_db, row[0] )
+        mycursor.execute(sql, val)
+        mydb.commit()
+    
     #***********************************
     #creating mall model and impact estimation
     #***********************************
@@ -911,11 +953,9 @@ for row in records:  #for each result
       print("\nUpdating MALL Model and impresion data:")
       print("\n-------------------------------------------")
 
-
       query = "DELETE from mall_models where mall_id='%s'" % (str(row[0]))
       engine.execute(query)
       mydb.commit()
-
 
       print("Screen Density: ", screen_density)
       print("density multiplier: ", DENSITY_MULTIPLIER)
@@ -932,19 +972,19 @@ for row in records:  #for each result
       print("\nGetting mall model from DB")
 
       #get default model 
-      query = "SELECT monthly, weekly, hourly, weekday from mall_default_models  WHERE id = %s" % (alias_id)
+      query = "SELECT monthly, weekly, hourly, weekday from mall_default_models  WHERE id = %s" % (mall_model_type)
       df_default_model = pd.read_sql_query(query, engine)
       
-
+      #si no hay modelo escogemos el por defecto 
       if len(df_default_model)==0:
           #get default model 
           query = "SELECT monthly, weekly, hourly, weekday from mall_default_models  WHERE name='default'"
           df_default_model = pd.read_sql_query(query, engine)
           print("Getting default model behaviour , model for the mail not available . Be careful all linear data accross all days!!!")
  
+
       model_info=df_default_model.to_dict('records')
       model=model_info[0]
-
       #hourly distribution update
       hourly_str= model['hourly']
       hourly_str= hourly_str.replace(",", ".")
@@ -979,7 +1019,6 @@ for row in records:  #for each result
       df_default_mall_model['year']=df_default_mall_model['date'].dt.year
       df_default_mall_model['week_of_year']=df_default_mall_model['date'].dt.weekofyear
       df_default_mall_model['day_of_week']=df_default_mall_model['date'].dt.day_of_week
-      #df_default_mall_model['default_daily_impacts']=mall_daily_impacts
       df_default_mall_model['default_hourly_impacts']=mall_hourly_impacts
       df_default_mall_model['mall_name']=mall_name
       df_default_mall_model['source_data_x']="mall_default_model"
@@ -1012,10 +1051,39 @@ for row in records:  #for each result
       #pd.set_option('display.max_rows', None)
       print(df_default_mall_model)
 
-      df_default_mall_model['camera_ots']= 0
+      df_mall_model_updated=df_default_mall_model
+      df_mall_model_updated['impacts']=df_mall_model_updated['default_impacts']
+
 
       if available_admobilize_data:
-        df_default_mall_model['camera_ots']= 0
+        df_admobilize_data['hour']=df_admobilize_data['fecha_hora'].dt.hour      
+        df_admobilize_data['month']=df_admobilize_data['fecha_hora'].dt.month
+        df_admobilize_data['week_of_year']=df_admobilize_data['fecha_hora'].dt.weekofyear
+        df_admobilize_data['day_of_week']=df_admobilize_data['fecha_hora'].dt.day_of_week
+        df_admobilize_data['year']=df_admobilize_data['fecha_hora'].dt.year
+        df_admobilize_data['camera_ots']=df_admobilize_data['impresiones']
+        df_admobilize_data = df_admobilize_data.drop('impresiones', axis=1)
+        df_mall_model=df_admobilize_data
+
+        df_mall_model['mall_id']=row[0]
+
+        df_mall_model = df_mall_model.drop('fecha_hora', axis=1)
+        df_mall_model = df_mall_model.drop('deviceId', axis=1)
+
+        df_default_mall_model['mall_id']=df_default_mall_model['mall_id'].astype(int)
+
+        df_mall_model_updated=pd.merge(df_default_mall_model, df_mall_model, how='left', on=["mall_id", "hour", "month", "week_of_year", "day_of_week", "year"], )
+        print(df_mall_model_updated)
+        
+        #df_mall_model_updated['camera_error']=df_mall_model_updated['camera_ots'] - df_mall_model_updated['default_impacts']
+        #df_mall_model_updated['camera_ratio']=df_mall_model_updated['camera_ots']/df_mall_model_updated['default_impacts']
+
+        df_mall_model_updated['impacts']=df_mall_model_updated.apply(lambda_model6,axis=1)
+        df_mall_model_updated['source_data']=df_mall_model_updated.apply(lambda_model7,axis=1)
+
+
+        print(df_mall_model_updated)
+        
 
       if available_inspide_data:
 
@@ -1026,17 +1094,10 @@ for row in records:  #for each result
         df_inspide['year']=df_inspide['start_date'].dt.year
         df_inspide['source_data_y']="inspide"
           
-        if screen_exposure_area>LARGE_MALL_EXPOSURE_AREA_THRESHOLD:
-          mall_visit_time_min=MALL_VISIT_TIME_LARGE
-        elif screen_exposure_area>SMALL_MALL_EXPOSURE_AREA_THRESHOLD:
-          mall_visit_time_min=MALL_VISIT_TIME_MEDIUM
-        else:
-          mall_visit_time_min=MALL_VISIT_TIME_SMALL
-
-        travelled_meters = WALKING_SPEED_KMH * 1000 * (mall_visit_time_min/60)
+        travelled_meters = WALKING_SPEED_KMH * 1000
         travelled_surface = travelled_meters * CORRIDOR_WIDTH
         
-        df_inspide['impacts']= df_inspide['visits']*(travelled_surface/screen_exposure_area)*screen_visibility_index*K_FACTOR
+        df_inspide['impacts']= df_inspide['visits']*(travelled_surface/screen_exposure_area)*screen_visibility_index
         df_inspide['inspide_impacts']= df_inspide['impacts'].astype(int)
         df_inspide = df_inspide.drop('impacts', axis=1)
 
@@ -1065,15 +1126,9 @@ for row in records:  #for each result
         df_mall_model_updated['impacts']=df_mall_model_updated.apply(lambda_model4,axis=1)
         df_mall_model_updated['source_data']=df_mall_model_updated.apply(lambda_model5,axis=1)
 
-
-
         #pd.set_option('display.max_rows', None)
         print(df_mall_model_updated)
-        
-        df_mall_model_updated = df_mall_model_updated.drop('source_data_x', axis=1)
-        df_mall_model_updated = df_mall_model_updated.drop('source_data_y', axis=1)
-
-        
+                
         updated_estimation_error_ratio= df_mall_model_updated['inspide_ratio'].mean()
 
         if not math.isinf(updated_estimation_error_ratio):
@@ -1087,33 +1142,28 @@ for row in records:  #for each result
             input()
         else:
           updated_estimation_error_ratio=1
-          df_mall_model_updated['inspide_ratio']= 1
-          
+          df_mall_model_updated['inspide_ratio']= 1    
+      try:
+        df_mall_model_updated = df_mall_model_updated.drop('source_data_x', axis=1)
+      except:
+        None
+      try:
+        df_mall_model_updated = df_mall_model_updated.drop('source_data_y', axis=1)
+      except:
+        None   
+      try:
+        df_mall_model_updated['impacts']=df_mall_model_updated['impacts'].astype(int)
+      except:
+        None 
+      print(df_mall_model_updated)
+      df_mall_model_updated = df_mall_model_updated.drop('default_hourly_impacts', axis=1)      
 
-
-        
-      else:
-        df_default_mall_model['mall_id']=df_default_mall_model['mall_id'].astype(int)
-        df_mall_model_updated = df_default_mall_model
-
-      
-      #df_mall_model_updated = df_mall_model_updated.drop(df_mall_model_updated[df_mall_model_updated.week_of_year != 45].index)
-      
-      #df_mall_model_updated = df_mall_model_updated.drop('impacts_hour', axis=1)
-      #df_mall_model_updated = df_mall_model_updated.drop('impacts_hour2', axis=1)
-      #df_mall_model_updated = df_mall_model_updated.drop('impacts_hour3', axis=1)
-      #df_mall_model_updated = df_mall_model_updated.drop('default_daily_impacts', axis=1)
-      df_mall_model_updated = df_mall_model_updated.drop('default_hourly_impacts', axis=1)
-      df_mall_model_updated['impacts']=df_mall_model_updated['impacts'].astype(int)
 
 
       #calculo del impression multiplier
       #*********************************
       df_mall_model_updated['impression_multiplier']=round((df_mall_model_updated['impacts']*(dwell_time/AD_SLOT_DURATION))/(3600/AD_SLOT_DURATION),2)
       #*********************************
-
-
-
 
       #update average multiplier y error de estimacion
 
@@ -1124,14 +1174,8 @@ for row in records:  #for each result
       mydb.commit()
       print("Average multiplier :", multiplicador_medio)
 
-
-
-
-
-
       #pd.set_option('display.max_rows', None)
       print(df_mall_model_updated)
-
       
 
       #update database with new model
