@@ -46,7 +46,7 @@ fecha_actual = datetime.now()
 
 
 # Calcular la fecha de ayer
-fecha_ayer = fecha_actual - timedelta(days=1)
+fecha_ayer = fecha_actual - timedelta(days=3)
 
 #fecha_week_ago = fecha_actual - timedelta(days=7)
 

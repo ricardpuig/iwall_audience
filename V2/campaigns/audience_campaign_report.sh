@@ -1,7 +1,12 @@
 #! /bin/bash
 
-python3 audience_campaign_report.py id COLOMBIA 870103123 
-python3 audience_campaign_report.py id COLOMBIA 873819035 
-python3 audience_campaign_report.py id COLOMBIA 863886955
-python3 audience_campaign_report.py id COLOMBIA 867777887
-python3 audience_campaign_report.py id COLOMBIA 774877007
+python3 audience_campaign_report.py  967785430 PERU  
+python3 audience_campaign_report.py  968517453 PERU  
+python3 audience_campaign_report.py  981680547 PERU 
+python3 audience_campaign_report.py  981680785 PERU 
+python3 audience_campaign_report.py  981695817 PERU 
+python3 audience_campaign_report.py  981696493 PERU 
+python3 audience_campaign_report.py  981718206 PERU 
+python3 audience_campaign_report.py  981718297 PERU 
+python3 audience_campaign_report.py  981718361 PERU 
+python3 audience_campaign_report.py  981718406 PERU 

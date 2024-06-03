@@ -25,28 +25,6 @@ critical_players=[]
 player_container_blacklist=[]
 player_id_blacklist=[]
 
-def load_filtering_players():
-	#load player filters
-    sql_select = "SELECT broadsign_id, type from player_monitoring_filtering"
-    mycursor.execute(sql_select)
-    records= mycursor.fetchall()    
-    for row_0 in records:  #for each result
-		#load wifi players
-        if row_0[1] =="WIFI_PLAYER":
-           wifi_players.append(row_0[0])
-        if row_0[1] =="DU_CONTAINER_ID_BLACKLIST":
-           du_container_blacklist.append(row_0[0])
-        if row_0[1] =="DU_ID_WHITELIST":
-           du_id_whitelist.append(row_0[0])
-        if row_0[1] =="TEMPORARY_PLAYER":
-           temporary_players.append(row_0[0])
-        if row_0[1] =="CRITICAL_PLAYER":
-           critical_players.append(row_0[0])
-        if row_0[1] =="PLAYER_CONTAINER_ID_BLACKLIST":
-           player_container_blacklist.append(row_0[0])
-        if row_0[1] =="PLAYER_ID_BLACKLIST":
-           player_id_blacklist.append(row_0[0])
-
 def alarms_check(df_report):
 
 	email_to_send="rpuig@iwallinshop.com"
@@ -157,13 +135,11 @@ else:
 	exit(1)
 
 if country=="SPAIN":
-        container_ids=["21393898"]
-		#container_ids=['136035622']
+        container_ids=["39463525"]
 elif country=="COLOMBIA":
-        container_ids=['135518539']
-		#container_ids=['145094982']	
+        container_ids=['120963914']
 elif country=="PERU":
-        container_ids=['53704276']
+        container_ids=['39365305']
 else:
 	print("Country Missing, exiting....")
 	exit(1)
@@ -172,8 +148,6 @@ print("Extracting Player Information")
 
 player_field_report={}
 field_report=[]
-
-load_filtering_players()
 
 for m in container_ids:
 
@@ -389,8 +363,14 @@ for m in container_ids:
 				
 				player_field_report['display_unit_active']=du_active
 				player_field_report['geolocation']=geolocation
-				player_field_report['longitude']= re.search('\((.*)\,', geolocation).group(1)
-				player_field_report['latitude']=re.search('\,(.*)\)', geolocation).group(1)
+				try:
+					player_field_report['longitude']= re.search('\((.*)\,', geolocation).group(1)
+					player_field_report['latitude']=re.search('\,(.*)\)', geolocation).group(1)
+				except:
+					player_field_report['longitude']=0
+					player_field_report['latitude']=0
+
+					
 				player_field_report['zipcode']=zipcode
 				player_field_report['address']=address
 				player_field_report['display_unit_type_id']=du_type_id

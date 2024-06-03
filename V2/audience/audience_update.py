@@ -176,11 +176,6 @@ else:
     print(f"Argumentos erroneos")
 
 
-
-
-
-
-
 if sys.argv[1]:
 	country= sys.argv[1]
 else:
